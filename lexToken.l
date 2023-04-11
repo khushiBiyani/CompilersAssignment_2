@@ -4,7 +4,7 @@
 
 %% 
 
-"int" | "else" | "char" | "float" | "if" | "while" | "for" | "switch" | "case" {ECHO; printf("\tKeyword\n");}
+"int" | "else" | "char" | "float" | "if" | "while" | "for" | "switch" | "case" | "default" {ECHO; printf("\tKeyword\n");}
 [+-/=*%]   {ECHO; printf("\tOperator\n");}
 {0-9}+   {ECHO; printf("\tNumber\n");}
 scanf    {printf("Scanf encountered.\n");}
