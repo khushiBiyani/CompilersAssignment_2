@@ -5,7 +5,12 @@
 %% 
 
 "int" | "else" | "char" | "float" | "if" | "while" | "for" | "switch" | "case" | "default" {ECHO; printf("\tKeyword\n");}
-[+-/=*%]   {ECHO; printf("\tOperator\n");}
++ {ECHO; printf("\tAddition Operator\n");}
+- {ECHO; printf("\tSubtraction Operator\n");}
+* {ECHO; printf("\tMultiplication Operator\n");}
+= {ECHO; printf("\tAssignment Operator\n");}
+% {ECHO; printf("\tModulus Operator\n");}
+/ {ECHO; printf("\tDivision Operator\n");}
 {0-9}+   {ECHO; printf("\tNumber\n");}
 scanf    {printf("Scanf encountered.\n");}
 printf   {printf("Printf encountered.\n");}
