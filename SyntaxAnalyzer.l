@@ -60,7 +60,7 @@
 "[" {return BOXOPEN;}
 "]" {return BOXCLOSE;}
 "!" {return LOGICALNOT;}
-[-]?[1-9][0-9]*([eE][+-]?[1-9][0-9]*)? {return INTVAL;}
+[-]?[0-9]*([eE][+-]?[1-9][0-9]*)? {return INTVAL;}
 [-]?[0-9]*\.[0-9]+([eE][+-]?[1-9][0-9]*)? {return FLOATVAL;}
 \'[^\'\n]\' {return CHARVAL;}
 \"[^\"\n]*\" {return STRING;}

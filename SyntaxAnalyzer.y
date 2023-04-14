@@ -30,7 +30,8 @@
 code : statements {printf("Starting..\n");return 0;}
 statements : specialStatement statements {printf("Special..\n");}
 		   | basicStatement statements {printf("Basic123..\n");}
-		   | 
+		   | functionCall
+		   |
 
 specialStatement : forLoop 
 				 | ifStatement
@@ -102,24 +103,24 @@ declarationListChar : IDENTIFIER EQUAL CHARVAL COMMA declarationListChar
 		| IDENTIFIER EQUAL CHARVAL
 		| IDENTIFIER
 		
-expressionStatement : expressionStatement LOGICALOR logicalExpression {printf("ES1..\n");}
+expressionStatement : logicalExpression LOGICALOR expressionStatement {printf("ES1..\n");}
 		| logicalExpression {printf("ES2..\n");}
 		
-logicalExpression : logicalExpression LOGICALAND expression {printf("LE1..\n");}
+logicalExpression : expression LOGICALAND logicalExpression {printf("LE1..\n");}
 		| expression {printf("LE2..\n");}
 		
-expression : expression EQUALS relationalExpression {printf("E1..\n");}
-		| expression NOTEQUAL relationalExpression {printf("E2..\n");}
+expression : relationalExpression EQUALS expression {printf("E1..\n");}
+		| relationalExpression NOTEQUAL expression {printf("E2..\n");}
 		| relationalExpression {printf("E3..\n");}
 		
-relationalExpression : relationalExpression GREATERTHAN value 
-		| relationalExpression GREATERTHANEQUALTO value
-		| relationalExpression LESSTHAN value
-		| relationalExpression LESSTHANEQUALTO value
+relationalExpression : value GREATERTHAN relationalExpression
+		| value GREATERTHANEQUALTO relationalExpression
+		| value LESSTHAN relationalExpression
+		| value LESSTHANEQUALTO relationalExpression
 		| value {printf("VALUE..\n");}
 		
-value : value ADD term {printf("ADD..\n");}
-	| value SUB term
+value : term ADD value {printf("ADD..\n");}
+	| term SUB value
 	| term {printf("Basic TERM..\n");}
 	
 term : factor MULT term {printf("MULT..\n");}
