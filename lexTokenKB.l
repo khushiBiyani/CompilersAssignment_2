@@ -28,13 +28,11 @@ scanf\s*\(\s*\"[a-zA-Z:,\s*]*\s*\%[c|s|d|f|u]\s*[a-zA-Z:,\s*]*\s*\"\s*,\s*\&[a-z
 "||" {ECHO; printf("\tLogical OR Operator\n");}
 "!"  {ECHO; printf("\tLogical NOT Operator\n");}
 
-
-
 [a-zA-Z_][a-zA-Z0-9_]* {printf("%s - Identifier\n",yytext);}
 
 [.,;:(){}\[\]]   {printf("%s - Punctuator\n",yytext);}
 
-.|\n ; 	
+.|\n {yyterminate();} 	
 
 %%
 
