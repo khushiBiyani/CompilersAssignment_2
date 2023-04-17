@@ -27,7 +27,11 @@
 %%
 
 /* start of the program */
-code : statements {printf("Starting..\n");return 0;}
+code : declarationList {printf("Starting..\n");return 0;}
+
+declarationList :  declarationStatement declarationList {printf("RECURSIVE DECLARATION \n");}
+				|  declarationStatement {printf("DECLARATION \n");}
+
 statements : specialStatement statements {printf("Special..\n");}
 		   | basicStatement statements {printf("Basic123..\n");}
 		   | functionCall
@@ -89,18 +93,27 @@ basicStatement : expressionStatement {printf("BS->EXPS..\n");}
 assignmentStatement : IDENTIFIER EQUAL expressionStatement COMMA assignmentStatement {printf("AS1..\n");}
 		| IDENTIFIER EQUAL expressionStatement SEMICOLON {printf("AS2..\n");}
 
-declarationStatement : INT declarationListIntFloat SEMICOLON {printf("DS1..\n");}
+declarationStatement : INT IDENTIFIER OPBRAC parameters CLBRAC compoundStatements  {printf("INT F WITH PARAMS..\n");}
+		| CHAR IDENTIFIER OPBRAC parameters CLBRAC compoundStatements {printf("char F WITH PARAMS..\n");}
+		| FLOAT IDENTIFIER OPBRAC parameters CLBRAC compoundStatements {printf("float F WITH PARAMS..\n");}
+		| INT IDENTIFIER OPBRAC CLBRAC compoundStatements
+		| FLOAT IDENTIFIER OPBRAC CLBRAC compoundStatements
+		| CHAR IDENTIFIER OPBRAC CLBRAC compoundStatements
+		| INT declarationListIntFloat SEMICOLON {printf("DS1..\n");}
 		| CHAR declarationListChar SEMICOLON
 		| FLOAT declarationListIntFloat SEMICOLON
+		
 		
 declarationListIntFloat : IDENTIFIER EQUAL expressionStatement COMMA declarationListIntFloat {printf("DSL1..\n");}
 		| IDENTIFIER COMMA declarationListIntFloat
 		| IDENTIFIER EQUAL expressionStatement {printf("DSL3..\n");}
+		| IDENTIFIER dimension  {printf("INTFLOAT ARRAY..\n");}
 		| IDENTIFIER {printf("DSL4..\n");}
 		
 declarationListChar : IDENTIFIER EQUAL CHARVAL COMMA declarationListChar
 		| IDENTIFIER COMMA declarationListChar
 		| IDENTIFIER EQUAL CHARVAL
+		| IDENTIFIER dimension
 		| IDENTIFIER
 		
 expressionStatement : logicalExpression LOGICALOR expressionStatement {printf("ES1..\n");}
@@ -126,21 +139,21 @@ value : term ADD value {printf("ADD..\n");}
 term : factor MULT term {printf("MULT..\n");}
 	| factor DIV term
 	| factor MOD term
-	| factor {printf("F..\n");}
+	| factor {printf("Factor..\n");}
 	
 factor : IDENTIFIER
 	| OPBRAC expressionStatement CLBRAC
 	| LOGICALNOT expressionStatement
 	| CHARVAL
-	| INTVAL {printf("arey waah.. %d\n",yylval);}
+	| INTVAL {printf("INT VALS.. %d\n",yylval);}
 	| FLOATVAL
 	| IDENTIFIER BOXOPEN INTVAL BOXCLOSE 
 	| IDENTIFIER BOXOPEN INTVAL BOXCLOSE BOXOPEN INTVAL BOXCLOSE 
 
 
 /* function */
-functionDec : type IDENTIFIER OPBRAC parameters CLBRAC compoundStatements 
-            | type IDENTIFIER OPBRAC CLBRAC compoundStatements
+functionDec : type IDENTIFIER OPBRAC parameters CLBRAC compoundStatements {printf("FUNCTIONDEC\n");}
+            | type IDENTIFIER OPBRAC CLBRAC compoundStatements {printf("FUNCTIONDEC without param\n");}
 
 functionCall : IDENTIFIER OPBRAC CLBRAC SEMICOLON
              | IDENTIFIER OPBRAC argList CLBRAC SEMICOLON 
@@ -148,20 +161,21 @@ functionCall : IDENTIFIER OPBRAC CLBRAC SEMICOLON
 /* changes to be made - either expressionStatement or expression */
 argList : argList COMMA expressionStatement | expressionStatement 
 
-parameters : parameter | parameter COMMA parameters 
+parameters : parameter | parameter COMMA parameters  {printf("FUNCTION params\n");}
 
-parameter : type IDENTIFIER 
+parameter : type IDENTIFIER {printf("FUNCTION param\n");}
 
 type : INT | FLOAT | CHAR 
 
-compoundStatements : OPCUR CLCUR | OPCUR statementList CLCUR 
+compoundStatements : OPCUR statementList CLCUR {printf("FUNCTION statements\n");}
 
-statementList : statementList basicStatements | statementList specialStatement | 
+statementList : basicStatements statementList | specialStatement statementList | functionCall statementList | returnDec |
 
+returnDec : RETURN expressionStatement SEMICOLON | RETURN SEMICOLON 
 /* array */
-arrayDec : type declarator SEMICOLON
-declarator : IDENTIFIER dimension
-dimension : BOXOPEN INTVAL BOXCLOSE 
+arrayDec : type declarator SEMICOLON {printf("ARRAY START..\n");}
+declarator : IDENTIFIER dimension {printf("declarator..\n");}
+dimension : BOXOPEN INTVAL BOXCLOSE {printf("size..\n");}
 		  | BOXOPEN INTVAL BOXCLOSE BOXOPEN INTVAL BOXCLOSE 
 		  | BOXOPEN BOXCLOSE BOXOPEN INTVAL BOXCLOSE
 %%
