@@ -30,7 +30,9 @@
 code : declarationList {printf("Starting..\n");}
  
 declarationList :  declarationStatement declarationList {printf("RECURSIVE DECLARATION \n");}
+				|  assignmentStatement declarationList
 				|  declarationStatement {printf("DECLARATION \n");}
+				|  assignmentStatement
  
 statements : specialStatement statements {printf("Special..\n");}
 		   | basicStatement statements {printf("Basic123..\n");}
@@ -46,7 +48,10 @@ specialStatement : forLoop
 forLoop : FOR OPBRAC forAssignStatement forExpStatement SEMICOLON forUpdateStatement CLBRAC OPCUR inLoop CLCUR
 		| FOR OPBRAC forAssignStatement forExpStatement SEMICOLON forUpdateStatement CLBRAC SEMICOLON 
  
-forAssignStatement : assignmentStatement | SEMICOLON
+forAssignStatement : assignmentStatement 
+					| INT IDENTIFIER EQUAL expressionStatement SEMICOLON 
+					| INT IDENTIFIER EQUAL expressionStatement COMMA  forAssignStatement
+					| SEMICOLON
 forExpStatement : expressionStatement | 
 forUpdateStatement : IDENTIFIER EQUAL expressionStatement COMMA forUpdateStatement
 				   | IDENTIFIER EQUAL expressionStatement 
@@ -190,7 +195,7 @@ dimension : BOXOPEN INTVAL BOXCLOSE {printf("size..\n");}
  
 #include "lex.yy.c"
 void main(){
-	yyin = fopen("input.txt","r");
+	yyin = fopen("./Test Cases/input.txt","r");
 	if(!yyparse())
 	{
 		printf("Parsing Done\n");
