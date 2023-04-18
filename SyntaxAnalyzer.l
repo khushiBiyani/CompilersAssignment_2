@@ -31,7 +31,8 @@
 "char" {return CHAR;}
 "float" {return FLOAT;}
 "return" {return RETURN;}
-
+"printf" {return PRINTF;}
+"scanf" {return SCANF;}
 [ \t\f\v\r] ;
 "=" {return EQUAL;}
 "," {return COMMA;}
