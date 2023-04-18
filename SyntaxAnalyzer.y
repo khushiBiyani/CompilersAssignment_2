@@ -14,7 +14,7 @@
 %token INT CHAR FLOAT STRING
  
 /* Keywords */
-%token IF ELSE FOR WHILE DEFAULT SWITCH CASE BREAK CONTINUE RETURN 
+%token IF ELSE FOR WHILE DEFAULT SWITCH CASE BREAK CONTINUE RETURN PRINTF SCANF
  
 /* parenthesis */
 %token OPBRAC CLBRAC OPCUR CLCUR BOXOPEN BOXCLOSE
@@ -35,7 +35,7 @@ declarationList :  declarationStatement declarationList {printf("RECURSIVE DECLA
 statements : specialStatement statements {printf("Special..\n");}
 		   | basicStatement statements {printf("Basic123..\n");}
 		   | functionCall
-		   |
+		   | 
  
 specialStatement : forLoop 
 				 | ifStatement
@@ -104,7 +104,11 @@ declarationStatement : INT IDENTIFIER OPBRAC parameters CLBRAC compoundStatement
 		| CHAR IDENTIFIER BOXOPEN BOXCLOSE EQUAL STRING SEMICOLON
 		| CHAR declarationListChar SEMICOLON
 		| FLOAT declarationListIntFloat SEMICOLON
-		
+		| PRINTF OPBRAC STRING prattributes CLBRAC SEMICOLON
+		| SCANF OPBRAC STRING scattributes CLBRAC SEMICOLON
+
+prattributes : COMMA IDENTIFIER prattributes | 
+scattributes : COMMA AMPERSAND IDENTIFIER scattributes | 
 		
 declarationListIntFloat : IDENTIFIER EQUAL expressionStatement COMMA declarationListIntFloat {printf("DSL1..\n");}
 		| IDENTIFIER COMMA declarationListIntFloat
