@@ -1,7 +1,8 @@
 %{
 	#include <stdio.h>
-	#include <stdlib.h>
-	#include <stdbool.h>
+	
+	using namespace std;
+
 %}
 %start code
 /* left associative */
@@ -224,6 +225,7 @@ void main(){
 	}
 	else 
 		printf("Failed\n");
+	cout<<"CODE COMPLETED\n";
 	exit(0);
 }
  
