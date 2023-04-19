@@ -263,5 +263,7 @@ int a()
      else{
        int j;        
     }
-      
+    printf("ll123[p[ll'l;';'.klk");
+    printf("%d %d %d",a,b,c);
+    scanf("%d %d %d",&a,&b,&c);
 }

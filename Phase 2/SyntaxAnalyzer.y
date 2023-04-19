@@ -119,7 +119,9 @@ basicStatement : expressionStatement {printf("BS->EXPS..\n");}
 		
 assignmentStatement : IDENTIFIER EQUAL expressionStatement COMMA assignmentStatement {printf("AS1..\n");}
 		| IDENTIFIER EQUAL expressionStatement SEMICOLON {printf("AS2..\n");}
- 
+
+printer : PRINTF OPBRAC STRING prattributes CLBRAC SEMICOLON
+scanner : SCANF OPBRAC STRING scattributes CLBRAC SEMICOLON
 declarationStatement : INT IDENTIFIER OPBRAC parameters CLBRAC compoundStatements  {printf("INT F WITH PARAMS..\n");}
 		| CHAR IDENTIFIER OPBRAC parameters CLBRAC compoundStatements {printf("char F WITH PARAMS..\n");}
 		| FLOAT IDENTIFIER OPBRAC parameters CLBRAC compoundStatements {printf("float F WITH PARAMS..\n");}
@@ -131,8 +133,6 @@ declarationStatement : INT IDENTIFIER OPBRAC parameters CLBRAC compoundStatement
 		| CHAR IDENTIFIER BOXOPEN BOXCLOSE EQUAL STRING SEMICOLON
 		| CHAR declarationListChar SEMICOLON
 		| FLOAT declarationListIntFloat SEMICOLON
-		| PRINTF OPBRAC STRING prattributes CLBRAC SEMICOLON
-		| SCANF OPBRAC STRING scattributes CLBRAC SEMICOLON
 
 prattributes : COMMA IDENTIFIER prattributes | 
 scattributes : COMMA AMPERSAND IDENTIFIER scattributes | 
@@ -202,7 +202,7 @@ type : INT | FLOAT | CHAR
  
 compoundStatements : OPCUR statementList CLCUR {printf("FUNCTION statements\n");}
  
-statementList : basicStatements statementList | specialStatement statementList | functionCall statementList | returnDec |
+statementList : basicStatements statementList | specialStatement statementList | functionCall statementList | returnDec | printer statementList | scanner statementList | 
  
 returnDec : RETURN expressionStatement SEMICOLON | RETURN SEMICOLON 
 /* array */
