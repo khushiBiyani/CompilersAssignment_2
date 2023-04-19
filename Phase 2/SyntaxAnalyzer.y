@@ -36,7 +36,7 @@ declarationList :  declarationStatement declarationList {printf("RECURSIVE DECLA
  
 statements : specialStatement statements {printf("Special..\n");}
 		   | basicStatement statements {printf("Basic123..\n");}
-		   | functionCall
+		   | functionCall statements
 		   | 
  
 specialStatement : forLoop 
@@ -45,47 +45,69 @@ specialStatement : forLoop
 				 | switchStatement
  
 /* for loop */
-forLoop : FOR OPBRAC forAssignStatement forExpStatement SEMICOLON forUpdateStatement CLBRAC OPCUR inLoop CLCUR
-		| FOR OPBRAC forAssignStatement forExpStatement SEMICOLON forUpdateStatement CLBRAC SEMICOLON 
+forLoop : FOR OPBRAC forAssignStatement forExpStatement SEMICOLON forUpdateStatement CLBRAC OPCUR inLoop CLCUR {printf("\nproper FOR \n");}
+		| FOR OPBRAC forAssignStatement forExpStatement SEMICOLON forUpdateStatement CLBRAC SEMICOLON {printf("\nFOR SEMICOLON \n");}
+		| FOR OPBRAC forAssignStatement forExpStatement SEMICOLON forUpdateStatement CLBRAC singleLoopStatement {printf("\nFOR SINGLE STATEMENT \n");}
+
+singleLoopStatement : specialStatement 
+					| basicStatement
+					| functionCall
+					| BREAK SEMICOLON
+					| CONTINUE SEMICOLON
+					| switchStatement
+					| ifInLoopStatement
  
 forAssignStatement : assignmentStatement 
 					| INT IDENTIFIER EQUAL expressionStatement SEMICOLON 
 					| INT IDENTIFIER EQUAL expressionStatement COMMA  forAssignStatement
+					| CHAR IDENTIFIER EQUAL expressionStatement SEMICOLON 
+					| CHAR IDENTIFIER EQUAL expressionStatement COMMA  forAssignStatement
 					| SEMICOLON
 forExpStatement : expressionStatement | 
 forUpdateStatement : IDENTIFIER EQUAL expressionStatement COMMA forUpdateStatement
 				   | IDENTIFIER EQUAL expressionStatement 
  
 /* while loop */
-whileLoop : WHILE OPBRAC expressionStatement CLBRAC OPCUR inLoop CLCUR 
-		  | WHILE OPBRAC expressionStatement CLBRAC SEMICOLON
+whileLoop : WHILE OPBRAC expressionStatement CLBRAC OPCUR inLoop CLCUR {printf("\nproper WHILE \n");}
+		  | WHILE OPBRAC expressionStatement CLBRAC SEMICOLON {printf("\nWHILE SEMICOLON \n");}
+		  | WHILE OPBRAC expressionStatement CLBRAC singleLoopStatement {printf("\nSINGLE WHILE \n");}
  
-inLoop : BREAK SEMICOLON inLoop 
-		| CONTINUE SEMICOLON inLoop
-		| statements inLoop
-		| ifInLoopStatement inLoop
-		| switchStatement inLoop
-		| 
+inLoop : BREAK SEMICOLON inLoop {printf("\n break in loop \n");}
+		| CONTINUE SEMICOLON inLoop {printf("\ncontinue in loop \n");}
+		| specialStatement inLoop {printf("\n special statement in loop \n");}
+		| basicStatement inLoop {printf("\n basic statement in loop \n");}
+ 		|functionCall inLoop {printf("\n basic statement in loop \n");}
+		| ifInLoopStatement inLoop {printf("\n if in loop \n");}
+		| switchStatement inLoop {printf("\n switch in loop \n");}
+		| singleLoopStatement inLoop {printf("\n any other statement in loop \n");}
+		|
  
 ifStatement : IF OPBRAC expressionStatement CLBRAC OPCUR statements CLCUR ES
 			| IF OPBRAC expressionStatement CLBRAC OPCUR statements CLCUR ifStatement
  
 ES : ELSE IF OPBRAC expressionStatement CLBRAC OPCUR statements CLCUR ES
 	| ELSE OPCUR statements CLCUR
+	|
  
 ifInLoopStatement : IF OPBRAC expressionStatement CLBRAC OPCUR inLoop CLCUR ESLoop
 			| IF OPBRAC expressionStatement CLBRAC OPCUR inLoop CLCUR ifInLoopStatement
  
 ESLoop : ELSE IF OPBRAC expressionStatement CLBRAC OPCUR inLoop CLCUR ESLoop
 	| ELSE OPCUR inLoop CLCUR
+	|
  
-switchStatement : SWITCH OPBRAC IDENTIFIER CLBRAC OPCUR caseStatements defaultStatement CLCUR
-caseStatements : caseStatementInt | caseStatementChar | 
-caseStatementInt : caseInt caseStatementInt | 
-caseInt : CASE OPBRAC INTVAL CLBRAC COLON statements BREAK SEMICOLON 
-caseStatementChar : caseChar caseStatementChar |
-caseChar :  CASE OPBRAC CHARVAL CLBRAC COLON statements BREAK SEMICOLON 
-defaultStatement : DEFAULT COLON statements SEMICOLON | 
+switchStatement : SWITCH OPBRAC IDENTIFIER CLBRAC OPCUR caseStatements defaultStatement CLCUR {printf("SWITCH START..\n");}
+caseStatements : caseStatementInt | {printf("char/int..\n");}
+caseStatementInt : caseInt caseStatementInt | {printf("INT CASE..\n");}
+caseInt : CASE OPBRAC INTVAL CLBRAC COLON statements BREAK SEMICOLON {printf("case (INT) : break; ..\n");} 
+		| CASE OPBRAC INTVAL CLBRAC COLON statements {printf("case (INT) : ..\n");}
+		| CASE INTVAL COLON statements BREAK SEMICOLON {printf("case INT : BREAK;..\n");}
+		| CASE INTVAL COLON statements {printf("CASE INT : ..\n");}
+		| CASE OPBRAC CHARVAL CLBRAC COLON statements BREAK SEMICOLON {printf("case (char) : break; ..\n");} 
+		| CASE OPBRAC CHARVAL CLBRAC COLON statements {printf("case (char) : ..\n");}
+		| CASE CHARVAL COLON statements BREAK SEMICOLON {printf("case char : BREAK;..\n");}
+		| CASE CHARVAL COLON statements {printf("CASE char : ..\n");}
+defaultStatement : DEFAULT COLON statements  | {printf(" \nDEFAULT : ..\n");}
  
 /* basic statements */
 basicStatements : basicStatement basicStatements

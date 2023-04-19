@@ -1,8 +1,267 @@
 int g;
 g=10;
 g = (r>3) || 5<6;
+int b(){
 
+}
+int c(){
+    
+     for(int i=8,p=3;i<=8;i=i+1){
+        int y;
+        int j;
+        break;
+        continue;
+        if(a==0){
+
+        }
+        else if(a==9){
+
+        }
+        else{
+
+        }
+        if(p ==0){
+
+        }
+        else{
+
+        }
+        switch(a){
+            case 'a':  int y = 0; int a[5];break;
+            case 1:  for(int i=0;i<9;i=i+2){int u=0;}break;
+            case 'b':  break;
+            
+        }
+        for(int i=8;i<=8;i=i+1)
+            for(int i=8;i<9;i=i+1)
+                int y = 0;
+        
+    }
+    while(a==9){
+        int y;
+        int j;
+        break;
+        continue;
+        if(a==0){
+
+        }
+        else if(a==9){
+
+        }
+        else{
+
+        }
+        if(p ==0){
+
+        }
+        else{
+
+        }
+        switch(a){
+            case 1:  break;
+            case 1:  break;
+            case 1:  break;
+            
+        }
+        for(int i=8;i<=8;i=i+1)
+        for(int i=8;i<9;i=i+1)
+            int y = 0;
+        
+    }
+     for(char i='a';i<'z';i=i+1)
+        switch(a){
+            default : int y;
+        }
+    
+    for(int i=8;i<=8;i=i+1)
+        for(int i=8;i<9;i=i+1)
+            int y = 0,c=0;
+    for(int i=8;i<9;i=i+1)
+        break;
+    for(int i=8;i<9;i=i+1)
+        continue;
+    for(int i=8;i<9;i=i+1)
+        switch(a){
+            case 1:  break;
+            case 1:  break;
+            case 1:  break;
+            default : int y;
+        }
+
+    for(int i=8;i<9;i=i+1)
+        switch(a){
+            case 1:  break;
+            case 1:  break;
+            case 1:  break;
+            
+        }
+    for(int i=8;i<9;i=i+1)
+        switch(a){
+            default : int y;
+        }
+    for(int i=8;i<9;i=i+1)
+        if(a==5){
+            int y;
+        }
+        if(a==3){
+
+        }
+        else if(a==3){
+
+        }
+        else if(a==3){
+
+        }
+    for(int i=8;i<9;i=i+1)
+        if(a==5){
+            int y;
+        }
+        if(a==3){
+
+        }
+        else if(a==3){
+
+        }
+        else if(a==3){
+
+        }
+        else{
+
+        }
+    if(u==0){
+
+    }
+     else{
+       int j;        
+    }
+      
+}
 int a()
-{
-    for(int i=8,t=4,c=2>d;i<=8;i=i+1);
+{   
+    for(int i=8,p=3;i<=8;i=i+1){
+        int y;
+        int j;
+        break;
+        continue;
+        if(a==0){
+
+        }
+        else if(a==9){
+
+        }
+        else{
+
+        }
+        if(p ==0){
+
+        }
+        else{
+
+        }
+        switch(a){
+            case 1:  int y = 0; int a[5];break;
+            case 1:  for(int i=0;i<9;i=i+2){int u=0;}break;
+            case 1:  break;
+            
+        }
+        for(int i=8;i<=8;i=i+1)
+            for(int i=8;i<9;i=i+1)
+                int y = 0;
+        
+    }
+    while(a==9){
+        int y;
+        int j;
+        break;
+        continue;
+        if(a==0){
+
+        }
+        else if(a==9){
+
+        }
+        else{
+
+        }
+        if(p ==0){
+
+        }
+        else{
+
+        }
+        switch(a){
+            case 1:  break;
+            case 1:  break;
+            case 1:  break;
+            
+        }
+        for(int i=8;i<=8;i=i+1)
+        for(int i=8;i<9;i=i+1)
+            int y = 0;
+        
+    }
+
+    
+    for(int i=8;i<=8;i=i+1)
+        for(int i=8;i<9;i=i+1)
+            int y = 0,c=0;
+    for(int i=8;i<9;i=i+1)
+        break;
+    for(int i=8;i<9;i=i+1)
+        continue;
+    for(int i=8;i<9;i=i+1)
+        switch(a){
+            case 1:  break;
+            case 1:  break;
+            case 1:  break;
+            default : int y;
+        }
+
+    for(int i=8;i<9;i=i+1)
+        switch(a){
+            case 1:  break;
+            case 1:  break;
+            case 1:  break;
+            
+        }
+    for(int i=8;i<9;i=i+1)
+        switch(a){
+            default : int y;
+        }
+    for(int i=8;i<9;i=i+1)
+        if(a==5){
+            int y;
+        }
+        if(a==3){
+
+        }
+        else if(a==3){
+
+        }
+        else if(a==3){
+
+        }
+    for(int i=8;i<9;i=i+1)
+        if(a==5){
+            int y;
+        }
+        if(a==3){
+
+        }
+        else if(a==3){
+
+        }
+        else if(a==3){
+
+        }
+        else{
+
+        }
+    if(u==0){
+
+    }
+     else{
+       int j;        
+    }
+      
 }
