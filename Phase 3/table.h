@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
-#define size 500
+#define size 10000
 
 struct table {
     int lineNo;
@@ -14,10 +14,4 @@ struct table {
     int parameterCount;
     int depthInTree;
     struct tableEntry *next;
-};
-
-struct depth{
-    int startLine;
-    int endLine;
-    int depth;
 };

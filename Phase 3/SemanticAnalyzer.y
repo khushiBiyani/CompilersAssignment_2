@@ -3,7 +3,10 @@
 	#include "table.h"
 	
 	using namespace std;
-
+	table symbolTable[10000];
+	int currIndex = 0;
+	int currState = 0;
+	int maxState = 0;
 %}
 %start code
 /* left associative */
