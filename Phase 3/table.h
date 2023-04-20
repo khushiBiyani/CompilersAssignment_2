@@ -3,7 +3,6 @@
 #define size 10000
 
 struct table {
-    int lineNo;
     char* lexeme;
     char* dataType;
     char* value;
@@ -12,6 +11,5 @@ struct table {
     int arrayDimension[size];
     char* parameterList [size];
     int parameterCount;
-    int depthInTree;
-    struct tableEntry *next;
+    int scope;
 };

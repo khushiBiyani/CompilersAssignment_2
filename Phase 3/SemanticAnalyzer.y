@@ -1,12 +1,31 @@
 %{
 	#include <stdio.h>
 	#include "table.h"
-	
+	#include <string.h>
 	using namespace std;
 	table symbolTable[10000];
+	int availableScope[10000]; 
 	int currIndex = 0;
-	int currState = 0;
-	int maxState = 0;
+	int currScope = 0;
+	int maxScope = 0;
+	void insertInTable(char* lexeme,char* dataType,char* value,bool isFunction,bool isArray,int arrayDimension[size],char* parameterList [size],int parameterCount,int scope){
+		table newTable;
+		newTable.lexeme.strcpy(lexeme);
+		newTable.dataType.strcpy(dataType;
+		newTable.value.strcpy(value);
+		newTable.isFunction=isFunction;
+		if(isFunction){
+
+		}
+		newTable.isArray = isArray;
+		if(isArray){
+
+		}
+		newTable.scope=scope;
+		symbolTable[currIndex++]=newTable;
+
+
+	}
 %}
 %start code
 /* left associative */
@@ -32,7 +51,7 @@
 %%
  
 /* start of the program */
-code : declarationList {printf("Starting..\n");}
+code : declarationList {printf("Starting..\n");insertInTable(void}
  
 declarationList :  declarationStatement declarationList {printf("RECURSIVE DECLARATION \n");}
 				|  assignmentStatement declarationList
