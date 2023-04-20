@@ -69,11 +69,13 @@
 /* First part of user prologue.  */
 #line 1 "SyntaxAnalyzer.y"
 
-	#include <bits/stdc++.h>
+	#include <stdio.h>
+	#include "table.h"
+	
 	using namespace std;
 
 
-#line 77 "y.tab.c"
+#line 79 "y.tab.c"
 
 # ifndef YY_CAST
 #  ifdef __cplusplus
@@ -720,22 +722,22 @@ static const yytype_int8 yytranslate[] =
 /* YYRLINE[YYN] -- Source line where rule number YYN was defined.  */
 static const yytype_uint8 yyrline[] =
 {
-       0,    30,    30,    32,    33,    34,    35,    37,    38,    39,
-      40,    42,    43,    44,    45,    48,    49,    50,    52,    53,
-      54,    55,    56,    57,    58,    60,    61,    62,    63,    64,
-      65,    66,    66,    67,    68,    71,    72,    73,    75,    76,
-      77,    78,    79,    80,    81,    82,    83,    85,    86,    88,
-      89,    90,    92,    93,    95,    96,    97,    99,   100,   100,
-     101,   101,   102,   103,   104,   105,   106,   107,   108,   109,
-     110,   110,   113,   114,   116,   117,   118,   120,   121,   123,
-     124,   125,   126,   127,   128,   129,   130,   131,   132,   133,
-     134,   135,   137,   137,   138,   138,   140,   141,   142,   143,
-     144,   146,   147,   148,   149,   150,   152,   153,   155,   156,
-     158,   159,   160,   162,   163,   164,   165,   166,   168,   169,
-     170,   172,   173,   174,   175,   177,   178,   179,   180,   181,
-     182,   183,   184,   191,   192,   195,   195,   197,   197,   199,
-     201,   201,   201,   203,   205,   205,   205,   205,   205,   205,
-     205,   207,   207,   211,   213,   214,   215
+       0,    32,    32,    34,    35,    36,    37,    39,    40,    41,
+      42,    44,    45,    46,    47,    50,    51,    52,    54,    55,
+      56,    57,    58,    59,    60,    62,    63,    64,    65,    66,
+      67,    68,    68,    69,    70,    73,    74,    75,    77,    78,
+      79,    80,    81,    82,    83,    84,    85,    87,    88,    90,
+      91,    92,    94,    95,    97,    98,    99,   101,   102,   102,
+     103,   103,   104,   105,   106,   107,   108,   109,   110,   111,
+     112,   112,   115,   116,   118,   119,   120,   122,   123,   125,
+     126,   127,   128,   129,   130,   131,   132,   133,   134,   135,
+     136,   137,   139,   139,   140,   140,   142,   143,   144,   145,
+     146,   148,   149,   150,   151,   152,   154,   155,   157,   158,
+     160,   161,   162,   164,   165,   166,   167,   168,   170,   171,
+     172,   174,   175,   176,   177,   179,   180,   181,   182,   183,
+     184,   185,   186,   193,   194,   197,   197,   199,   199,   201,
+     203,   203,   203,   205,   207,   207,   207,   207,   207,   207,
+     207,   209,   209,   213,   215,   216,   217
 };
 #endif
 
@@ -1561,373 +1563,373 @@ yyreduce:
   switch (yyn)
     {
   case 2: /* code: declarationList  */
-#line 30 "SyntaxAnalyzer.y"
+#line 32 "SyntaxAnalyzer.y"
                        {printf("Starting..\n");}
-#line 1567 "y.tab.c"
+#line 1569 "y.tab.c"
     break;
 
   case 3: /* declarationList: declarationStatement declarationList  */
-#line 32 "SyntaxAnalyzer.y"
+#line 34 "SyntaxAnalyzer.y"
                                                         {printf("RECURSIVE DECLARATION \n");}
-#line 1573 "y.tab.c"
+#line 1575 "y.tab.c"
     break;
 
   case 5: /* declarationList: declarationStatement  */
-#line 34 "SyntaxAnalyzer.y"
+#line 36 "SyntaxAnalyzer.y"
                                                         {printf("DECLARATION \n");}
-#line 1579 "y.tab.c"
+#line 1581 "y.tab.c"
     break;
 
   case 7: /* statements: specialStatement statements  */
-#line 37 "SyntaxAnalyzer.y"
+#line 39 "SyntaxAnalyzer.y"
                                          {printf("Special..\n");}
-#line 1585 "y.tab.c"
+#line 1587 "y.tab.c"
     break;
 
   case 8: /* statements: basicStatement statements  */
-#line 38 "SyntaxAnalyzer.y"
+#line 40 "SyntaxAnalyzer.y"
                                                {printf("Basic123..\n");}
-#line 1591 "y.tab.c"
+#line 1593 "y.tab.c"
     break;
 
   case 15: /* forLoop: FOR OPBRAC forAssignStatement forExpStatement SEMICOLON forUpdateStatement CLBRAC OPCUR inLoop CLCUR  */
-#line 48 "SyntaxAnalyzer.y"
+#line 50 "SyntaxAnalyzer.y"
                                                                                                                {printf("\nproper FOR \n");}
-#line 1597 "y.tab.c"
+#line 1599 "y.tab.c"
     break;
 
   case 16: /* forLoop: FOR OPBRAC forAssignStatement forExpStatement SEMICOLON forUpdateStatement CLBRAC SEMICOLON  */
-#line 49 "SyntaxAnalyzer.y"
+#line 51 "SyntaxAnalyzer.y"
                                                                                                               {printf("\nFOR SEMICOLON \n");}
-#line 1603 "y.tab.c"
+#line 1605 "y.tab.c"
     break;
 
   case 17: /* forLoop: FOR OPBRAC forAssignStatement forExpStatement SEMICOLON forUpdateStatement CLBRAC singleLoopStatement  */
-#line 50 "SyntaxAnalyzer.y"
+#line 52 "SyntaxAnalyzer.y"
                                                                                                                         {printf("\nFOR SINGLE STATEMENT \n");}
-#line 1609 "y.tab.c"
+#line 1611 "y.tab.c"
     break;
 
   case 35: /* whileLoop: WHILE OPBRAC expressionStatement CLBRAC OPCUR inLoop CLCUR  */
-#line 71 "SyntaxAnalyzer.y"
+#line 73 "SyntaxAnalyzer.y"
                                                                        {printf("\nproper WHILE \n");}
-#line 1615 "y.tab.c"
+#line 1617 "y.tab.c"
     break;
 
   case 36: /* whileLoop: WHILE OPBRAC expressionStatement CLBRAC SEMICOLON  */
-#line 72 "SyntaxAnalyzer.y"
+#line 74 "SyntaxAnalyzer.y"
                                                                       {printf("\nWHILE SEMICOLON \n");}
-#line 1621 "y.tab.c"
+#line 1623 "y.tab.c"
     break;
 
   case 37: /* whileLoop: WHILE OPBRAC expressionStatement CLBRAC singleLoopStatement  */
-#line 73 "SyntaxAnalyzer.y"
+#line 75 "SyntaxAnalyzer.y"
                                                                                 {printf("\nSINGLE WHILE \n");}
-#line 1627 "y.tab.c"
+#line 1629 "y.tab.c"
     break;
 
   case 38: /* inLoop: BREAK SEMICOLON inLoop  */
-#line 75 "SyntaxAnalyzer.y"
+#line 77 "SyntaxAnalyzer.y"
                                 {printf("\n break in loop \n");}
-#line 1633 "y.tab.c"
+#line 1635 "y.tab.c"
     break;
 
   case 39: /* inLoop: CONTINUE SEMICOLON inLoop  */
-#line 76 "SyntaxAnalyzer.y"
+#line 78 "SyntaxAnalyzer.y"
                                             {printf("\ncontinue in loop \n");}
-#line 1639 "y.tab.c"
+#line 1641 "y.tab.c"
     break;
 
   case 40: /* inLoop: specialStatement inLoop  */
-#line 77 "SyntaxAnalyzer.y"
+#line 79 "SyntaxAnalyzer.y"
                                           {printf("\n special statement in loop \n");}
-#line 1645 "y.tab.c"
+#line 1647 "y.tab.c"
     break;
 
   case 41: /* inLoop: basicStatement inLoop  */
-#line 78 "SyntaxAnalyzer.y"
+#line 80 "SyntaxAnalyzer.y"
                                         {printf("\n basic statement in loop \n");}
-#line 1651 "y.tab.c"
+#line 1653 "y.tab.c"
     break;
 
   case 42: /* inLoop: functionCall inLoop  */
-#line 79 "SyntaxAnalyzer.y"
+#line 81 "SyntaxAnalyzer.y"
                                      {printf("\n basic statement in loop \n");}
-#line 1657 "y.tab.c"
+#line 1659 "y.tab.c"
     break;
 
   case 43: /* inLoop: ifInLoopStatement inLoop  */
-#line 80 "SyntaxAnalyzer.y"
+#line 82 "SyntaxAnalyzer.y"
                                            {printf("\n if in loop \n");}
-#line 1663 "y.tab.c"
+#line 1665 "y.tab.c"
     break;
 
   case 44: /* inLoop: switchStatement inLoop  */
-#line 81 "SyntaxAnalyzer.y"
+#line 83 "SyntaxAnalyzer.y"
                                          {printf("\n switch in loop \n");}
-#line 1669 "y.tab.c"
+#line 1671 "y.tab.c"
     break;
 
   case 45: /* inLoop: singleLoopStatement inLoop  */
-#line 82 "SyntaxAnalyzer.y"
+#line 84 "SyntaxAnalyzer.y"
                                              {printf("\n any other statement in loop \n");}
-#line 1675 "y.tab.c"
+#line 1677 "y.tab.c"
     break;
 
   case 57: /* switchStatement: SWITCH OPBRAC IDENTIFIER CLBRAC OPCUR caseStatements defaultStatement CLCUR  */
-#line 99 "SyntaxAnalyzer.y"
+#line 101 "SyntaxAnalyzer.y"
                                                                                               {printf("SWITCH START..\n");}
-#line 1681 "y.tab.c"
+#line 1683 "y.tab.c"
     break;
 
   case 59: /* caseStatements: %empty  */
-#line 100 "SyntaxAnalyzer.y"
+#line 102 "SyntaxAnalyzer.y"
                                     {printf("char/int..\n");}
-#line 1687 "y.tab.c"
+#line 1689 "y.tab.c"
     break;
 
   case 61: /* caseStatementInt: %empty  */
-#line 101 "SyntaxAnalyzer.y"
+#line 103 "SyntaxAnalyzer.y"
                                               {printf("INT CASE..\n");}
-#line 1693 "y.tab.c"
+#line 1695 "y.tab.c"
     break;
 
   case 62: /* caseInt: CASE OPBRAC INTVAL CLBRAC COLON statements BREAK SEMICOLON  */
-#line 102 "SyntaxAnalyzer.y"
+#line 104 "SyntaxAnalyzer.y"
                                                                      {printf("case (INT) : break; ..\n");}
-#line 1699 "y.tab.c"
+#line 1701 "y.tab.c"
     break;
 
   case 63: /* caseInt: CASE OPBRAC INTVAL CLBRAC COLON statements  */
-#line 103 "SyntaxAnalyzer.y"
+#line 105 "SyntaxAnalyzer.y"
                                                              {printf("case (INT) : ..\n");}
-#line 1705 "y.tab.c"
+#line 1707 "y.tab.c"
     break;
 
   case 64: /* caseInt: CASE INTVAL COLON statements BREAK SEMICOLON  */
-#line 104 "SyntaxAnalyzer.y"
+#line 106 "SyntaxAnalyzer.y"
                                                                {printf("case INT : BREAK;..\n");}
-#line 1711 "y.tab.c"
+#line 1713 "y.tab.c"
     break;
 
   case 65: /* caseInt: CASE INTVAL COLON statements  */
-#line 105 "SyntaxAnalyzer.y"
+#line 107 "SyntaxAnalyzer.y"
                                                {printf("CASE INT : ..\n");}
-#line 1717 "y.tab.c"
+#line 1719 "y.tab.c"
     break;
 
   case 66: /* caseInt: CASE OPBRAC CHARVAL CLBRAC COLON statements BREAK SEMICOLON  */
-#line 106 "SyntaxAnalyzer.y"
+#line 108 "SyntaxAnalyzer.y"
                                                                               {printf("case (char) : break; ..\n");}
-#line 1723 "y.tab.c"
+#line 1725 "y.tab.c"
     break;
 
   case 67: /* caseInt: CASE OPBRAC CHARVAL CLBRAC COLON statements  */
-#line 107 "SyntaxAnalyzer.y"
+#line 109 "SyntaxAnalyzer.y"
                                                               {printf("case (char) : ..\n");}
-#line 1729 "y.tab.c"
+#line 1731 "y.tab.c"
     break;
 
   case 68: /* caseInt: CASE CHARVAL COLON statements BREAK SEMICOLON  */
-#line 108 "SyntaxAnalyzer.y"
+#line 110 "SyntaxAnalyzer.y"
                                                                 {printf("case char : BREAK;..\n");}
-#line 1735 "y.tab.c"
+#line 1737 "y.tab.c"
     break;
 
   case 69: /* caseInt: CASE CHARVAL COLON statements  */
-#line 109 "SyntaxAnalyzer.y"
+#line 111 "SyntaxAnalyzer.y"
                                                 {printf("CASE char : ..\n");}
-#line 1741 "y.tab.c"
+#line 1743 "y.tab.c"
     break;
 
   case 71: /* defaultStatement: %empty  */
-#line 110 "SyntaxAnalyzer.y"
+#line 112 "SyntaxAnalyzer.y"
                                                {printf(" \nDEFAULT : ..\n");}
-#line 1747 "y.tab.c"
+#line 1749 "y.tab.c"
     break;
 
   case 74: /* basicStatement: expressionStatement  */
-#line 116 "SyntaxAnalyzer.y"
+#line 118 "SyntaxAnalyzer.y"
                                      {printf("BS->EXPS..\n");}
-#line 1753 "y.tab.c"
+#line 1755 "y.tab.c"
     break;
 
   case 75: /* basicStatement: declarationStatement  */
-#line 117 "SyntaxAnalyzer.y"
+#line 119 "SyntaxAnalyzer.y"
                                        {printf("BS->DS..\n");}
-#line 1759 "y.tab.c"
+#line 1761 "y.tab.c"
     break;
 
   case 76: /* basicStatement: assignmentStatement  */
-#line 118 "SyntaxAnalyzer.y"
+#line 120 "SyntaxAnalyzer.y"
                                         {printf("Basic->AS..\n");}
-#line 1765 "y.tab.c"
+#line 1767 "y.tab.c"
     break;
 
   case 77: /* assignmentStatement: IDENTIFIER EQUAL expressionStatement COMMA assignmentStatement  */
-#line 120 "SyntaxAnalyzer.y"
+#line 122 "SyntaxAnalyzer.y"
                                                                                      {printf("AS1..\n");}
-#line 1771 "y.tab.c"
+#line 1773 "y.tab.c"
     break;
 
   case 78: /* assignmentStatement: IDENTIFIER EQUAL expressionStatement SEMICOLON  */
-#line 121 "SyntaxAnalyzer.y"
+#line 123 "SyntaxAnalyzer.y"
                                                                  {printf("AS2..\n");}
-#line 1777 "y.tab.c"
+#line 1779 "y.tab.c"
     break;
 
   case 81: /* declarationStatement: INT IDENTIFIER OPBRAC parameters CLBRAC compoundStatements  */
-#line 125 "SyntaxAnalyzer.y"
+#line 127 "SyntaxAnalyzer.y"
                                                                                    {printf("INT F WITH PARAMS..\n");}
-#line 1783 "y.tab.c"
+#line 1785 "y.tab.c"
     break;
 
   case 82: /* declarationStatement: CHAR IDENTIFIER OPBRAC parameters CLBRAC compoundStatements  */
-#line 126 "SyntaxAnalyzer.y"
+#line 128 "SyntaxAnalyzer.y"
                                                                               {printf("char F WITH PARAMS..\n");}
-#line 1789 "y.tab.c"
+#line 1791 "y.tab.c"
     break;
 
   case 83: /* declarationStatement: FLOAT IDENTIFIER OPBRAC parameters CLBRAC compoundStatements  */
-#line 127 "SyntaxAnalyzer.y"
+#line 129 "SyntaxAnalyzer.y"
                                                                                {printf("float F WITH PARAMS..\n");}
-#line 1795 "y.tab.c"
+#line 1797 "y.tab.c"
     break;
 
   case 87: /* declarationStatement: INT declarationListIntFloat SEMICOLON  */
-#line 131 "SyntaxAnalyzer.y"
+#line 133 "SyntaxAnalyzer.y"
                                                         {printf("DS1..\n");}
-#line 1801 "y.tab.c"
+#line 1803 "y.tab.c"
     break;
 
   case 96: /* declarationListIntFloat: IDENTIFIER EQUAL expressionStatement COMMA declarationListIntFloat  */
-#line 140 "SyntaxAnalyzer.y"
+#line 142 "SyntaxAnalyzer.y"
                                                                                              {printf("DSL1..\n");}
-#line 1807 "y.tab.c"
+#line 1809 "y.tab.c"
     break;
 
   case 98: /* declarationListIntFloat: IDENTIFIER EQUAL expressionStatement  */
-#line 142 "SyntaxAnalyzer.y"
+#line 144 "SyntaxAnalyzer.y"
                                                        {printf("DSL3..\n");}
-#line 1813 "y.tab.c"
+#line 1815 "y.tab.c"
     break;
 
   case 99: /* declarationListIntFloat: IDENTIFIER dimension  */
-#line 143 "SyntaxAnalyzer.y"
+#line 145 "SyntaxAnalyzer.y"
                                         {printf("INTFLOAT ARRAY..\n");}
-#line 1819 "y.tab.c"
+#line 1821 "y.tab.c"
     break;
 
   case 100: /* declarationListIntFloat: IDENTIFIER  */
-#line 144 "SyntaxAnalyzer.y"
+#line 146 "SyntaxAnalyzer.y"
                              {printf("DSL4..\n");}
-#line 1825 "y.tab.c"
+#line 1827 "y.tab.c"
     break;
 
   case 106: /* expressionStatement: logicalExpression LOGICALOR expressionStatement  */
-#line 152 "SyntaxAnalyzer.y"
+#line 154 "SyntaxAnalyzer.y"
                                                                       {printf("ES1..\n");}
-#line 1831 "y.tab.c"
+#line 1833 "y.tab.c"
     break;
 
   case 107: /* expressionStatement: logicalExpression  */
-#line 153 "SyntaxAnalyzer.y"
+#line 155 "SyntaxAnalyzer.y"
                                     {printf("ES2..\n");}
-#line 1837 "y.tab.c"
+#line 1839 "y.tab.c"
     break;
 
   case 108: /* logicalExpression: expression LOGICALAND logicalExpression  */
-#line 155 "SyntaxAnalyzer.y"
+#line 157 "SyntaxAnalyzer.y"
                                                             {printf("LE1..\n");}
-#line 1843 "y.tab.c"
+#line 1845 "y.tab.c"
     break;
 
   case 109: /* logicalExpression: expression  */
-#line 156 "SyntaxAnalyzer.y"
+#line 158 "SyntaxAnalyzer.y"
                              {printf("LE2..\n");}
-#line 1849 "y.tab.c"
+#line 1851 "y.tab.c"
     break;
 
   case 110: /* expression: relationalExpression EQUALS expression  */
-#line 158 "SyntaxAnalyzer.y"
+#line 160 "SyntaxAnalyzer.y"
                                                     {printf("E1..\n");}
-#line 1855 "y.tab.c"
+#line 1857 "y.tab.c"
     break;
 
   case 111: /* expression: relationalExpression NOTEQUAL expression  */
-#line 159 "SyntaxAnalyzer.y"
+#line 161 "SyntaxAnalyzer.y"
                                                            {printf("E2..\n");}
-#line 1861 "y.tab.c"
+#line 1863 "y.tab.c"
     break;
 
   case 112: /* expression: relationalExpression  */
-#line 160 "SyntaxAnalyzer.y"
+#line 162 "SyntaxAnalyzer.y"
                                        {printf("E3..\n");}
-#line 1867 "y.tab.c"
+#line 1869 "y.tab.c"
     break;
 
   case 117: /* relationalExpression: value  */
-#line 166 "SyntaxAnalyzer.y"
+#line 168 "SyntaxAnalyzer.y"
                         {printf("VALUE..\n");}
-#line 1873 "y.tab.c"
+#line 1875 "y.tab.c"
     break;
 
   case 118: /* value: term ADD value  */
-#line 168 "SyntaxAnalyzer.y"
+#line 170 "SyntaxAnalyzer.y"
                        {printf("ADD..\n");}
-#line 1879 "y.tab.c"
+#line 1881 "y.tab.c"
     break;
 
   case 120: /* value: term  */
-#line 170 "SyntaxAnalyzer.y"
+#line 172 "SyntaxAnalyzer.y"
                {printf("Basic TERM..\n");}
-#line 1885 "y.tab.c"
+#line 1887 "y.tab.c"
     break;
 
   case 121: /* term: factor MULT term  */
-#line 172 "SyntaxAnalyzer.y"
+#line 174 "SyntaxAnalyzer.y"
                         {printf("MULT..\n");}
-#line 1891 "y.tab.c"
+#line 1893 "y.tab.c"
     break;
 
   case 124: /* term: factor  */
-#line 175 "SyntaxAnalyzer.y"
+#line 177 "SyntaxAnalyzer.y"
                  {printf("Factor..\n");}
-#line 1897 "y.tab.c"
+#line 1899 "y.tab.c"
     break;
 
   case 129: /* factor: INTVAL  */
-#line 181 "SyntaxAnalyzer.y"
+#line 183 "SyntaxAnalyzer.y"
                  {printf("INT VALS.. %d\n",yylval);}
-#line 1903 "y.tab.c"
+#line 1905 "y.tab.c"
     break;
 
   case 138: /* parameters: parameter COMMA parameters  */
-#line 197 "SyntaxAnalyzer.y"
+#line 199 "SyntaxAnalyzer.y"
                                                      {printf("FUNCTION params\n");}
-#line 1909 "y.tab.c"
+#line 1911 "y.tab.c"
     break;
 
   case 139: /* parameter: type IDENTIFIER  */
-#line 199 "SyntaxAnalyzer.y"
+#line 201 "SyntaxAnalyzer.y"
                             {printf("FUNCTION param\n");}
-#line 1915 "y.tab.c"
+#line 1917 "y.tab.c"
     break;
 
   case 143: /* compoundStatements: OPCUR statementList CLCUR  */
-#line 203 "SyntaxAnalyzer.y"
+#line 205 "SyntaxAnalyzer.y"
                                                {printf("FUNCTION statements\n");}
-#line 1921 "y.tab.c"
+#line 1923 "y.tab.c"
     break;
 
   case 154: /* dimension: BOXOPEN INTVAL BOXCLOSE  */
-#line 213 "SyntaxAnalyzer.y"
+#line 215 "SyntaxAnalyzer.y"
                                     {printf("size..\n");}
-#line 1927 "y.tab.c"
+#line 1929 "y.tab.c"
     break;
 
 
-#line 1931 "y.tab.c"
+#line 1933 "y.tab.c"
 
       default: break;
     }
@@ -2120,7 +2122,7 @@ yyreturnlab:
   return yyresult;
 }
 
-#line 216 "SyntaxAnalyzer.y"
+#line 218 "SyntaxAnalyzer.y"
 
  
 #include "lex.yy.c"
