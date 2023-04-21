@@ -64,7 +64,12 @@
     		for(int i=tableIndex-1;i>=0;i--)
     		{	
     			if(strcmp(table[i].lexeme,token)){
-
+					for(int j = scopeIndex;j>=0;j--){
+						if(table[i].scope==availableScopes[j]){
+							strcpy(table[i].value,value);
+							return;
+						}
+					}
 				}
     		}
      
