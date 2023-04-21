@@ -145,6 +145,9 @@
     		   | basicStatement statements {printf("Basic123..\n");}
     		   | functionCall statements
     		   | 
+	singleStatement : specialStatement
+    		   | basicStatement 
+    		   | functionCall
      
     specialStatement : FOR {pushNewScope();} forLoop 
     				 | ifStatement
@@ -175,10 +178,10 @@
     				   | IDENTIFIER EQUAL expressionStatement 
      
     /* while loop */
-	whileLoop : WHILE OPBRAC expressionStatement CLBRAC whileSuffix
-    whileSuffix : OPCUR inLoop CLCUR {printf("\nproper WHILE \n");}
-    		  | SEMICOLON {printf("\nWHILE SEMICOLON \n");}
-    		  | singleLoopStatement {printf("\nSINGLE WHILE \n");}
+	whileLoop : WHILE OPBRAC {pushNewScope();} expressionStatement CLBRAC whileSuffix
+    whileSuffix : OPCUR {pushNewScope();}inLoop CLCUR { popScope(); popScope(); printf("\nproper WHILE \n");}
+    		  | SEMICOLON {popScope(); printf("\nWHILE SEMICOLON \n");}
+    		  | {pushNewScope();} singleLoopStatement { popScope(); popScope(); printf("\nSINGLE WHILE \n");}
      
     inLoop : BREAK SEMICOLON inLoop {printf("\n break in loop \n");}
     		| CONTINUE SEMICOLON inLoop {printf("\ncontinue in loop \n");}
@@ -190,32 +193,37 @@
     		| singleLoopStatement inLoop {printf("\n any other statement in loop \n");}
     		|
      
-    ifStatement : IF OPBRAC expressionStatement CLBRAC OPCUR statements CLCUR ES
-    			| IF OPBRAC expressionStatement CLBRAC OPCUR statements CLCUR ifStatement
+    ifStatement : IF OPBRAC expressionStatement CLBRAC OPCUR {pushNewScope();} statements {popScope();} CLCUR ifContinuer
+				| IF OPBRAC expressionStatement CLBRAC {pushNewScope();} singleStatement {popScope();} ifContinuer
+
+	ifContinuer : ES | ifStatement
      
-    ES : ELSE IF OPBRAC expressionStatement CLBRAC OPCUR statements CLCUR ES
-    	| ELSE OPCUR statements CLCUR
-    	|
+    ES : ELSE IF OPBRAC expressionStatement CLBRAC OPCUR {pushNewScope();} statements {popScope();}CLCUR ES
+    	| ELSE OPCUR {pushNewScope();} statements {popScope();} CLCUR
+    	|ELSE IF OPBRAC expressionStatement CLBRAC {pushNewScope();} singleStatement {popScope();} ES
+    	| ELSE {pushNewScope();} singleStatement {popScope();}
+		|
      
-    ifInLoopStatement : IF OPBRAC expressionStatement CLBRAC OPCUR inLoop CLCUR ESLoop
-    			| IF OPBRAC expressionStatement CLBRAC OPCUR inLoop CLCUR ifInLoopStatement
+    ifInLoopStatement : IF OPBRAC expressionStatement CLBRAC OPCUR {pushNewScope();} inLoop {popScope;} CLCUR ifInLoopContinuer
+
+	ifInLoopContinuer : ESLoop | ifInLoopStatement
      
-    ESLoop : ELSE IF OPBRAC expressionStatement CLBRAC OPCUR inLoop CLCUR ESLoop
-    	| ELSE OPCUR inLoop CLCUR
-    	|
+    ESLoop : ELSE IF OPBRAC expressionStatement CLBRAC OPCUR {pushNewScope();} inLoop {popScope();}CLCUR ESLoop
+    	| ELSE OPCUR {pushNewScope();} inLoop {popScope();} CLCUR
+    	|ELSE IF OPBRAC expressionStatement CLBRAC {pushNewScope();} singleLoopStatement {popScope();} ESLoop
+    	| ELSE {pushNewScope();} singleLoopStatement {popScope();}
+		|
      
-    switchStatement : SWITCH OPBRAC IDENTIFIER CLBRAC OPCUR caseStatements defaultStatement CLCUR {printf("SWITCH START..\n");}
+    switchStatement : SWITCH OPBRAC IDENTIFIER CLBRAC OPCUR {pushNewScope();} caseStatements defaultStatement {popScope();} CLCUR {printf("SWITCH START..\n");}
     caseStatements : caseStatementInt | {printf("char/int..\n");}
-    caseStatementInt : caseInt caseStatementInt | {printf("INT CASE..\n");}
-    caseInt : CASE OPBRAC INTVAL CLBRAC COLON statements BREAK SEMICOLON {printf("case (INT) : break; ..\n");} 
-    		| CASE OPBRAC INTVAL CLBRAC COLON statements {printf("case (INT) : ..\n");}
-    		| CASE INTVAL COLON statements BREAK SEMICOLON {printf("case INT : BREAK;..\n");}
-    		| CASE INTVAL COLON statements {printf("CASE INT : ..\n");}
-    		| CASE OPBRAC CHARVAL CLBRAC COLON statements BREAK SEMICOLON {printf("case (char) : break; ..\n");} 
-    		| CASE OPBRAC CHARVAL CLBRAC COLON statements {printf("case (char) : ..\n");}
-    		| CASE CHARVAL COLON statements BREAK SEMICOLON {printf("case char : BREAK;..\n");}
-    		| CASE CHARVAL COLON statements {printf("CASE char : ..\n");}
-    defaultStatement : DEFAULT COLON statements  | {printf(" \nDEFAULT : ..\n");}
+    caseStatementInt : {pushNewScope();} caseInt {pushNewScope();} caseStatementInt | {printf("INT CASE..\n");}
+    caseInt : CASE OPBRAC INTVAL CLBRAC COLON caseContinuer
+    		| CASE INTVAL COLON caseContinuer {printf("CASE INT : ..\n");}
+    		| CASE OPBRAC CHARVAL CLBRAC COLON caseContinuer
+    		| CASE CHARVAL COLON caseContinuer
+
+	caseContinuer :  statements BREAK SEMICOLON | statements 
+    defaultStatement : DEFAULT COLON {pushNewScope();} statements {popScope();} | {printf(" \nDEFAULT : ..\n");}
      
     /* basic statements */
     basicStatements : basicStatement basicStatements
@@ -230,9 +238,9 @@
      
     printer : PRINTF OPBRAC STRING prattributes CLBRAC SEMICOLON
     scanner : SCANF OPBRAC STRING scattributes CLBRAC SEMICOLON
-    declarationStatement : INT IDENTIFIER OPBRAC {pushNewScope();} parameters CLBRAC compoundStatements  {printf("INT F WITH PARAMS..\n");}
-    		| CHAR IDENTIFIER OPBRAC  {pushNewScope();}  parameters CLBRAC compoundStatements {printf("char F WITH PARAMS..\n");}
-    		| FLOAT IDENTIFIER OPBRAC  {pushNewScope();} parameters CLBRAC compoundStatements {printf("float F WITH PARAMS..\n");}
+    declarationStatement : INT IDENTIFIER OPBRAC parameters CLBRAC compoundStatements  {printf("INT F WITH PARAMS..\n");}
+    		| CHAR IDENTIFIER OPBRAC   parameters CLBRAC compoundStatements {printf("char F WITH PARAMS..\n");}
+    		| FLOAT IDENTIFIER OPBRAC  parameters CLBRAC compoundStatements {printf("float F WITH PARAMS..\n");}
     		| INT IDENTIFIER OPBRAC  {pushNewScope();} CLBRAC compoundStatements
     		| FLOAT IDENTIFIER OPBRAC  {pushNewScope();}  CLBRAC compoundStatements
     		| CHAR IDENTIFIER OPBRAC  {pushNewScope();}  CLBRAC compoundStatements
@@ -301,7 +309,8 @@
     /* changes to be made - either expressionStatement or expression */
     argList : argList COMMA expressionStatement | expressionStatement 
      
-    parameters : parameter | parameter COMMA parameters  {printf("FUNCTION params\n");}
+    parameters : {pushNewScope();} paramContinuer
+	paramContinuer : parameter | parameter COMMA paramContinuer  {printf("FUNCTION params\n");}
      
     parameter : type IDENTIFIER {printf("FUNCTION param\n");}
      
