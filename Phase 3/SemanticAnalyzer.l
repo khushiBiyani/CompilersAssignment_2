@@ -39,7 +39,7 @@
 "&" {return AMPERSAND;}
 ":" {return COLON;}
 ";" {return SEMICOLON;}
-[a-zA-Z_][a-zA-Z0-9_]* {strcpy(yylval.identifier,yytext);return IDENTIFIER;}
+[a-zA-Z_][a-zA-Z0-9_]* {return IDENTIFIER;}
 [0-9]+([a-zA-Z]|_)+  {printf("Error: Illegal identifier format\n");error=1;}
 "||" {return LOGICALOR;}
 "&&" {return LOGICALAND;}
@@ -61,10 +61,10 @@
 "[" {return BOXOPEN;}
 "]" {return BOXCLOSE;}
 "!" {return LOGICALNOT;}
-[-]?[0-9]+([eE][+-]?[1-9][0-9]*)? {yylval.number=atoi(yytext);return INTVAL;}
-[-]?[0-9]*\.[0-9]+([eE][+-]?[1-9][0-9]*)? {yylval.numberf=atoi(yytext);return FLOATVAL;}
-\'[^\'\n]\' {yylval.singleChar = yytext[0];return CHARVAL;}
-\"[^\"\n]*\" {strcpy(yylval.longString,yytext);return STRING;}
+[-]?[0-9]+([eE][+-]?[1-9][0-9]*)? {return INTVAL;}
+[-]?[0-9]*\.[0-9]+([eE][+-]?[1-9][0-9]*)? {return FLOATVAL;}
+\'[^\'\n]\' {return CHARVAL;}
+\"[^\"\n]*\" {return STRING;}
 \n {lineCount++;}
 . {return yytext[0];}
 %%

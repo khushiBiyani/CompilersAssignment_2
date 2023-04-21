@@ -973,7 +973,7 @@ YY_RULE_SETUP
 case 29:
 YY_RULE_SETUP
 #line 42 "SemanticAnalyzer.l"
-{strcpy(yylval.identifier,yytext);return IDENTIFIER;}
+{return IDENTIFIER;}
 	YY_BREAK
 case 30:
 YY_RULE_SETUP
@@ -1083,22 +1083,22 @@ YY_RULE_SETUP
 case 51:
 YY_RULE_SETUP
 #line 64 "SemanticAnalyzer.l"
-{yylval.number=atoi(yytext);return INTVAL;}
+{return INTVAL;}
 	YY_BREAK
 case 52:
 YY_RULE_SETUP
 #line 65 "SemanticAnalyzer.l"
-{yylval.numberf=atoi(yytext);return FLOATVAL;}
+{return FLOATVAL;}
 	YY_BREAK
 case 53:
 YY_RULE_SETUP
 #line 66 "SemanticAnalyzer.l"
-{yylval.singleChar = yytext[0];return CHARVAL;}
+{return CHARVAL;}
 	YY_BREAK
 case 54:
 YY_RULE_SETUP
 #line 67 "SemanticAnalyzer.l"
-{strcpy(yylval.longString,yytext);return STRING;}
+{return STRING;}
 	YY_BREAK
 case 55:
 /* rule 55 can match eol */

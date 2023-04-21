@@ -155,21 +155,7 @@ extern int yydebug;
 
 /* Value type.  */
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
-union YYSTYPE
-{
-#line 69 "SemanticAnalyzer.y"
-
-    	int number;
-    	char* identifier;
-    	float numberf;
-    	char singleChar;
-		char* longString;
-    
-
-#line 170 "y.tab.h"
-
-};
-typedef union YYSTYPE YYSTYPE;
+typedef int YYSTYPE;
 # define YYSTYPE_IS_TRIVIAL 1
 # define YYSTYPE_IS_DECLARED 1
 #endif

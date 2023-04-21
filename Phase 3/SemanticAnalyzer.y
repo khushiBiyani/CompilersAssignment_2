@@ -1,78 +1,77 @@
-%{
+    %{
     	#include <stdio.h>
+    	#include <stdlib.h>
     	#include <string.h>
     	#include <stdbool.h>
-    	const int size = 10000;
-	void yyerror(const char* s){
-		fprintf(stderr,"Error: %s\n",s);
-	}
-	int yylex();
-    	struct table {
-        	char* lexeme;
-        	char* dataType;
-        	char* value;
-        	bool isFunction;
-        	bool isArray;
-        	int arrayDimension[10000];
-        	char* parameterList [10000];
-        	int parameterCount;
-    		int dimensionOfArray;
-        	int scope;
-    	};
-    	struct table symbolTable[10000];
-    	int availableScope[10000]={-1}; 
-		int scopeIndex = 0;
-    	int currIndex = 0;
-    	int currScope = 0;
-    	int maxScope = 0;
-    	void insertInTable(char* lexeme,char* dataType,char* value,bool isFunction,bool isArray,int dimensionOfArray,int arrayDimension[],char* parameterList [],int parameterCount,int scope){
-    		struct table newTable;
-    		strcpy(newTable.lexeme,lexeme);
-    		strcpy(newTable.dataType,dataType);
-    		strcpy(newTable.value,value);
-    		newTable.isFunction=isFunction;
-    		if(isFunction){
-    			for(int i =0;i<parameterCount;i++){
-    				strcpy(newTable.parameterList[i],parameterList[i]);
-    			}
-    			newTable.parameterCount=parameterCount;
-    		}
-    		newTable.isArray = isArray;
-    		if(isArray){
-    			for(int i =0;i<dimensionOfArray;i++){
-    				newTable.arrayDimension[i]=arrayDimension[i];
-    			}
-    			newTable.dimensionOfArray=dimensionOfArray;
-    		}
-    		newTable.scope=scope;
-    		symbolTable[currIndex++]=newTable;
+    	int yylex();
+     
+    	// error function
+    	void yyerror(const char*){
+    	printf("Invalid Statement");
+    	exit(0);
     	}
-		void updateValue(char* lexeme, char* value, int scope){
-			int instanceScopeIndex = scopeIndex;
-			int tableIndex = currIndex;
-			for(int i = tableIndex-1;i>=0;i--){
-				if(strcmp(symbolTable[i].lexeme,lexeme)==0){
-					for(int j=instanceScopeIndex;j>=0;j--){
-						if(availableScope[j]==scope){
-							strcpy(symbolTable[i].value,value);
-							return;
-						}
-					}
+     
+    	// symbol table structure
+    	struct symbolTable{
+    		char *lexeme;
+    		char *value;
+    		char *dataType;
+    		bool isFunction;
+    		bool isArray;
+    		int scope;
+    		int dimensionofArray;
+    		char *parameterList[1000];
+    		int arrayDimension[1000];
+    		int parameterCount;
+    	};
+    	symbolTable table[1000];
+    	int availableScopes[1000]={-1};
+    	int scopeIndex=0;
+    	int currIndex=0;
+    	int maxScope=0;
+    	int currScope=0;
+     
+    	// insert function
+    	void insertInTable(char *token,char *type,char *val,int sc,int paramCount,char *paramList[],int arrayDim[],int dimensionofArr,bool isArr,bool isFunc){
+    		symbolTable newEntry;
+    		strcpy(newEntry.lexeme,token);
+    		strcpy(newEntry.value,val);
+    		strcpy(newEntry.dataType,type);
+    		newEntry.scope=sc;
+     
+    		if(isFunc){
+        		for(int i =0;i<paramCount;i++){
+        			strcpy(newEntry.parameterList[i],paramList[i]);
+        		}
+        		newEntry.parameterCount=paramCount;
+        	}
+     
+    		newEntry.isArray = isArr;
+        	if(isArr){
+        		for(int i =0;i<dimensionofArr;i++){
+        				newEntry.arrayDimension[i]=arrayDim[i];
+        		}
+        		newEntry.dimensionofArray=dimensionofArr;
+        	}
+    		table[currIndex++]=newEntry;
+    	}
+     
+    	// update value of token
+    	void updateVal(int sc,char *token,char *value)
+    	{
+    		int instScopeIndex=sc;
+    		int tableIndex=currIndex;
+    		for(int i=tableIndex-1;i>=0;i--)
+    		{	
+    			if(strcmp(table[i].lexeme,token)){
+
 				}
-			}
-			printf("Variable not in scope\n");
-		}
-		void popScope(){
-			currScope = availableScope[scopeIndex-1];
-		}
+    		}
+     
+    	}
+     
+     
     %}
-    %union {
-    	int number;
-    	char* identifier;
-    	float numberf;
-    	char singleChar;
-		char* longString;
-    }
     %start code
     /* left associative */
     %left LOGICALOR LOGICALAND EQUALS NOTEQUAL GREATERTHAN GREATERTHANEQUALTO LESSTHAN LESSTHANEQUALTO ADD SUB MULT DIV MOD
@@ -203,7 +202,10 @@
     		| CHAR IDENTIFIER BOXOPEN BOXCLOSE EQUAL STRING SEMICOLON
     		| CHAR declarationListChar SEMICOLON
     		| FLOAT declarationListIntFloat SEMICOLON
+    		| INT IDENTIFIER BOXOPEN BOXCLOSE EQUAL OPCUR arrayValues CLCUR SEMICOLON
+    		| INT IDENTIFIER BOXOPEN BOXCLOSE EQUAL OPCUR CLCUR SEMICOLON
      
+    arrayValues :  INTVAL COMMA arrayValues | INTVAL 
     prattributes : COMMA IDENTIFIER prattributes | 
     scattributes : COMMA AMPERSAND IDENTIFIER scattributes | 
     		
@@ -278,7 +280,7 @@
     /* array */
     // arrayDec : type declarator SEMICOLON {printf("ARRAY START..\n");} | charArrayDec
     // charArrayDec : CHAR IDENTIFIER BOXOPEN INTVAL BOXCLOSE EQUAL STRING
-    			//|  CHAR IDENTIFIER BOXOPEN BOXCLOSE EQUAL STRING
+    			|  CHAR IDENTIFIER BOXOPEN BOXCLOSE EQUAL STRING
     declarator : IDENTIFIER dimension {printf("declarator..\n");}
     dimension : BOXOPEN INTVAL BOXCLOSE {printf("size..\n");}
     		  | BOXOPEN INTVAL BOXCLOSE BOXOPEN INTVAL BOXCLOSE 
@@ -288,7 +290,6 @@
     #include "lex.yy.c"
     int main(){
     	yyin = fopen("./Test Cases/input.txt","r");
-		printf("In Main");
     	if(!yyparse())
     	{
     		printf("Parsing Done\n");
@@ -296,7 +297,6 @@
     	else 
     		printf("Failed\n");
     	exit(0);
-    	return 0;
     }
      
-   
+     
