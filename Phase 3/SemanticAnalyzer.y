@@ -72,8 +72,10 @@
 					}
 				}
     		}
-     
     	}
+		void printTable(){
+			printf
+		}
      
      
     %}
