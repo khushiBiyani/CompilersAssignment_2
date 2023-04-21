@@ -95,10 +95,10 @@ extern int yydebug;
     BOXCLOSE = 296,                /* BOXCLOSE  */
     LOGICALNOT = 297,              /* LOGICALNOT  */
     EQUAL = 298,                   /* EQUAL  */
-    IDENTIFIER = 299,              /* IDENTIFIER  */
-    CHARVAL = 300,                 /* CHARVAL  */
-    INTVAL = 301,                  /* INTVAL  */
-    FLOATVAL = 302                 /* FLOATVAL  */
+    CHARVAL = 299,                 /* CHARVAL  */
+    INTVAL = 300,                  /* INTVAL  */
+    FLOATVAL = 301,                /* FLOATVAL  */
+    IDENTIFIER = 302               /* IDENTIFIER  */
   };
   typedef enum yytokentype yytoken_kind_t;
 #endif
@@ -148,10 +148,10 @@ extern int yydebug;
 #define BOXCLOSE 296
 #define LOGICALNOT 297
 #define EQUAL 298
-#define IDENTIFIER 299
-#define CHARVAL 300
-#define INTVAL 301
-#define FLOATVAL 302
+#define CHARVAL 299
+#define INTVAL 300
+#define FLOATVAL 301
+#define IDENTIFIER 302
 
 /* Value type.  */
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
@@ -163,9 +163,12 @@ union YYSTYPE
 		float Float;
 		char Char;
 		char* Str;
+		struct data{
+
+		};
 	
 
-#line 169 "y.tab.h"
+#line 172 "y.tab.h"
 
 };
 typedef union YYSTYPE YYSTYPE;

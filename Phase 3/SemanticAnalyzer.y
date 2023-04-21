@@ -29,6 +29,7 @@
  	int currIndex=0;// table array index points to the next empty one
  	int maxScope=0;
  	int currScope=0;
+	char* instanceParamList[1000];
   
  	// insert function
  	void insertInTable(char *token,char *type,char *val,int sc,int paramCount,char *paramList[],int arrayDim[],int dimensionofArr,bool isArr,bool isFunc){
@@ -115,31 +116,35 @@
 		char Char;
 		char* Str;
 		struct data{
-			
+
 		};
 	}
  %start code
+ // 'i' for INT 
+ // 'f' for FLOAT
+ // 'c' for CHAR 
+ // 's' for CHAR*
  /* left associative */
- %left LOGICALOR LOGICALAND EQUALS NOTEQUAL GREATERTHAN GREATERTHANEQUALTO LESSTHAN LESSTHANEQUALTO ADD SUB MULT DIV MOD
+ %left <Str> LOGICALOR LOGICALAND EQUALS NOTEQUAL GREATERTHAN GREATERTHANEQUALTO LESSTHAN LESSTHANEQUALTO ADD SUB MULT DIV MOD
   
  /* Punctuators */
- %token COMMA SEMICOLON AMPERSAND COLON 
+ %token <Str> COMMA SEMICOLON AMPERSAND COLON 
   
  /* Type */
- %token INT CHAR FLOAT STRING
+ %token <Str> INT CHAR FLOAT STRING
   
  /* Keywords */
- %token IF ELSE FOR WHILE DEFAULT SWITCH CASE BREAK CONTINUE RETURN PRINTF SCANF
+ %token <Str> IF ELSE FOR WHILE DEFAULT SWITCH CASE BREAK CONTINUE RETURN PRINTF SCANF
   
  /* parenthesis */
- %token OPBRAC CLBRAC OPCUR CLCUR BOXOPEN BOXCLOSE
+ %token <Str> OPBRAC CLBRAC OPCUR CLCUR BOXOPEN BOXCLOSE
   
  /* right associative */
- %right LOGICALNOT EQUAL
+ %right <Str> LOGICALNOT EQUAL
   
- %token <Char> CHARVAL 
- %token <Int> INTVAL
- %token <Float> FLOATVAL
+ %token <Str> CHARVAL 
+ %token <Str> INTVAL
+ %token <Str> FLOATVAL
   
 %token <Str> IDENTIFIER
  %%
@@ -179,12 +184,13 @@ forLoop2 : OPBRAC forAssignStatement forExpStatement SEMICOLON forUpdateStatemen
  					| ifInLoopStatement
   
  forAssignStatement : assignmentStatement 
- 					| INT IDENTIFIER EQUAL expressionStatement SEMICOLON {insertInTable($2,"Int",$4,currScope, 0,NULL,NULL,0,false,false);}
+ 					| INT IDENTIFIER EQUAL expressionStatement SEMICOLON {}
  					| INT IDENTIFIER EQUAL expressionStatement COMMA  forAssignStatement
  					| CHAR IDENTIFIER EQUAL expressionStatement SEMICOLON 
  					| CHAR IDENTIFIER EQUAL expressionStatement COMMA  forAssignStatement
  					| SEMICOLON
- forExpStatement : expressionStatement | 
+ forExpStatement : expressionStatement 
+ 					| 
  forUpdateStatement : IDENTIFIER EQUAL expressionStatement COMMA forUpdateStatement
  				   | IDENTIFIER EQUAL expressionStatement 
   
@@ -206,16 +212,18 @@ whileLoop : WHILE OPBRAC {pushNewScope();} expressionStatement CLBRAC whileSuffi
   
  ifStatement : IF OPBRAC expressionStatement CLBRAC OPCUR {pushNewScope();} statements {popScope();} CLCUR ifContinuer
 			| IF OPBRAC expressionStatement CLBRAC {pushNewScope();} singleStatement {popScope();} ifContinuer
-ifContinuer : ES | ifStatement
+ifContinuer : ES 
+			| ifStatement
   
- ES : ELSE IF OPBRAC expressionStatement CLBRAC OPCUR {pushNewScope();} statements {popScope();}CLCUR ES
+ ES : ELSE IF OPBRAC expressionStatement CLBRAC OPCUR {pushNewScope();} statements {popScope();} CLCUR ES
  	| ELSE OPCUR {pushNewScope();} statements {popScope();} CLCUR
  	|ELSE IF OPBRAC expressionStatement CLBRAC {pushNewScope();} singleStatement {popScope();} ES
  	| ELSE {pushNewScope();} singleStatement {popScope();}
 	|
   
  ifInLoopStatement : IF OPBRAC expressionStatement CLBRAC OPCUR {pushNewScope();} inLoop {popScope;} CLCUR ifInLoopContinuer
-ifInLoopContinuer : ESLoop | ifInLoopStatement
+ifInLoopContinuer : ESLoop 
+					| ifInLoopStatement
   
  ESLoop : ELSE IF OPBRAC expressionStatement CLBRAC OPCUR {pushNewScope();} inLoop {popScope();}CLCUR ESLoop
  	| ELSE OPCUR {pushNewScope();} inLoop {popScope();} CLCUR
@@ -230,8 +238,10 @@ ifInLoopContinuer : ESLoop | ifInLoopStatement
  		| CASE INTVAL COLON caseContinuer {printf("CASE INT : ..\n");}
  		| CASE OPBRAC CHARVAL CLBRAC COLON caseContinuer
  		| CASE CHARVAL COLON caseContinuer
-caseContinuer :  statements BREAK SEMICOLON | statements 
- defaultStatement : DEFAULT COLON {pushNewScope();} statements {popScope();} | {printf(" \nDEFAULT : ..\n");}
+caseContinuer :  statements BREAK SEMICOLON 
+				| statements 
+ defaultStatement : DEFAULT COLON {pushNewScope();} statements {popScope();} 
+ 					| {printf(" \nDEFAULT : ..\n");}
   
  /* basic statements */
  basicStatements : basicStatement basicStatements
@@ -260,9 +270,12 @@ caseContinuer :  statements BREAK SEMICOLON | statements
  		| INT IDENTIFIER BOXOPEN BOXCLOSE EQUAL OPCUR arrayValues CLCUR SEMICOLON
  		| INT IDENTIFIER BOXOPEN BOXCLOSE EQUAL OPCUR CLCUR SEMICOLON
   
- arrayValues :  INTVAL COMMA arrayValues | INTVAL 
- prattributes : COMMA IDENTIFIER prattributes | 
- scattributes : COMMA AMPERSAND IDENTIFIER scattributes | 
+ arrayValues :  INTVAL COMMA arrayValues 
+ 			| INTVAL 
+ prattributes : COMMA IDENTIFIER prattributes 
+ 			| 
+ scattributes : COMMA AMPERSAND IDENTIFIER scattributes 
+ 			| 
  		
  declarationListIntFloat : IDENTIFIER EQUAL expressionStatement COMMA declarationListIntFloat {printf("DSL1..\n");}
  		| IDENTIFIER COMMA declarationListIntFloat
@@ -304,32 +317,45 @@ caseContinuer :  statements BREAK SEMICOLON | statements
  factor : IDENTIFIER
  	| OPBRAC expressionStatement CLBRAC
  	| LOGICALNOT expressionStatement
- 	| CHARVAL
- 	| INTVAL {printf("INT VALS.. %d\n",yylval);}
- 	| FLOATVAL
- 	| IDENTIFIER BOXOPEN INTVAL BOXCLOSE 
- 	| IDENTIFIER BOXOPEN INTVAL BOXCLOSE BOXOPEN INTVAL BOXCLOSE 
+ 	| CHARVAL $<Str>$ = strdup("c");
+ 	| INTVAL {$<Str>$ = strdup("i");printf("INT VALS.. %d\n",yylval);}
+ 	| FLOATVAL {$<Str>$ = strdup("f");}
+ 	| IDENTIFIER BOXOPEN INTVAL BOXCLOSE {} 
+ 	| IDENTIFIER BOXOPEN INTVAL BOXCLOSE BOXOPEN INTVAL BOXCLOSE {} 
   
   
  functionCall : IDENTIFIER OPBRAC CLBRAC SEMICOLON
               | IDENTIFIER OPBRAC argList CLBRAC SEMICOLON 
   
  /* changes to be made - either expressionStatement or expression */
- argList : argList COMMA expressionStatement | expressionStatement 
+ argList : argList COMMA expressionStatement 
+ 		| expressionStatement 
   
  parameters : {pushNewScope();} paramContinuer
-paramContinuer : parameter | parameter COMMA paramContinuer  {printf("FUNCTION params\n");}
+paramContinuer : parameter 
+				| parameter COMMA paramContinuer  {printf("FUNCTION params\n");}
   
- parameter : type IDENTIFIER {printf("FUNCTION param\n");}
+ parameter : type IDENTIFIER {printf("FUNCTION param\n");insertInTable($2,$1,$1,currScope,0,NULL,NULL.0,false,false);}
   
- type : INT | FLOAT | CHAR 
+ type : INT {$<Str>$ = strdup("i");} 
+ 		| FLOAT {$<Str>$ = strdup("f");}
+		| CHAR  {$<Str>$ = strdup("c");}
   
  compoundStatements : OPCUR statementList CLCUR {popScope();printf("FUNCTION statements\n");}
   
- statementList : basicStatements statementList | specialStatement statementList | functionCall statementList | returnDec | printer statementList | scanner statementList | 
+ statementList : basicStatements statementList 
+ 				| specialStatement statementList 
+				| functionCall statementList 
+				| returnDec 
+				| printer statementList 
+				| scanner statementList 
+				| 
   
- returnDec : RETURN expressionStatement SEMICOLON | RETURN SEMICOLON 
+ returnDec : RETURN expressionStatement SEMICOLON {$<Str>$ = strdup($2);} 
+ 			| RETURN SEMICOLON 
+
  declarator : IDENTIFIER dimension {printf("declarator..\n");}
+
  dimension : BOXOPEN INTVAL BOXCLOSE {printf("size..\n");}
  		  | BOXOPEN INTVAL BOXCLOSE BOXOPEN INTVAL BOXCLOSE 
  		  | BOXOPEN BOXCLOSE BOXOPEN INTVAL BOXCLOSE

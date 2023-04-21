@@ -1083,22 +1083,22 @@ YY_RULE_SETUP
 case 51:
 YY_RULE_SETUP
 #line 64 "SemanticAnalyzer.l"
-{yylval.Int = atoi(yytext);return INTVAL;}
+{return INTVAL;}
 	YY_BREAK
 case 52:
 YY_RULE_SETUP
 #line 65 "SemanticAnalyzer.l"
-{yylval.Float = atof(yytext);return FLOATVAL;}
+{return FLOATVAL;}
 	YY_BREAK
 case 53:
 YY_RULE_SETUP
 #line 66 "SemanticAnalyzer.l"
-{yylval.Char=yytext[1];return CHARVAL;}   
+{return CHARVAL;}   
 	YY_BREAK
 case 54:
 YY_RULE_SETUP
 #line 67 "SemanticAnalyzer.l"
-{yylval.Str = strdup(yytext);return STRING;}
+{return STRING;}
 	YY_BREAK
 case 55:
 /* rule 55 can match eol */
