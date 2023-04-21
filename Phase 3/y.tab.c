@@ -69,119 +69,117 @@
 /* First part of user prologue.  */
 #line 1 "SemanticAnalyzer.y"
 
-    	#include <stdio.h>
-    	#include <stdlib.h>
-    	#include <string.h>
-    	#include <stdbool.h>
-    	int yylex();
-     
-    	// error function
-    	void yyerror(const char*){
-    	printf("Invalid Statement");
-    	exit(0);
-    	}
-     
-    	// symbol table structure
-    	struct symbolTable{
-    		char *lexeme;
-    		char *value;
-    		char *dataType;
-    		bool isFunction;
-    		bool isArray;
-    		int scope;
-    		int dimensionofArray;
-    		char *parameterList[1000];
-    		int arrayDimension[1000];
-    		int parameterCount;
-    	};
-    	symbolTable table[1000];
-    	int availableScopes[1000]={-1};
-    	int scopeIndex=0;// AvailableScopes array index points to the current 
-    	int currIndex=0;// table array index points to the next empty one
-    	int maxScope=0;
-    	int currScope=0;
-     
-    	// insert function
-    	void insertInTable(char *token,char *type,char *val,int sc,int paramCount,char *paramList[],int arrayDim[],int dimensionofArr,bool isArr,bool isFunc){
-    		symbolTable newEntry;
-    		strcpy(newEntry.lexeme,token);
-    		strcpy(newEntry.value,val);
-    		strcpy(newEntry.dataType,type);
-    		newEntry.scope=sc;
-     
-    		if(isFunc){
-        		for(int i =0;i<paramCount;i++){
-        			strcpy(newEntry.parameterList[i],paramList[i]);
-        		}
-        		newEntry.parameterCount=paramCount;
-        	}
-     
-    		newEntry.isArray = isArr;
-        	if(isArr){
-        		for(int i =0;i<dimensionofArr;i++){
-        				newEntry.arrayDimension[i]=arrayDim[i];
-        		}
-        		newEntry.dimensionofArray=dimensionofArr;
-        	}
-    		table[currIndex++]=newEntry;
-    	}
-     
-    	// update value of token
-    	void updateVal(int sc,char *token,char *value)
-    	{
-    		int instScopeIndex=sc;
-    		int tableIndex=currIndex;
-    		for(int i=tableIndex-1;i>=0;i--)
-    		{	
-    			if(strcmp(table[i].lexeme,token)){
-					for(int j = scopeIndex;j>=0;j--){
-						if(table[i].scope==availableScopes[j]){
-							strcpy(table[i].value,value);
-							return;
-						}
+ 	#include <stdio.h>
+ 	#include <stdlib.h>
+ 	#include <string.h>
+ 	#include <stdbool.h>
+ 	int yylex();
+  
+ 	// error function
+ 	void yyerror(const char*){
+ 	printf("Invalid Statement");
+ 	exit(0);
+ 	}
+ 	// symbol table structure
+ 	struct symbolTable{
+ 		char *lexeme;
+ 		char *value;
+ 		char *dataType;
+ 		bool isFunction;
+ 		bool isArray;
+ 		int scope;
+ 		int dimensionofArray;
+ 		char *parameterList[1000];
+ 		int arrayDimension[1000];
+ 		int parameterCount;
+ 	};
+ 	symbolTable table[1000];
+ 	int availableScopes[1000]={-1};
+ 	int scopeIndex=0;// AvailableScopes array index points to the current 
+ 	int currIndex=0;// table array index points to the next empty one
+ 	int maxScope=0;
+ 	int currScope=0;
+  
+ 	// insert function
+ 	void insertInTable(char *token,char *type,char *val,int sc,int paramCount,char *paramList[],int arrayDim[],int dimensionofArr,bool isArr,bool isFunc){
+ 		symbolTable newEntry;
+ 		strcpy(newEntry.lexeme,token);
+ 		strcpy(newEntry.value,val);
+ 		strcpy(newEntry.dataType,type);
+ 		newEntry.scope=sc;
+  
+ 		if(isFunc){
+     		for(int i =0;i<paramCount;i++){
+     			strcpy(newEntry.parameterList[i],paramList[i]);
+     		}
+     		newEntry.parameterCount=paramCount;
+     	}
+  
+ 		newEntry.isArray = isArr;
+     	if(isArr){
+     		for(int i =0;i<dimensionofArr;i++){
+     				newEntry.arrayDimension[i]=arrayDim[i];
+     		}
+     		newEntry.dimensionofArray=dimensionofArr;
+     	}
+ 		table[currIndex++]=newEntry;
+ 	}
+  
+ 	// update value of token
+ 	void updateVal(int sc,char *token,char *value)
+ 	{
+ 		int instScopeIndex=sc;
+ 		int tableIndex=currIndex;
+ 		for(int i=tableIndex-1;i>=0;i--)
+ 		{	
+ 			if(strcmp(table[i].lexeme,token)){
+				for(int j = scopeIndex;j>=0;j--){
+					if(table[i].scope==availableScopes[j]){
+						strcpy(table[i].value,value);
+						return;
 					}
 				}
-    		}
-    	}
-		void printTable(){
-			printf("TABLE IS THIS\n\n");
-			printf("Lexeme		Value 		dataType 		isFunc		isArray			scope			paramCount		paramList		dimensionofArray	arrayList\n"); 
-			for(int i=0;i<currIndex;i++){
-				printf("%s		",table[i].lexeme);
-				printf("%s		",table[i].value);
-				printf("%s		",table[i].dataType);
-				printf("%d		",table[i].isFunction);
-				printf("%d		",table[i].isArray);
-				printf("%d		",table[i].scope);
-				printf("%d		",table[i].parameterCount);
-				if(table[i].isFunction){
-					for(int p = 0;p<table[i].parameterCount;p++){
-						printf("%s ",table[i].parameterList[p]);
-					}
-				}
-				printf("		");
-				
-				printf("%d		",table[i].dimensionofArray);
-				if(table[i].isArray){
-					for(int p = 0;p<table[i].dimensionofArray;p++){
-						printf("%d ",table[i].arrayDimension[p]);
-					}
-				}
-				printf("\n");
-
 			}
+ 		}
+ 	}
+	void printTable(){
+		printf("TABLE IS THIS\n\n");
+		printf("Lexeme		Value 		dataType 		isFunc		isArray			scope			paramCount		paramList		dimensionofArray	arrayList\n"); 
+		for(int i=0;i<currIndex;i++){
+			printf("%s		",table[i].lexeme);
+			printf("%s		",table[i].value);
+			printf("%s		",table[i].dataType);
+			printf("%d		",table[i].isFunction);
+			printf("%d		",table[i].isArray);
+			printf("%d		",table[i].scope);
+			printf("%d		",table[i].parameterCount);
+			if(table[i].isFunction){
+				for(int p = 0;p<table[i].parameterCount;p++){
+					printf("%s ",table[i].parameterList[p]);
+				}
+			}
+			printf("		");
+			
+			printf("%d		",table[i].dimensionofArray);
+			if(table[i].isArray){
+				for(int p = 0;p<table[i].dimensionofArray;p++){
+					printf("%d ",table[i].arrayDimension[p]);
+				}
+			}
+			printf("\n");
 		}
-		void pushNewScope(){// Put a new scope for every open {
-			availableScopes[++scopeIndex]=++maxScope;
-			currScope = maxScope;
-		}
-		void popScope(){ // pop latest scope on every }
-			availableScopes[scopeIndex--]=-1;
-			currScope = availableScopes[scopeIndex];
-		}
-    
+	}
+	void pushNewScope(){// Put a new scope for every open {
+		availableScopes[++scopeIndex]=++maxScope;
+		currScope = maxScope;
+	}
+	void popScope(){ // pop latest scope on every }
+		availableScopes[scopeIndex--]=-1;
+		currScope = availableScopes[scopeIndex];
+	}
+ 
 
-#line 185 "y.tab.c"
+#line 183 "y.tab.c"
 
 # ifndef YY_CAST
 #  ifdef __cplusplus
@@ -326,7 +324,20 @@ extern int yydebug;
 
 /* Value type.  */
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
-typedef int YYSTYPE;
+union YYSTYPE
+{
+#line 112 "SemanticAnalyzer.y"
+
+		int Int;
+		float Float;
+		char Char;
+		char* Str;
+	
+
+#line 338 "y.tab.c"
+
+};
+typedef union YYSTYPE YYSTYPE;
 # define YYSTYPE_IS_TRIVIAL 1
 # define YYSTYPE_IS_DECLARED 1
 #endif
@@ -873,27 +884,27 @@ static const yytype_int8 yytranslate[] =
 /* YYRLINE[YYN] -- Source line where rule number YYN was defined.  */
 static const yytype_int16 yyrline[] =
 {
-       0,   137,   137,   139,   140,   141,   142,   144,   145,   146,
-     147,   148,   149,   150,   152,   152,   153,   154,   155,   156,
-     156,   156,   158,   159,   159,   160,   160,   162,   163,   164,
-     165,   166,   167,   168,   170,   171,   172,   173,   174,   175,
-     176,   176,   177,   178,   181,   181,   182,   182,   183,   184,
-     184,   186,   187,   188,   189,   190,   191,   192,   193,   194,
-     196,   196,   196,   197,   197,   197,   199,   199,   201,   201,
-     201,   202,   202,   202,   203,   203,   203,   204,   204,   205,
-     207,   207,   207,   209,   209,   211,   211,   211,   212,   212,
-     212,   213,   213,   213,   214,   214,   215,   217,   217,   217,
-     218,   218,   219,   219,   219,   219,   220,   221,   222,   223,
-     225,   225,   226,   226,   226,   229,   230,   232,   233,   234,
-     236,   237,   239,   240,   241,   242,   243,   244,   244,   245,
-     245,   246,   246,   247,   248,   249,   250,   251,   252,   253,
-     255,   255,   256,   256,   257,   257,   259,   260,   261,   262,
-     263,   265,   266,   267,   268,   269,   271,   272,   274,   275,
-     277,   278,   279,   281,   282,   283,   284,   285,   287,   288,
-     289,   291,   292,   293,   294,   296,   297,   298,   299,   300,
-     301,   302,   303,   306,   307,   310,   310,   312,   312,   313,
-     313,   315,   317,   317,   317,   319,   321,   321,   321,   321,
-     321,   321,   321,   323,   323,   325,   326,   327
+       0,   142,   142,   144,   145,   146,   147,   149,   150,   151,
+     152,   153,   154,   155,   157,   157,   158,   159,   160,   161,
+     161,   161,   163,   164,   164,   165,   165,   167,   168,   169,
+     170,   171,   172,   173,   175,   176,   177,   178,   179,   180,
+     181,   181,   182,   183,   186,   186,   187,   187,   188,   189,
+     189,   191,   192,   193,   194,   195,   196,   197,   198,   199,
+     201,   201,   201,   202,   202,   202,   203,   203,   205,   205,
+     205,   206,   206,   206,   207,   207,   207,   208,   208,   209,
+     211,   211,   211,   212,   212,   214,   214,   214,   215,   215,
+     215,   216,   216,   216,   217,   217,   218,   220,   220,   220,
+     221,   221,   222,   222,   222,   222,   223,   224,   225,   226,
+     227,   227,   228,   228,   228,   231,   232,   234,   235,   236,
+     238,   239,   241,   242,   243,   244,   245,   246,   246,   247,
+     247,   248,   248,   249,   250,   251,   252,   253,   254,   255,
+     257,   257,   258,   258,   259,   259,   261,   262,   263,   264,
+     265,   267,   268,   269,   270,   271,   273,   274,   276,   277,
+     279,   280,   281,   283,   284,   285,   286,   287,   289,   290,
+     291,   293,   294,   295,   296,   298,   299,   300,   301,   302,
+     303,   304,   305,   308,   309,   312,   312,   314,   314,   315,
+     315,   317,   319,   319,   319,   321,   323,   323,   323,   323,
+     323,   323,   323,   325,   325,   327,   328,   329
 };
 #endif
 
@@ -1755,559 +1766,559 @@ yyreduce:
   switch (yyn)
     {
   case 2: /* code: declarationList  */
-#line 137 "SemanticAnalyzer.y"
-                           {printf("Starting..\n");}
-#line 1761 "y.tab.c"
+#line 142 "SemanticAnalyzer.y"
+                        {printf("Starting..\n");}
+#line 1772 "y.tab.c"
     break;
 
   case 3: /* declarationList: declarationStatement declarationList  */
-#line 139 "SemanticAnalyzer.y"
-                                                            {printf("RECURSIVE DECLARATION \n");}
-#line 1767 "y.tab.c"
+#line 144 "SemanticAnalyzer.y"
+                                                         {printf("RECURSIVE DECLARATION \n");}
+#line 1778 "y.tab.c"
     break;
 
   case 5: /* declarationList: declarationStatement  */
-#line 141 "SemanticAnalyzer.y"
+#line 146 "SemanticAnalyzer.y"
                                                         {printf("DECLARATION \n");}
-#line 1773 "y.tab.c"
+#line 1784 "y.tab.c"
     break;
 
   case 7: /* statements: specialStatement statements  */
-#line 144 "SemanticAnalyzer.y"
-                                             {printf("Special..\n");}
-#line 1779 "y.tab.c"
+#line 149 "SemanticAnalyzer.y"
+                                          {printf("Special..\n");}
+#line 1790 "y.tab.c"
     break;
 
   case 8: /* statements: basicStatement statements  */
-#line 145 "SemanticAnalyzer.y"
+#line 150 "SemanticAnalyzer.y"
                                                {printf("Basic123..\n");}
-#line 1785 "y.tab.c"
+#line 1796 "y.tab.c"
     break;
 
   case 14: /* $@1: %empty  */
-#line 152 "SemanticAnalyzer.y"
-                           {pushNewScope();}
-#line 1791 "y.tab.c"
+#line 157 "SemanticAnalyzer.y"
+                        {pushNewScope();}
+#line 1802 "y.tab.c"
     break;
 
   case 22: /* forLoop1: OPBRAC forAssignStatement forExpStatement SEMICOLON forUpdateStatement CLBRAC SEMICOLON  */
-#line 158 "SemanticAnalyzer.y"
-                                                                                                         {popScope(); printf("\nFOR SEMICOLON \n");}
-#line 1797 "y.tab.c"
+#line 163 "SemanticAnalyzer.y"
+                                                                                                      {popScope(); printf("\nFOR SEMICOLON \n");}
+#line 1808 "y.tab.c"
     break;
 
   case 23: /* $@2: %empty  */
-#line 159 "SemanticAnalyzer.y"
-                                                                                                       {pushNewScope();}
-#line 1803 "y.tab.c"
+#line 164 "SemanticAnalyzer.y"
+                                                                                               {pushNewScope();}
+#line 1814 "y.tab.c"
     break;
 
   case 24: /* forLoop2: OPBRAC forAssignStatement forExpStatement SEMICOLON forUpdateStatement CLBRAC OPCUR $@2 inLoop CLCUR  */
-#line 159 "SemanticAnalyzer.y"
-                                                                                                                                      {popScope(); popScope(); printf("\nproper FOR \n");}
-#line 1809 "y.tab.c"
+#line 164 "SemanticAnalyzer.y"
+                                                                                                                              {popScope(); popScope(); printf("\nproper FOR \n");}
+#line 1820 "y.tab.c"
     break;
 
   case 25: /* $@3: %empty  */
-#line 160 "SemanticAnalyzer.y"
-                                                                                             {pushNewScope();}
-#line 1815 "y.tab.c"
+#line 165 "SemanticAnalyzer.y"
+                                                                                          {pushNewScope();}
+#line 1826 "y.tab.c"
     break;
 
   case 26: /* forLoop3: OPBRAC forAssignStatement forExpStatement SEMICOLON forUpdateStatement CLBRAC $@3 singleLoopStatement  */
-#line 160 "SemanticAnalyzer.y"
-                                                                                                                                   {popScope(); popScope(); printf("\nFOR SINGLE STATEMENT \n");}
-#line 1821 "y.tab.c"
+#line 165 "SemanticAnalyzer.y"
+                                                                                                                                {popScope(); popScope(); printf("\nFOR SINGLE STATEMENT \n");}
+#line 1832 "y.tab.c"
     break;
 
   case 44: /* $@4: %empty  */
-#line 181 "SemanticAnalyzer.y"
-                                 {pushNewScope();}
-#line 1827 "y.tab.c"
+#line 186 "SemanticAnalyzer.y"
+                         {pushNewScope();}
+#line 1838 "y.tab.c"
     break;
 
   case 46: /* $@5: %empty  */
-#line 182 "SemanticAnalyzer.y"
-                        {pushNewScope();}
-#line 1833 "y.tab.c"
+#line 187 "SemanticAnalyzer.y"
+                     {pushNewScope();}
+#line 1844 "y.tab.c"
     break;
 
   case 47: /* whileSuffix: OPCUR $@5 inLoop CLCUR  */
-#line 182 "SemanticAnalyzer.y"
-                                                      { popScope(); popScope(); printf("\nproper WHILE \n");}
-#line 1839 "y.tab.c"
+#line 187 "SemanticAnalyzer.y"
+                                                   { popScope(); popScope(); printf("\nproper WHILE \n");}
+#line 1850 "y.tab.c"
     break;
 
   case 48: /* whileSuffix: SEMICOLON  */
-#line 183 "SemanticAnalyzer.y"
+#line 188 "SemanticAnalyzer.y"
                               {popScope(); printf("\nWHILE SEMICOLON \n");}
-#line 1845 "y.tab.c"
+#line 1856 "y.tab.c"
     break;
 
   case 49: /* $@6: %empty  */
-#line 184 "SemanticAnalyzer.y"
+#line 189 "SemanticAnalyzer.y"
                     {pushNewScope();}
-#line 1851 "y.tab.c"
+#line 1862 "y.tab.c"
     break;
 
   case 50: /* whileSuffix: $@6 singleLoopStatement  */
-#line 184 "SemanticAnalyzer.y"
+#line 189 "SemanticAnalyzer.y"
                                                           { popScope(); popScope(); printf("\nSINGLE WHILE \n");}
-#line 1857 "y.tab.c"
+#line 1868 "y.tab.c"
     break;
 
   case 51: /* inLoop: BREAK SEMICOLON inLoop  */
-#line 186 "SemanticAnalyzer.y"
-                                    {printf("\n break in loop \n");}
-#line 1863 "y.tab.c"
+#line 191 "SemanticAnalyzer.y"
+                                 {printf("\n break in loop \n");}
+#line 1874 "y.tab.c"
     break;
 
   case 52: /* inLoop: CONTINUE SEMICOLON inLoop  */
-#line 187 "SemanticAnalyzer.y"
+#line 192 "SemanticAnalyzer.y"
                                             {printf("\ncontinue in loop \n");}
-#line 1869 "y.tab.c"
+#line 1880 "y.tab.c"
     break;
 
   case 53: /* inLoop: specialStatement inLoop  */
-#line 188 "SemanticAnalyzer.y"
+#line 193 "SemanticAnalyzer.y"
                                           {printf("\n special statement in loop \n");}
-#line 1875 "y.tab.c"
+#line 1886 "y.tab.c"
     break;
 
   case 54: /* inLoop: basicStatement inLoop  */
-#line 189 "SemanticAnalyzer.y"
+#line 194 "SemanticAnalyzer.y"
                                         {printf("\n basic statement in loop \n");}
-#line 1881 "y.tab.c"
+#line 1892 "y.tab.c"
     break;
 
   case 55: /* inLoop: functionCall inLoop  */
-#line 190 "SemanticAnalyzer.y"
+#line 195 "SemanticAnalyzer.y"
                                      {printf("\n basic statement in loop \n");}
-#line 1887 "y.tab.c"
+#line 1898 "y.tab.c"
     break;
 
   case 56: /* inLoop: ifInLoopStatement inLoop  */
-#line 191 "SemanticAnalyzer.y"
+#line 196 "SemanticAnalyzer.y"
                                            {printf("\n if in loop \n");}
-#line 1893 "y.tab.c"
+#line 1904 "y.tab.c"
     break;
 
   case 57: /* inLoop: switchStatement inLoop  */
-#line 192 "SemanticAnalyzer.y"
+#line 197 "SemanticAnalyzer.y"
                                          {printf("\n switch in loop \n");}
-#line 1899 "y.tab.c"
+#line 1910 "y.tab.c"
     break;
 
   case 58: /* inLoop: singleLoopStatement inLoop  */
-#line 193 "SemanticAnalyzer.y"
+#line 198 "SemanticAnalyzer.y"
                                              {printf("\n any other statement in loop \n");}
-#line 1905 "y.tab.c"
+#line 1916 "y.tab.c"
     break;
 
   case 60: /* $@7: %empty  */
-#line 196 "SemanticAnalyzer.y"
-                                                             {pushNewScope();}
-#line 1911 "y.tab.c"
+#line 201 "SemanticAnalyzer.y"
+                                                          {pushNewScope();}
+#line 1922 "y.tab.c"
     break;
 
   case 61: /* $@8: %empty  */
-#line 196 "SemanticAnalyzer.y"
-                                                                                          {popScope();}
-#line 1917 "y.tab.c"
+#line 201 "SemanticAnalyzer.y"
+                                                                                       {popScope();}
+#line 1928 "y.tab.c"
     break;
 
   case 63: /* $@9: %empty  */
-#line 197 "SemanticAnalyzer.y"
-                                                                       {pushNewScope();}
-#line 1923 "y.tab.c"
+#line 202 "SemanticAnalyzer.y"
+                                                               {pushNewScope();}
+#line 1934 "y.tab.c"
     break;
 
   case 64: /* $@10: %empty  */
-#line 197 "SemanticAnalyzer.y"
-                                                                                                         {popScope();}
-#line 1929 "y.tab.c"
+#line 202 "SemanticAnalyzer.y"
+                                                                                                 {popScope();}
+#line 1940 "y.tab.c"
     break;
 
   case 68: /* $@11: %empty  */
-#line 201 "SemanticAnalyzer.y"
-                                                         {pushNewScope();}
-#line 1935 "y.tab.c"
+#line 205 "SemanticAnalyzer.y"
+                                                      {pushNewScope();}
+#line 1946 "y.tab.c"
     break;
 
   case 69: /* $@12: %empty  */
-#line 201 "SemanticAnalyzer.y"
-                                                                                      {popScope();}
-#line 1941 "y.tab.c"
+#line 205 "SemanticAnalyzer.y"
+                                                                                   {popScope();}
+#line 1952 "y.tab.c"
     break;
 
   case 71: /* $@13: %empty  */
-#line 202 "SemanticAnalyzer.y"
+#line 206 "SemanticAnalyzer.y"
                      {pushNewScope();}
-#line 1947 "y.tab.c"
+#line 1958 "y.tab.c"
     break;
 
   case 72: /* $@14: %empty  */
-#line 202 "SemanticAnalyzer.y"
+#line 206 "SemanticAnalyzer.y"
                                                   {popScope();}
-#line 1953 "y.tab.c"
+#line 1964 "y.tab.c"
     break;
 
   case 74: /* $@15: %empty  */
-#line 203 "SemanticAnalyzer.y"
+#line 207 "SemanticAnalyzer.y"
                                                    {pushNewScope();}
-#line 1959 "y.tab.c"
+#line 1970 "y.tab.c"
     break;
 
   case 75: /* $@16: %empty  */
-#line 203 "SemanticAnalyzer.y"
+#line 207 "SemanticAnalyzer.y"
                                                                                      {popScope();}
-#line 1965 "y.tab.c"
+#line 1976 "y.tab.c"
     break;
 
   case 77: /* $@17: %empty  */
-#line 204 "SemanticAnalyzer.y"
+#line 208 "SemanticAnalyzer.y"
                {pushNewScope();}
-#line 1971 "y.tab.c"
+#line 1982 "y.tab.c"
     break;
 
   case 78: /* ES: ELSE $@17 singleStatement  */
-#line 204 "SemanticAnalyzer.y"
+#line 208 "SemanticAnalyzer.y"
                                                  {popScope();}
-#line 1977 "y.tab.c"
+#line 1988 "y.tab.c"
     break;
 
   case 80: /* $@18: %empty  */
-#line 207 "SemanticAnalyzer.y"
-                                                                   {pushNewScope();}
-#line 1983 "y.tab.c"
+#line 211 "SemanticAnalyzer.y"
+                                                                {pushNewScope();}
+#line 1994 "y.tab.c"
     break;
 
   case 81: /* $@19: %empty  */
-#line 207 "SemanticAnalyzer.y"
-                                                                                            {popScope;}
-#line 1989 "y.tab.c"
+#line 211 "SemanticAnalyzer.y"
+                                                                                         {popScope;}
+#line 2000 "y.tab.c"
     break;
 
   case 85: /* $@20: %empty  */
-#line 211 "SemanticAnalyzer.y"
-                                                             {pushNewScope();}
-#line 1995 "y.tab.c"
+#line 214 "SemanticAnalyzer.y"
+                                                          {pushNewScope();}
+#line 2006 "y.tab.c"
     break;
 
   case 86: /* $@21: %empty  */
-#line 211 "SemanticAnalyzer.y"
-                                                                                      {popScope();}
-#line 2001 "y.tab.c"
+#line 214 "SemanticAnalyzer.y"
+                                                                                   {popScope();}
+#line 2012 "y.tab.c"
     break;
 
   case 88: /* $@22: %empty  */
-#line 212 "SemanticAnalyzer.y"
+#line 215 "SemanticAnalyzer.y"
                      {pushNewScope();}
-#line 2007 "y.tab.c"
+#line 2018 "y.tab.c"
     break;
 
   case 89: /* $@23: %empty  */
-#line 212 "SemanticAnalyzer.y"
+#line 215 "SemanticAnalyzer.y"
                                               {popScope();}
-#line 2013 "y.tab.c"
+#line 2024 "y.tab.c"
     break;
 
   case 91: /* $@24: %empty  */
-#line 213 "SemanticAnalyzer.y"
+#line 216 "SemanticAnalyzer.y"
                                                    {pushNewScope();}
-#line 2019 "y.tab.c"
+#line 2030 "y.tab.c"
     break;
 
   case 92: /* $@25: %empty  */
-#line 213 "SemanticAnalyzer.y"
+#line 216 "SemanticAnalyzer.y"
                                                                                          {popScope();}
-#line 2025 "y.tab.c"
+#line 2036 "y.tab.c"
     break;
 
   case 94: /* $@26: %empty  */
-#line 214 "SemanticAnalyzer.y"
+#line 217 "SemanticAnalyzer.y"
                {pushNewScope();}
-#line 2031 "y.tab.c"
+#line 2042 "y.tab.c"
     break;
 
   case 95: /* ESLoop: ELSE $@26 singleLoopStatement  */
-#line 214 "SemanticAnalyzer.y"
+#line 217 "SemanticAnalyzer.y"
                                                      {popScope();}
-#line 2037 "y.tab.c"
+#line 2048 "y.tab.c"
     break;
 
   case 97: /* $@27: %empty  */
-#line 217 "SemanticAnalyzer.y"
-                                                            {pushNewScope();}
-#line 2043 "y.tab.c"
+#line 220 "SemanticAnalyzer.y"
+                                                         {pushNewScope();}
+#line 2054 "y.tab.c"
     break;
 
   case 98: /* $@28: %empty  */
-#line 217 "SemanticAnalyzer.y"
-                                                                                                              {popScope();}
-#line 2049 "y.tab.c"
+#line 220 "SemanticAnalyzer.y"
+                                                                                                           {popScope();}
+#line 2060 "y.tab.c"
     break;
 
   case 99: /* switchStatement: SWITCH OPBRAC IDENTIFIER CLBRAC OPCUR $@27 caseStatements defaultStatement $@28 CLCUR  */
-#line 217 "SemanticAnalyzer.y"
-                                                                                                                                  {printf("SWITCH START..\n");}
-#line 2055 "y.tab.c"
+#line 220 "SemanticAnalyzer.y"
+                                                                                                                               {printf("SWITCH START..\n");}
+#line 2066 "y.tab.c"
     break;
 
   case 101: /* caseStatements: %empty  */
-#line 218 "SemanticAnalyzer.y"
-                                        {printf("char/int..\n");}
-#line 2061 "y.tab.c"
+#line 221 "SemanticAnalyzer.y"
+                                     {printf("char/int..\n");}
+#line 2072 "y.tab.c"
     break;
 
   case 102: /* $@29: %empty  */
-#line 219 "SemanticAnalyzer.y"
-                       {pushNewScope();}
-#line 2067 "y.tab.c"
+#line 222 "SemanticAnalyzer.y"
+                    {pushNewScope();}
+#line 2078 "y.tab.c"
     break;
 
   case 103: /* $@30: %empty  */
-#line 219 "SemanticAnalyzer.y"
-                                                 {pushNewScope();}
-#line 2073 "y.tab.c"
+#line 222 "SemanticAnalyzer.y"
+                                              {pushNewScope();}
+#line 2084 "y.tab.c"
     break;
 
   case 105: /* caseStatementInt: %empty  */
-#line 219 "SemanticAnalyzer.y"
-                                                                                      {printf("INT CASE..\n");}
-#line 2079 "y.tab.c"
+#line 222 "SemanticAnalyzer.y"
+                                                                                   {printf("INT CASE..\n");}
+#line 2090 "y.tab.c"
     break;
 
   case 107: /* caseInt: CASE INTVAL COLON caseContinuer  */
-#line 221 "SemanticAnalyzer.y"
+#line 224 "SemanticAnalyzer.y"
                                                   {printf("CASE INT : ..\n");}
-#line 2085 "y.tab.c"
+#line 2096 "y.tab.c"
     break;
 
   case 112: /* $@31: %empty  */
-#line 226 "SemanticAnalyzer.y"
-                                     {pushNewScope();}
-#line 2091 "y.tab.c"
+#line 228 "SemanticAnalyzer.y"
+                                  {pushNewScope();}
+#line 2102 "y.tab.c"
     break;
 
   case 113: /* defaultStatement: DEFAULT COLON $@31 statements  */
-#line 226 "SemanticAnalyzer.y"
-                                                                  {popScope();}
-#line 2097 "y.tab.c"
+#line 228 "SemanticAnalyzer.y"
+                                                               {popScope();}
+#line 2108 "y.tab.c"
     break;
 
   case 114: /* defaultStatement: %empty  */
-#line 226 "SemanticAnalyzer.y"
-                                                                                  {printf(" \nDEFAULT : ..\n");}
-#line 2103 "y.tab.c"
+#line 228 "SemanticAnalyzer.y"
+                                                                               {printf(" \nDEFAULT : ..\n");}
+#line 2114 "y.tab.c"
     break;
 
   case 117: /* basicStatement: expressionStatement  */
-#line 232 "SemanticAnalyzer.y"
-                                         {printf("BS->EXPS..\n");}
-#line 2109 "y.tab.c"
+#line 234 "SemanticAnalyzer.y"
+                                      {printf("BS->EXPS..\n");}
+#line 2120 "y.tab.c"
     break;
 
   case 118: /* basicStatement: declarationStatement  */
-#line 233 "SemanticAnalyzer.y"
+#line 235 "SemanticAnalyzer.y"
                                        {printf("BS->DS..\n");}
-#line 2115 "y.tab.c"
+#line 2126 "y.tab.c"
     break;
 
   case 119: /* basicStatement: assignmentStatement  */
-#line 234 "SemanticAnalyzer.y"
+#line 236 "SemanticAnalyzer.y"
                                         {printf("Basic->AS..\n");}
-#line 2121 "y.tab.c"
+#line 2132 "y.tab.c"
     break;
 
   case 120: /* assignmentStatement: IDENTIFIER EQUAL expressionStatement COMMA assignmentStatement  */
-#line 236 "SemanticAnalyzer.y"
-                                                                                         {printf("AS1..\n");}
-#line 2127 "y.tab.c"
+#line 238 "SemanticAnalyzer.y"
+                                                                                      {printf("AS1..\n");}
+#line 2138 "y.tab.c"
     break;
 
   case 121: /* assignmentStatement: IDENTIFIER EQUAL expressionStatement SEMICOLON  */
-#line 237 "SemanticAnalyzer.y"
+#line 239 "SemanticAnalyzer.y"
                                                                  {printf("AS2..\n");}
-#line 2133 "y.tab.c"
+#line 2144 "y.tab.c"
     break;
 
   case 124: /* declarationStatement: INT IDENTIFIER OPBRAC parameters CLBRAC compoundStatements  */
-#line 241 "SemanticAnalyzer.y"
-                                                                                       {printf("INT F WITH PARAMS..\n");}
-#line 2139 "y.tab.c"
+#line 243 "SemanticAnalyzer.y"
+                                                                                    {printf("INT F WITH PARAMS..\n");}
+#line 2150 "y.tab.c"
     break;
 
   case 125: /* declarationStatement: CHAR IDENTIFIER OPBRAC parameters CLBRAC compoundStatements  */
-#line 242 "SemanticAnalyzer.y"
+#line 244 "SemanticAnalyzer.y"
                                                                                 {printf("char F WITH PARAMS..\n");}
-#line 2145 "y.tab.c"
+#line 2156 "y.tab.c"
     break;
 
   case 126: /* declarationStatement: FLOAT IDENTIFIER OPBRAC parameters CLBRAC compoundStatements  */
-#line 243 "SemanticAnalyzer.y"
+#line 245 "SemanticAnalyzer.y"
                                                                                 {printf("float F WITH PARAMS..\n");}
-#line 2151 "y.tab.c"
+#line 2162 "y.tab.c"
     break;
 
   case 127: /* $@32: %empty  */
-#line 244 "SemanticAnalyzer.y"
+#line 246 "SemanticAnalyzer.y"
                                          {pushNewScope();}
-#line 2157 "y.tab.c"
+#line 2168 "y.tab.c"
     break;
 
   case 129: /* $@33: %empty  */
-#line 245 "SemanticAnalyzer.y"
+#line 247 "SemanticAnalyzer.y"
                                            {pushNewScope();}
-#line 2163 "y.tab.c"
+#line 2174 "y.tab.c"
     break;
 
   case 131: /* $@34: %empty  */
-#line 246 "SemanticAnalyzer.y"
+#line 248 "SemanticAnalyzer.y"
                                           {pushNewScope();}
-#line 2169 "y.tab.c"
+#line 2180 "y.tab.c"
     break;
 
   case 133: /* declarationStatement: INT declarationListIntFloat SEMICOLON  */
-#line 247 "SemanticAnalyzer.y"
+#line 249 "SemanticAnalyzer.y"
                                                         {printf("DS1..\n");}
-#line 2175 "y.tab.c"
+#line 2186 "y.tab.c"
     break;
 
   case 146: /* declarationListIntFloat: IDENTIFIER EQUAL expressionStatement COMMA declarationListIntFloat  */
-#line 259 "SemanticAnalyzer.y"
-                                                                                                 {printf("DSL1..\n");}
-#line 2181 "y.tab.c"
+#line 261 "SemanticAnalyzer.y"
+                                                                                              {printf("DSL1..\n");}
+#line 2192 "y.tab.c"
     break;
 
   case 148: /* declarationListIntFloat: IDENTIFIER EQUAL expressionStatement  */
-#line 261 "SemanticAnalyzer.y"
+#line 263 "SemanticAnalyzer.y"
                                                        {printf("DSL3..\n");}
-#line 2187 "y.tab.c"
+#line 2198 "y.tab.c"
     break;
 
   case 149: /* declarationListIntFloat: IDENTIFIER dimension  */
-#line 262 "SemanticAnalyzer.y"
+#line 264 "SemanticAnalyzer.y"
                                         {printf("INTFLOAT ARRAY..\n");}
-#line 2193 "y.tab.c"
+#line 2204 "y.tab.c"
     break;
 
   case 150: /* declarationListIntFloat: IDENTIFIER  */
-#line 263 "SemanticAnalyzer.y"
+#line 265 "SemanticAnalyzer.y"
                              {printf("DSL4..\n");}
-#line 2199 "y.tab.c"
+#line 2210 "y.tab.c"
     break;
 
   case 156: /* expressionStatement: logicalExpression LOGICALOR expressionStatement  */
-#line 271 "SemanticAnalyzer.y"
-                                                                          {printf("ES1..\n");}
-#line 2205 "y.tab.c"
+#line 273 "SemanticAnalyzer.y"
+                                                                       {printf("ES1..\n");}
+#line 2216 "y.tab.c"
     break;
 
   case 157: /* expressionStatement: logicalExpression  */
-#line 272 "SemanticAnalyzer.y"
+#line 274 "SemanticAnalyzer.y"
                                     {printf("ES2..\n");}
-#line 2211 "y.tab.c"
+#line 2222 "y.tab.c"
     break;
 
   case 158: /* logicalExpression: expression LOGICALAND logicalExpression  */
-#line 274 "SemanticAnalyzer.y"
-                                                                {printf("LE1..\n");}
-#line 2217 "y.tab.c"
+#line 276 "SemanticAnalyzer.y"
+                                                             {printf("LE1..\n");}
+#line 2228 "y.tab.c"
     break;
 
   case 159: /* logicalExpression: expression  */
-#line 275 "SemanticAnalyzer.y"
+#line 277 "SemanticAnalyzer.y"
                              {printf("LE2..\n");}
-#line 2223 "y.tab.c"
+#line 2234 "y.tab.c"
     break;
 
   case 160: /* expression: relationalExpression EQUALS expression  */
-#line 277 "SemanticAnalyzer.y"
-                                                        {printf("E1..\n");}
-#line 2229 "y.tab.c"
+#line 279 "SemanticAnalyzer.y"
+                                                     {printf("E1..\n");}
+#line 2240 "y.tab.c"
     break;
 
   case 161: /* expression: relationalExpression NOTEQUAL expression  */
-#line 278 "SemanticAnalyzer.y"
+#line 280 "SemanticAnalyzer.y"
                                                            {printf("E2..\n");}
-#line 2235 "y.tab.c"
+#line 2246 "y.tab.c"
     break;
 
   case 162: /* expression: relationalExpression  */
-#line 279 "SemanticAnalyzer.y"
+#line 281 "SemanticAnalyzer.y"
                                        {printf("E3..\n");}
-#line 2241 "y.tab.c"
+#line 2252 "y.tab.c"
     break;
 
   case 167: /* relationalExpression: value  */
-#line 285 "SemanticAnalyzer.y"
+#line 287 "SemanticAnalyzer.y"
                         {printf("VALUE..\n");}
-#line 2247 "y.tab.c"
+#line 2258 "y.tab.c"
     break;
 
   case 168: /* value: term ADD value  */
-#line 287 "SemanticAnalyzer.y"
-                           {printf("ADD..\n");}
-#line 2253 "y.tab.c"
+#line 289 "SemanticAnalyzer.y"
+                        {printf("ADD..\n");}
+#line 2264 "y.tab.c"
     break;
 
   case 170: /* value: term  */
-#line 289 "SemanticAnalyzer.y"
+#line 291 "SemanticAnalyzer.y"
                {printf("Basic TERM..\n");}
-#line 2259 "y.tab.c"
+#line 2270 "y.tab.c"
     break;
 
   case 171: /* term: factor MULT term  */
-#line 291 "SemanticAnalyzer.y"
-                            {printf("MULT..\n");}
-#line 2265 "y.tab.c"
+#line 293 "SemanticAnalyzer.y"
+                         {printf("MULT..\n");}
+#line 2276 "y.tab.c"
     break;
 
   case 174: /* term: factor  */
-#line 294 "SemanticAnalyzer.y"
+#line 296 "SemanticAnalyzer.y"
                  {printf("Factor..\n");}
-#line 2271 "y.tab.c"
+#line 2282 "y.tab.c"
     break;
 
   case 179: /* factor: INTVAL  */
-#line 300 "SemanticAnalyzer.y"
+#line 302 "SemanticAnalyzer.y"
                  {printf("INT VALS.. %d\n",yylval);}
-#line 2277 "y.tab.c"
+#line 2288 "y.tab.c"
     break;
 
   case 187: /* $@35: %empty  */
-#line 312 "SemanticAnalyzer.y"
-                 {pushNewScope();}
-#line 2283 "y.tab.c"
+#line 314 "SemanticAnalyzer.y"
+              {pushNewScope();}
+#line 2294 "y.tab.c"
     break;
 
   case 190: /* paramContinuer: parameter COMMA paramContinuer  */
-#line 313 "SemanticAnalyzer.y"
-                                                                     {printf("FUNCTION params\n");}
-#line 2289 "y.tab.c"
+#line 315 "SemanticAnalyzer.y"
+                                                             {printf("FUNCTION params\n");}
+#line 2300 "y.tab.c"
     break;
 
   case 191: /* parameter: type IDENTIFIER  */
-#line 315 "SemanticAnalyzer.y"
-                                {printf("FUNCTION param\n");}
-#line 2295 "y.tab.c"
+#line 317 "SemanticAnalyzer.y"
+                             {printf("FUNCTION param\n");}
+#line 2306 "y.tab.c"
     break;
 
   case 195: /* compoundStatements: OPCUR statementList CLCUR  */
-#line 319 "SemanticAnalyzer.y"
-                                                   {popScope();printf("FUNCTION statements\n");}
-#line 2301 "y.tab.c"
+#line 321 "SemanticAnalyzer.y"
+                                                {popScope();printf("FUNCTION statements\n");}
+#line 2312 "y.tab.c"
     break;
 
   case 205: /* dimension: BOXOPEN INTVAL BOXCLOSE  */
-#line 325 "SemanticAnalyzer.y"
-                                        {printf("size..\n");}
-#line 2307 "y.tab.c"
+#line 327 "SemanticAnalyzer.y"
+                                     {printf("size..\n");}
+#line 2318 "y.tab.c"
     break;
 
 
-#line 2311 "y.tab.c"
+#line 2322 "y.tab.c"
 
       default: break;
     }
@@ -2500,20 +2511,20 @@ yyreturnlab:
   return yyresult;
 }
 
-#line 328 "SemanticAnalyzer.y"
+#line 330 "SemanticAnalyzer.y"
 
-     
-    #include "lex.yy.c"
-    int main(){
-    	yyin = fopen("./Test Cases/input.txt","r");
-		availableScopes[0] = 0;
-    	if(!yyparse())
-    	{
-    		printf("Parsing Done\n");
-    	}
-    	else 
-    		printf("Failed\n");
-    	exit(0);
-    }
-     
-     
+  
+ #include "lex.yy.c"
+ int main(){
+ 	yyin = fopen("./Test Cases/input.txt","r");
+	availableScopes[0] = 0;
+ 	if(!yyparse())
+ 	{
+ 		printf("Parsing Done\n");
+ 	}
+ 	else 
+ 		printf("Failed\n");
+ 	exit(0);
+ }
+  
+  
