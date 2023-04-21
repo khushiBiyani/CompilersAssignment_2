@@ -109,8 +109,6 @@
 			availableScopes[scopeIndex--]=-1;
 			currScope = availableScopes[scopeIndex];
 		}
-     
-     
     %}
     %start code
     /* left associative */
@@ -152,11 +150,11 @@
     				 | ifStatement
     				 | whileLoop
     				 | switchStatement
-     
-    /* for loop */
-    forLoop : FOR OPBRAC forAssignStatement forExpStatement SEMICOLON forUpdateStatement CLBRAC OPCUR inLoop CLCUR {printf("\nproper FOR \n");}
-    		| FOR OPBRAC forAssignStatement forExpStatement SEMICOLON forUpdateStatement CLBRAC SEMICOLON {printf("\nFOR SEMICOLON \n");}
-    		| FOR OPBRAC forAssignStatement forExpStatement SEMICOLON forUpdateStatement CLBRAC singleLoopStatement {printf("\nFOR SINGLE STATEMENT \n");}
+    forLoop : FOR OPBRAC  {pushNewScope();printf("\nFOR LOOP 2\n");} forAssignStatement forExpStatement SEMICOLON forUpdateStatement  {popScope();} CLBRAC forSuffix
+	
+    forSuffix : SEMICOLON {printf("\nFOR SEMICOLON \n");}
+	| OPCUR  {pushNewScope();} inLoop CLCUR {popScope(); popScope(); printf("\nproper FOR \n");}
+    | singleLoopStatement {popScope(); popScope(); printf("\nFOR SINGLE STATEMENT \n");}
      
     singleLoopStatement : specialStatement 
     					| basicStatement
@@ -177,9 +175,10 @@
     				   | IDENTIFIER EQUAL expressionStatement 
      
     /* while loop */
-    whileLoop : WHILE OPBRAC expressionStatement CLBRAC OPCUR inLoop CLCUR {printf("\nproper WHILE \n");}
-    		  | WHILE OPBRAC expressionStatement CLBRAC SEMICOLON {printf("\nWHILE SEMICOLON \n");}
-    		  | WHILE OPBRAC expressionStatement CLBRAC singleLoopStatement {printf("\nSINGLE WHILE \n");}
+	whileLoop : WHILE OPBRAC expressionStatement CLBRAC whileSuffix
+    whileSuffix : OPCUR inLoop CLCUR {printf("\nproper WHILE \n");}
+    		  | SEMICOLON {printf("\nWHILE SEMICOLON \n");}
+    		  | singleLoopStatement {printf("\nSINGLE WHILE \n");}
      
     inLoop : BREAK SEMICOLON inLoop {printf("\n break in loop \n");}
     		| CONTINUE SEMICOLON inLoop {printf("\ncontinue in loop \n");}
@@ -231,12 +230,12 @@
      
     printer : PRINTF OPBRAC STRING prattributes CLBRAC SEMICOLON
     scanner : SCANF OPBRAC STRING scattributes CLBRAC SEMICOLON
-    declarationStatement : INT IDENTIFIER OPBRAC parameters CLBRAC compoundStatements  {printf("INT F WITH PARAMS..\n");}
-    		| CHAR IDENTIFIER OPBRAC parameters CLBRAC compoundStatements {printf("char F WITH PARAMS..\n");}
-    		| FLOAT IDENTIFIER OPBRAC parameters CLBRAC compoundStatements {printf("float F WITH PARAMS..\n");}
-    		| INT IDENTIFIER OPBRAC CLBRAC compoundStatements
-    		| FLOAT IDENTIFIER OPBRAC CLBRAC compoundStatements
-    		| CHAR IDENTIFIER OPBRAC CLBRAC compoundStatements
+    declarationStatement : INT IDENTIFIER OPBRAC {pushNewScope();} parameters CLBRAC compoundStatements  {printf("INT F WITH PARAMS..\n");}
+    		| CHAR IDENTIFIER OPBRAC  {pushNewScope();}  parameters CLBRAC compoundStatements {printf("char F WITH PARAMS..\n");}
+    		| FLOAT IDENTIFIER OPBRAC  {pushNewScope();} parameters CLBRAC compoundStatements {printf("float F WITH PARAMS..\n");}
+    		| INT IDENTIFIER OPBRAC  {pushNewScope();} CLBRAC compoundStatements
+    		| FLOAT IDENTIFIER OPBRAC  {pushNewScope();}  CLBRAC compoundStatements
+    		| CHAR IDENTIFIER OPBRAC  {pushNewScope();}  CLBRAC compoundStatements
     		| INT declarationListIntFloat SEMICOLON {printf("DS1..\n");}
     		| CHAR IDENTIFIER BOXOPEN INTVAL BOXCLOSE EQUAL STRING SEMICOLON
     		| CHAR IDENTIFIER BOXOPEN BOXCLOSE EQUAL STRING SEMICOLON
@@ -296,10 +295,6 @@
     	| IDENTIFIER BOXOPEN INTVAL BOXCLOSE BOXOPEN INTVAL BOXCLOSE 
      
      
-    /* function */
-    functionDec : type IDENTIFIER OPBRAC parameters CLBRAC compoundStatements {printf("FUNCTIONDEC\n");}
-                | type IDENTIFIER OPBRAC CLBRAC compoundStatements {printf("FUNCTIONDEC without param\n");}
-     
     functionCall : IDENTIFIER OPBRAC CLBRAC SEMICOLON
                  | IDENTIFIER OPBRAC argList CLBRAC SEMICOLON 
      
@@ -312,15 +307,11 @@
      
     type : INT | FLOAT | CHAR 
      
-    compoundStatements : OPCUR statementList CLCUR {printf("FUNCTION statements\n");}
+    compoundStatements : OPCUR statementList CLCUR {popScope();printf("FUNCTION statements\n");}
      
     statementList : basicStatements statementList | specialStatement statementList | functionCall statementList | returnDec | printer statementList | scanner statementList | 
      
     returnDec : RETURN expressionStatement SEMICOLON | RETURN SEMICOLON 
-    /* array */
-    // arrayDec : type declarator SEMICOLON {printf("ARRAY START..\n");} | charArrayDec
-    // charArrayDec : CHAR IDENTIFIER BOXOPEN INTVAL BOXCLOSE EQUAL STRING
-    			|  CHAR IDENTIFIER BOXOPEN BOXCLOSE EQUAL STRING
     declarator : IDENTIFIER dimension {printf("declarator..\n");}
     dimension : BOXOPEN INTVAL BOXCLOSE {printf("size..\n");}
     		  | BOXOPEN INTVAL BOXCLOSE BOXOPEN INTVAL BOXCLOSE 
