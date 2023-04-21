@@ -1088,12 +1088,12 @@ YY_RULE_SETUP
 case 52:
 YY_RULE_SETUP
 #line 65 "SemanticAnalyzer.l"
-{yylval.numberF=ftoi(yytext);return FLOATVAL;}
+{yylval.numberf=atoi(yytext);return FLOATVAL;}
 	YY_BREAK
 case 53:
 YY_RULE_SETUP
 #line 66 "SemanticAnalyzer.l"
-{yylval.singleChar = yytext;return CHARVAL;}
+{yylval.singleChar = yytext[0];return CHARVAL;}
 	YY_BREAK
 case 54:
 YY_RULE_SETUP

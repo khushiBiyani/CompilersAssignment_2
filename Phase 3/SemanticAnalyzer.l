@@ -62,8 +62,8 @@
 "]" {return BOXCLOSE;}
 "!" {return LOGICALNOT;}
 [-]?[0-9]+([eE][+-]?[1-9][0-9]*)? {yylval.number=atoi(yytext);return INTVAL;}
-[-]?[0-9]*\.[0-9]+([eE][+-]?[1-9][0-9]*)? {yylval.numberF=ftoi(yytext);return FLOATVAL;}
-\'[^\'\n]\' {yylval.singleChar = yytext;return CHARVAL;}
+[-]?[0-9]*\.[0-9]+([eE][+-]?[1-9][0-9]*)? {yylval.numberf=atoi(yytext);return FLOATVAL;}
+\'[^\'\n]\' {yylval.singleChar = yytext[0];return CHARVAL;}
 \"[^\"\n]*\" {strcpy(yylval.longString,yytext);return STRING;}
 \n {lineCount++;}
 . {return yytext[0];}
