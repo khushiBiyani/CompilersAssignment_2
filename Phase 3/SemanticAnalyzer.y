@@ -114,6 +114,9 @@
 		float Float;
 		char Char;
 		char* Str;
+		struct data{
+			
+		};
 	}
  %start code
  /* left associative */
@@ -134,8 +137,11 @@
  /* right associative */
  %right LOGICALNOT EQUAL
   
- %token IDENTIFIER CHARVAL INTVAL FLOATVAL
+ %token <Char> CHARVAL 
+ %token <Int> INTVAL
+ %token <Float> FLOATVAL
   
+%token <Str> IDENTIFIER
  %%
   
  /* start of the program */
@@ -173,7 +179,7 @@ forLoop2 : OPBRAC forAssignStatement forExpStatement SEMICOLON forUpdateStatemen
  					| ifInLoopStatement
   
  forAssignStatement : assignmentStatement 
- 					| INT IDENTIFIER EQUAL expressionStatement SEMICOLON 
+ 					| INT IDENTIFIER EQUAL expressionStatement SEMICOLON {insertInTable($2,"Int",$4,currScope, 0,NULL,NULL,0,false,false);}
  					| INT IDENTIFIER EQUAL expressionStatement COMMA  forAssignStatement
  					| CHAR IDENTIFIER EQUAL expressionStatement SEMICOLON 
  					| CHAR IDENTIFIER EQUAL expressionStatement COMMA  forAssignStatement
@@ -339,6 +345,8 @@ paramContinuer : parameter | parameter COMMA paramContinuer  {printf("FUNCTION p
  	}
  	else 
  		printf("Failed\n");
+	
+	printTable();
  	exit(0);
  }
   

@@ -1,23 +1,4 @@
-int b=0;
-char cho(int a,float b){
-    return a*b;
-}
-
-float hii()
-{
-
-}
 int main(){
     int a=0;
-    
-    for(int i = 0;i<n;i=i+1);
-
-    
-    for(int v=0;v<=9;v=x+1){
-        int a;
-    }
-    cho(a,b);
-    hi();
-    
     return 0;
 }
