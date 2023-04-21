@@ -101,6 +101,12 @@
 
 			}
 		}
+		void pushNewScope(){
+
+		}
+		void popScope(){
+			
+		}
      
      
     %}
