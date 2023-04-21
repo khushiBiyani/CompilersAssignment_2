@@ -26,7 +26,14 @@
 
 
 	}
+
 %}
+%union {
+	int number;
+	char* identifier;
+	float number;
+	char singleChar;
+}
 %start code
 /* left associative */
 %left LOGICALOR LOGICALAND EQUALS NOTEQUAL GREATERTHAN GREATERTHANEQUALTO LESSTHAN LESSTHANEQUALTO ADD SUB MULT DIV MOD
