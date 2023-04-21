@@ -146,15 +146,15 @@
     		   | functionCall statements
     		   | 
      
-    specialStatement : forLoop 
+    specialStatement : FOR {pushNewScope();} forLoop 
     				 | ifStatement
     				 | whileLoop
     				 | switchStatement
-    forLoop : FOR OPBRAC  {pushNewScope();printf("\nFOR LOOP 2\n");} forAssignStatement forExpStatement SEMICOLON forUpdateStatement  {popScope();} CLBRAC forSuffix
-	
-    forSuffix : SEMICOLON {printf("\nFOR SEMICOLON \n");}
-	| OPCUR  {pushNewScope();} inLoop CLCUR {popScope(); popScope(); printf("\nproper FOR \n");}
-    | singleLoopStatement {popScope(); popScope(); printf("\nFOR SINGLE STATEMENT \n");}
+    forLoop : forLoop2 | forLoop3 | forLoop1
+    /* for loop */
+    forLoop1 :  OPBRAC forAssignStatement forExpStatement SEMICOLON forUpdateStatement  CLBRAC SEMICOLON {popScope(); printf("\nFOR SEMICOLON \n");}
+	forLoop2 : OPBRAC forAssignStatement forExpStatement SEMICOLON forUpdateStatement CLBRAC OPCUR {pushNewScope();} inLoop CLCUR {popScope(); popScope(); printf("\nproper FOR \n");}
+    forLoop3 : OPBRAC forAssignStatement forExpStatement SEMICOLON forUpdateStatement CLBRAC {pushNewScope();} singleLoopStatement {popScope(); popScope(); printf("\nFOR SINGLE STATEMENT \n");}
      
     singleLoopStatement : specialStatement 
     					| basicStatement

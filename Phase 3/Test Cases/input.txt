@@ -4,12 +4,15 @@ int main(){
     
     for(int i = 0;i<n;i=i+1);
 
-    for(int x=8;x>0;x--)
-        printf("apple");
-    
-    for(int v=0;v<=9;v++){
-        printf("hello");
+    for(int i = 0;i<n;i=i+1)
+        int y = 0;
+        
+    for(int v=0;v<=9;v=x+1){
+        int a;
     }
+
+    
+    
     
     return 0;
 }
