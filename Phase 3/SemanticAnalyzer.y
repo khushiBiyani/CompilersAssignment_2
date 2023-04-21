@@ -25,9 +25,9 @@
     		int parameterCount;
     	};
     	symbolTable table[1000];
-    	int availableScopes[1000]={-1};
-    	int scopeIndex=0;
-    	int currIndex=0;
+    	int availableScopes[1000];
+    	int scopeIndex=0;// AvailableScopes array index points to the current 
+    	int currIndex=0;// table array index points to the next empty one
     	int maxScope=0;
     	int currScope=0;
      
@@ -74,7 +74,32 @@
     		}
     	}
 		void printTable(){
-			printf
+			printf("TABLE IS THIS\n\n");
+			printf("Lexeme		Value 		dataType 		isFunc		isArray			scope			paramCount		paramList		dimensionofArray	arrayList\n"); 
+			for(int i=0;i<currIndex;i++){
+				printf("%s		",table[i].lexeme);
+				printf("%s		",table[i].value);
+				printf("%s		",table[i].dataType);
+				printf("%d		",table[i].isFunction);
+				printf("%d		",table[i].isArray);
+				printf("%d		",table[i].scope);
+				printf("%d		",table[i].parameterCount);
+				if(table[i].isFunction){
+					for(int p = 0;p<table[i].parameterCount;p++){
+						printf("%s ",table[i].parameterList[p]);
+					}
+				}
+				printf("		");
+				
+				printf("%d		",table[i].dimensionofArray);
+				if(table[i].isArray){
+					for(int p = 0;p<table[i].dimensionofArray;p++){
+						printf("%d ",table[i].arrayDimension[p]);
+					}
+				}
+				printf("\n");
+
+			}
 		}
      
      
@@ -297,6 +322,7 @@
     #include "lex.yy.c"
     int main(){
     	yyin = fopen("./Test Cases/input.txt","r");
+		availableScopes[0] = 0;
     	if(!yyparse())
     	{
     		printf("Parsing Done\n");
