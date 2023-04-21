@@ -31,8 +31,9 @@
 %union {
 	int number;
 	char* identifier;
-	float number;
+	float numberF;
 	char singleChar;
+	char* longString;
 }
 %start code
 /* left associative */
