@@ -25,7 +25,7 @@
     		int parameterCount;
     	};
     	symbolTable table[1000];
-    	int availableScopes[1000];
+    	int availableScopes[1000]={-1};
     	int scopeIndex=0;// AvailableScopes array index points to the current 
     	int currIndex=0;// table array index points to the next empty one
     	int maxScope=0;
@@ -101,11 +101,13 @@
 
 			}
 		}
-		void pushNewScope(){
-
+		void pushNewScope(){// Put a new scope for every open {
+			availableScopes[++scopeIndex]=++maxScope;
+			currScope = maxScope;
 		}
-		void popScope(){
-			
+		void popScope(){ // pop latest scope on every }
+			availableScopes[scopeIndex--]=-1;
+			currScope = availableScopes[scopeIndex];
 		}
      
      
