@@ -2215,7 +2215,7 @@ yyreduce:
 
   case 126: /* declarationStatement: FLOAT IDENTIFIER OPBRAC parameters CLBRAC compoundStatements  */
 #line 302 "SemanticAnalyzer.y"
-                                                                                {printf("float F WITH PARAMS..\n");}
+                                                                                {insertInTable((yyvsp[-4].Str),strdup("f"),strdup("f"),currScope,currentParamCount,instanceParamList,NULL,0,false,true);memset(instanceParamList, '\0',sizeof(instanceParamList)); currentParamCount = 0;}
 #line 2220 "y.tab.c"
     break;
 
@@ -2225,290 +2225,308 @@ yyreduce:
 #line 2226 "y.tab.c"
     break;
 
+  case 128: /* declarationStatement: INT IDENTIFIER OPBRAC $@32 CLBRAC compoundStatements  */
+#line 303 "SemanticAnalyzer.y"
+                                                                                     {insertInTable((yyvsp[-4].Str),strdup("i"),strdup("i"),currScope,currentParamCount,instanceParamList,NULL,0,false,true);memset(instanceParamList, '\0',sizeof(instanceParamList)); currentParamCount = 0;}
+#line 2232 "y.tab.c"
+    break;
+
   case 129: /* $@33: %empty  */
 #line 304 "SemanticAnalyzer.y"
                                            {pushNewScope();}
-#line 2232 "y.tab.c"
+#line 2238 "y.tab.c"
+    break;
+
+  case 130: /* declarationStatement: FLOAT IDENTIFIER OPBRAC $@33 CLBRAC compoundStatements  */
+#line 304 "SemanticAnalyzer.y"
+                                                                                        {insertInTable((yyvsp[-4].Str),strdup("f"),strdup("f"),currScope,currentParamCount,instanceParamList,NULL,0,false,true);memset(instanceParamList, '\0',sizeof(instanceParamList)); currentParamCount = 0;}
+#line 2244 "y.tab.c"
     break;
 
   case 131: /* $@34: %empty  */
 #line 305 "SemanticAnalyzer.y"
                                           {pushNewScope();}
-#line 2238 "y.tab.c"
+#line 2250 "y.tab.c"
+    break;
+
+  case 132: /* declarationStatement: CHAR IDENTIFIER OPBRAC $@34 CLBRAC compoundStatements  */
+#line 305 "SemanticAnalyzer.y"
+                                                                                       {insertInTable((yyvsp[-4].Str),strdup("c"),strdup("c"),currScope,currentParamCount,instanceParamList,NULL,0,false,true);memset(instanceParamList, '\0',sizeof(instanceParamList)); currentParamCount = 0;}
+#line 2256 "y.tab.c"
     break;
 
   case 133: /* declarationStatement: INT declarationListInt SEMICOLON  */
 #line 306 "SemanticAnalyzer.y"
                                                    {printf("DS1..\n");}
-#line 2244 "y.tab.c"
+#line 2262 "y.tab.c"
     break;
 
   case 138: /* declarationStatement: INT IDENTIFIER BOXOPEN BOXCLOSE EQUAL OPCUR arrayValues CLCUR SEMICOLON  */
 #line 311 "SemanticAnalyzer.y"
                                                                                           {}
-#line 2250 "y.tab.c"
+#line 2268 "y.tab.c"
     break;
 
   case 139: /* declarationStatement: INT IDENTIFIER BOXOPEN BOXCLOSE EQUAL OPCUR CLCUR SEMICOLON  */
 #line 312 "SemanticAnalyzer.y"
                                                                               {}
-#line 2256 "y.tab.c"
+#line 2274 "y.tab.c"
     break;
 
   case 146: /* declarationListInt: IDENTIFIER EQUAL expressionStatement COMMA declarationListInt  */
 #line 321 "SemanticAnalyzer.y"
                                                                                     {printf("DSL1..\n");}
-#line 2262 "y.tab.c"
+#line 2280 "y.tab.c"
     break;
 
   case 147: /* declarationListInt: IDENTIFIER COMMA declarationListInt  */
 #line 322 "SemanticAnalyzer.y"
                                                       {}
-#line 2268 "y.tab.c"
+#line 2286 "y.tab.c"
     break;
 
   case 148: /* declarationListInt: IDENTIFIER EQUAL expressionStatement  */
 #line 323 "SemanticAnalyzer.y"
                                                        {}
-#line 2274 "y.tab.c"
+#line 2292 "y.tab.c"
     break;
 
   case 149: /* declarationListInt: IDENTIFIER dimension  */
 #line 324 "SemanticAnalyzer.y"
                                         {insertInTable((yyvsp[-1].Str),strdup("i"),strdup("i"),currScope, -1,NULL,sizes,instDim,true,false);instDim=0;sizes[0]=-1;sizes[1]=-1;}
-#line 2280 "y.tab.c"
+#line 2298 "y.tab.c"
     break;
 
   case 150: /* declarationListInt: IDENTIFIER  */
 #line 325 "SemanticAnalyzer.y"
                              {}
-#line 2286 "y.tab.c"
+#line 2304 "y.tab.c"
     break;
 
   case 151: /* declarationListFloat: IDENTIFIER EQUAL expressionStatement COMMA declarationListFloat  */
 #line 327 "SemanticAnalyzer.y"
                                                                                         {printf("DSL1..\n");}
-#line 2292 "y.tab.c"
+#line 2310 "y.tab.c"
     break;
 
   case 153: /* declarationListFloat: IDENTIFIER EQUAL expressionStatement  */
 #line 329 "SemanticAnalyzer.y"
                                                        {printf("DSL3..\n");}
-#line 2298 "y.tab.c"
+#line 2316 "y.tab.c"
     break;
 
   case 154: /* declarationListFloat: IDENTIFIER dimension  */
 #line 330 "SemanticAnalyzer.y"
                                         {printf("INTFLOAT ARRAY..\n");}
-#line 2304 "y.tab.c"
+#line 2322 "y.tab.c"
     break;
 
   case 155: /* declarationListFloat: IDENTIFIER  */
 #line 331 "SemanticAnalyzer.y"
                              {printf("DSL4..\n");}
-#line 2310 "y.tab.c"
+#line 2328 "y.tab.c"
     break;
 
   case 161: /* expressionStatement: logicalExpression LOGICALOR expressionStatement  */
 #line 339 "SemanticAnalyzer.y"
                                                                        {printf("ES1..\n");}
-#line 2316 "y.tab.c"
+#line 2334 "y.tab.c"
     break;
 
   case 162: /* expressionStatement: logicalExpression  */
 #line 340 "SemanticAnalyzer.y"
                                     {printf("ES2..\n");}
-#line 2322 "y.tab.c"
+#line 2340 "y.tab.c"
     break;
 
   case 163: /* logicalExpression: expression LOGICALAND logicalExpression  */
 #line 342 "SemanticAnalyzer.y"
                                                              {printf("LE1..\n");}
-#line 2328 "y.tab.c"
+#line 2346 "y.tab.c"
     break;
 
   case 164: /* logicalExpression: expression  */
 #line 343 "SemanticAnalyzer.y"
                              {printf("LE2..\n");}
-#line 2334 "y.tab.c"
+#line 2352 "y.tab.c"
     break;
 
   case 165: /* expression: relationalExpression EQUALS expression  */
 #line 345 "SemanticAnalyzer.y"
                                                      {printf("E1..\n");}
-#line 2340 "y.tab.c"
+#line 2358 "y.tab.c"
     break;
 
   case 166: /* expression: relationalExpression NOTEQUAL expression  */
 #line 346 "SemanticAnalyzer.y"
                                                            {printf("E2..\n");}
-#line 2346 "y.tab.c"
+#line 2364 "y.tab.c"
     break;
 
   case 167: /* expression: relationalExpression  */
 #line 347 "SemanticAnalyzer.y"
                                        {printf("E3..\n");}
-#line 2352 "y.tab.c"
+#line 2370 "y.tab.c"
     break;
 
   case 172: /* relationalExpression: value  */
 #line 353 "SemanticAnalyzer.y"
                         {printf("VALUE..\n");}
-#line 2358 "y.tab.c"
+#line 2376 "y.tab.c"
     break;
 
   case 173: /* value: term ADD value  */
 #line 355 "SemanticAnalyzer.y"
                         {printf("ADD..\n");}
-#line 2364 "y.tab.c"
+#line 2382 "y.tab.c"
     break;
 
   case 175: /* value: term  */
 #line 357 "SemanticAnalyzer.y"
                {printf("Basic TERM..\n");}
-#line 2370 "y.tab.c"
+#line 2388 "y.tab.c"
     break;
 
   case 176: /* term: factor MULT term  */
 #line 359 "SemanticAnalyzer.y"
                          {printf("MULT..\n");}
-#line 2376 "y.tab.c"
+#line 2394 "y.tab.c"
     break;
 
   case 179: /* term: factor  */
 #line 362 "SemanticAnalyzer.y"
                  {printf("Factor..\n");}
-#line 2382 "y.tab.c"
+#line 2400 "y.tab.c"
     break;
 
   case 180: /* factor: IDENTIFIER  */
 #line 364 "SemanticAnalyzer.y"
                      {}
-#line 2388 "y.tab.c"
+#line 2406 "y.tab.c"
     break;
 
   case 181: /* factor: OPBRAC expressionStatement CLBRAC  */
 #line 365 "SemanticAnalyzer.y"
                                             {(yyval.Str) = strdup((yyvsp[-1].Str));}
-#line 2394 "y.tab.c"
+#line 2412 "y.tab.c"
     break;
 
   case 182: /* factor: LOGICALNOT expressionStatement  */
 #line 366 "SemanticAnalyzer.y"
                                          {(yyval.Str) = strdup((yyvsp[0].Str));}
-#line 2400 "y.tab.c"
+#line 2418 "y.tab.c"
     break;
 
   case 183: /* factor: CHARVAL  */
 #line 367 "SemanticAnalyzer.y"
                   {(yyval.Str) = strdup("c");}
-#line 2406 "y.tab.c"
+#line 2424 "y.tab.c"
     break;
 
   case 184: /* factor: INTVAL  */
 #line 368 "SemanticAnalyzer.y"
                  {(yyval.Str) = strdup("i");printf("INT VALS.. %d\n",yylval);}
-#line 2412 "y.tab.c"
+#line 2430 "y.tab.c"
     break;
 
   case 185: /* factor: FLOATVAL  */
 #line 369 "SemanticAnalyzer.y"
                    {(yyval.Str) = strdup("f");}
-#line 2418 "y.tab.c"
+#line 2436 "y.tab.c"
     break;
 
   case 188: /* factor: IDENTIFIER BOXOPEN INTVAL BOXCLOSE  */
 #line 372 "SemanticAnalyzer.y"
                                              {}
-#line 2424 "y.tab.c"
+#line 2442 "y.tab.c"
     break;
 
   case 189: /* factor: IDENTIFIER BOXOPEN INTVAL BOXCLOSE BOXOPEN INTVAL BOXCLOSE  */
 #line 373 "SemanticAnalyzer.y"
                                                                      {}
-#line 2430 "y.tab.c"
+#line 2448 "y.tab.c"
     break;
 
   case 190: /* functionCall: IDENTIFIER OPBRAC CLBRAC SEMICOLON  */
 #line 376 "SemanticAnalyzer.y"
                                                    {}
-#line 2436 "y.tab.c"
+#line 2454 "y.tab.c"
     break;
 
   case 191: /* functionCall: IDENTIFIER OPBRAC argList CLBRAC SEMICOLON  */
 #line 377 "SemanticAnalyzer.y"
                                                            {}
-#line 2442 "y.tab.c"
+#line 2460 "y.tab.c"
     break;
 
   case 194: /* $@35: %empty  */
 #line 383 "SemanticAnalyzer.y"
               {pushNewScope(); memset(instanceParamList, '\0',sizeof(instanceParamList)); currentParamCount = 0;}
-#line 2448 "y.tab.c"
+#line 2466 "y.tab.c"
     break;
 
   case 197: /* paramContinuer: parameter COMMA paramContinuer  */
 #line 385 "SemanticAnalyzer.y"
                                                                   {printf("FUNCTION params\n");}
-#line 2454 "y.tab.c"
+#line 2472 "y.tab.c"
     break;
 
   case 198: /* parameter: type IDENTIFIER  */
 #line 387 "SemanticAnalyzer.y"
                              {printf("FUNCTION param\n");insertInTable((yyvsp[0].Str),(yyvsp[-1].Str),(yyvsp[-1].Str),currScope,0,NULL,NULL,0,false,false);}
-#line 2460 "y.tab.c"
+#line 2478 "y.tab.c"
     break;
 
   case 199: /* type: INT  */
 #line 389 "SemanticAnalyzer.y"
             {(yyval.Str) = strdup("i");instanceParamList[currentParamCount++]=strdup("i");}
-#line 2466 "y.tab.c"
+#line 2484 "y.tab.c"
     break;
 
   case 200: /* type: FLOAT  */
 #line 390 "SemanticAnalyzer.y"
                         {(yyval.Str) = strdup("f");instanceParamList[currentParamCount++]=strdup("f");}
-#line 2472 "y.tab.c"
+#line 2490 "y.tab.c"
     break;
 
   case 201: /* type: CHAR  */
 #line 391 "SemanticAnalyzer.y"
                         {(yyval.Str) = strdup("c");instanceParamList[currentParamCount++]=strdup("c");}
-#line 2478 "y.tab.c"
+#line 2496 "y.tab.c"
     break;
 
   case 202: /* compoundStatements: OPCUR statementList CLCUR  */
 #line 393 "SemanticAnalyzer.y"
                                                 {popScope();printf("FUNCTION statements\n");}
-#line 2484 "y.tab.c"
+#line 2502 "y.tab.c"
     break;
 
   case 210: /* returnDec: RETURN expressionStatement SEMICOLON  */
 #line 403 "SemanticAnalyzer.y"
                                                   {(yyval.Str) = strdup((yyvsp[-1].Str));}
-#line 2490 "y.tab.c"
+#line 2508 "y.tab.c"
     break;
 
   case 212: /* dimension: BOXOPEN INTVAL BOXCLOSE  */
 #line 406 "SemanticAnalyzer.y"
                                      {int i = (yyvsp[-1].Int); if(i<=0){printf("Array size has to be  Positive\n"); return 1;}sizes[0] = (yyvsp[-1].Int);instDim++;}
-#line 2496 "y.tab.c"
+#line 2514 "y.tab.c"
     break;
 
   case 213: /* dimension: BOXOPEN INTVAL BOXCLOSE BOXOPEN INTVAL BOXCLOSE  */
 #line 407 "SemanticAnalyzer.y"
                                                                     {int a = (yyvsp[-4].Int); int b = (yyvsp[-1].Int); if(a<=0||b<=0){printf("Array sizes has to be  Positive\n"); return 1;}sizes[0] = (yyvsp[-4].Int); sizes[1] = (yyvsp[-1].Int);instDim+=2;}
-#line 2502 "y.tab.c"
+#line 2520 "y.tab.c"
     break;
 
   case 214: /* dimension: BOXOPEN BOXCLOSE BOXOPEN INTVAL BOXCLOSE  */
 #line 408 "SemanticAnalyzer.y"
                                                              {int i = (yyvsp[-1].Int); if(i<=0){printf("Array sizes has to be  Positive\n"); return 1;}sizes[1] = (yyvsp[-1].Int);instDim+=2;}
-#line 2508 "y.tab.c"
+#line 2526 "y.tab.c"
     break;
 
 
-#line 2512 "y.tab.c"
+#line 2530 "y.tab.c"
 
       default: break;
     }

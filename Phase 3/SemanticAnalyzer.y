@@ -299,10 +299,10 @@ caseContinuer :  statements BREAK SEMICOLON
  scanner : SCANF OPBRAC STRING scattributes CLBRAC SEMICOLON
  declarationStatement : INT IDENTIFIER OPBRAC parameters CLBRAC compoundStatements  {insertInTable($2,strdup("i"),strdup("i"),currScope,currentParamCount,instanceParamList,NULL,0,false,true);memset(instanceParamList, '\0',sizeof(instanceParamList)); currentParamCount = 0;}
  		| CHAR IDENTIFIER OPBRAC   parameters CLBRAC compoundStatements {insertInTable($2,strdup("c"),strdup("c"),currScope,currentParamCount,instanceParamList,NULL,0,false,true);memset(instanceParamList, '\0',sizeof(instanceParamList)); currentParamCount = 0;}
- 		| FLOAT IDENTIFIER OPBRAC  parameters CLBRAC compoundStatements {printf("float F WITH PARAMS..\n");}
- 		| INT IDENTIFIER OPBRAC  {pushNewScope();} CLBRAC compoundStatements
- 		| FLOAT IDENTIFIER OPBRAC  {pushNewScope();}  CLBRAC compoundStatements
- 		| CHAR IDENTIFIER OPBRAC  {pushNewScope();}  CLBRAC compoundStatements
+ 		| FLOAT IDENTIFIER OPBRAC  parameters CLBRAC compoundStatements {insertInTable($2,strdup("f"),strdup("f"),currScope,currentParamCount,instanceParamList,NULL,0,false,true);memset(instanceParamList, '\0',sizeof(instanceParamList)); currentParamCount = 0;}
+ 		| INT IDENTIFIER OPBRAC  {pushNewScope();} CLBRAC compoundStatements {insertInTable($2,strdup("i"),strdup("i"),currScope,currentParamCount,instanceParamList,NULL,0,false,true);memset(instanceParamList, '\0',sizeof(instanceParamList)); currentParamCount = 0;}
+ 		| FLOAT IDENTIFIER OPBRAC  {pushNewScope();}  CLBRAC compoundStatements {insertInTable($2,strdup("f"),strdup("f"),currScope,currentParamCount,instanceParamList,NULL,0,false,true);memset(instanceParamList, '\0',sizeof(instanceParamList)); currentParamCount = 0;}
+ 		| CHAR IDENTIFIER OPBRAC  {pushNewScope();}  CLBRAC compoundStatements {insertInTable($2,strdup("c"),strdup("c"),currScope,currentParamCount,instanceParamList,NULL,0,false,true);memset(instanceParamList, '\0',sizeof(instanceParamList)); currentParamCount = 0;}
  		| INT declarationListInt SEMICOLON {printf("DS1..\n");}
  		| CHAR IDENTIFIER BOXOPEN INTVAL BOXCLOSE EQUAL STRING SEMICOLON
  		| CHAR IDENTIFIER BOXOPEN BOXCLOSE EQUAL STRING SEMICOLON
