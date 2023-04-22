@@ -310,6 +310,8 @@ caseContinuer :  statements BREAK SEMICOLON
  		| FLOAT declarationListFloat SEMICOLON
  		| INT IDENTIFIER BOXOPEN BOXCLOSE EQUAL OPCUR arrayValues CLCUR SEMICOLON {}
  		| INT IDENTIFIER BOXOPEN BOXCLOSE EQUAL OPCUR CLCUR SEMICOLON {}
+
+		// IF FLOAT ALLOW ONLY FLOAT IN EXP, same for char and INT 
   
  arrayValues :  INTVAL COMMA arrayValues 
  			| INTVAL 
