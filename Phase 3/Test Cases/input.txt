@@ -5,3 +5,7 @@ int main(int u, char t, float p){
     int y = p();
     return 0;
 }
+
+char potty(int y, int u, float tatti, char p){
+    int a[5];
+}

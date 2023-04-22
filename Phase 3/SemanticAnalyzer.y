@@ -20,7 +20,7 @@
  		int scope;
  		int dimensionofArray=-1;
  		char *parameterList[1000];
- 		int arrayDimension[1000];
+ 		int arrayDimension[2]={-1,-1};
  		int parameterCount=-1;
  	};
  	symbolTable table[1000];
@@ -31,6 +31,8 @@
  	int currScope=0;
 	char* instanceParamList[1000];
 	int currentParamCount = 0;
+	int sizes[2]={-1,-1};
+	int instDim=0;
   
  	// insert function
  	void insertInTable(char *token,char *type,char *val,int sc,int paramCount,char *paramList[],int arrayDim[],int dimensionofArr,bool isArr,bool isFunc){
@@ -39,12 +41,14 @@
  		newEntry.value = strdup(val);
  		newEntry.dataType = strdup(type);
  		newEntry.scope=sc;
+
  		if(isFunc){
      		for(int i =0;i<paramCount;i++){
      			newEntry.parameterList[i] = strdup(paramList[i]);
      		}
      		newEntry.parameterCount=paramCount;
      	}
+		newEntry.isFunction = isFunc;
 		
  		newEntry.isArray = isArr;
      	if(isArr){
@@ -101,8 +105,9 @@
 			printf("scope = %d		",table[i].scope);
 			printf("paramCount = %d		",table[i].parameterCount);
 			if(table[i].isFunction){
+				printf("Parameter array = ");
 				for(int p = 0;p<table[i].parameterCount;p++){
-					printf("Parameter array = ");
+					
 					printf("%s ",table[i].parameterList[p]);
 				}
 			}
@@ -292,19 +297,19 @@ caseContinuer :  statements BREAK SEMICOLON
   
  printer : PRINTF OPBRAC STRING prattributes CLBRAC SEMICOLON
  scanner : SCANF OPBRAC STRING scattributes CLBRAC SEMICOLON
- declarationStatement : INT IDENTIFIER OPBRAC parameters CLBRAC compoundStatements  {printf("INT F WITH PARAMS..\n");}
- 		| CHAR IDENTIFIER OPBRAC   parameters CLBRAC compoundStatements {printf("char F WITH PARAMS..\n");}
+ declarationStatement : INT IDENTIFIER OPBRAC parameters CLBRAC compoundStatements  {insertInTable($2,strdup("i"),strdup("i"),currScope,currentParamCount,instanceParamList,NULL,0,false,true);memset(instanceParamList, '\0',sizeof(instanceParamList)); currentParamCount = 0;}
+ 		| CHAR IDENTIFIER OPBRAC   parameters CLBRAC compoundStatements {insertInTable($2,strdup("c"),strdup("c"),currScope,currentParamCount,instanceParamList,NULL,0,false,true);memset(instanceParamList, '\0',sizeof(instanceParamList)); currentParamCount = 0;}
  		| FLOAT IDENTIFIER OPBRAC  parameters CLBRAC compoundStatements {printf("float F WITH PARAMS..\n");}
  		| INT IDENTIFIER OPBRAC  {pushNewScope();} CLBRAC compoundStatements
  		| FLOAT IDENTIFIER OPBRAC  {pushNewScope();}  CLBRAC compoundStatements
  		| CHAR IDENTIFIER OPBRAC  {pushNewScope();}  CLBRAC compoundStatements
- 		| INT declarationListIntFloat SEMICOLON {printf("DS1..\n");}
+ 		| INT declarationListInt SEMICOLON {printf("DS1..\n");}
  		| CHAR IDENTIFIER BOXOPEN INTVAL BOXCLOSE EQUAL STRING SEMICOLON
  		| CHAR IDENTIFIER BOXOPEN BOXCLOSE EQUAL STRING SEMICOLON
  		| CHAR declarationListChar SEMICOLON
- 		| FLOAT declarationListIntFloat SEMICOLON
- 		| INT IDENTIFIER BOXOPEN BOXCLOSE EQUAL OPCUR arrayValues CLCUR SEMICOLON
- 		| INT IDENTIFIER BOXOPEN BOXCLOSE EQUAL OPCUR CLCUR SEMICOLON
+ 		| FLOAT declarationListFloat SEMICOLON
+ 		| INT IDENTIFIER BOXOPEN BOXCLOSE EQUAL OPCUR arrayValues CLCUR SEMICOLON {}
+ 		| INT IDENTIFIER BOXOPEN BOXCLOSE EQUAL OPCUR CLCUR SEMICOLON {}
   
  arrayValues :  INTVAL COMMA arrayValues 
  			| INTVAL 
@@ -313,12 +318,18 @@ caseContinuer :  statements BREAK SEMICOLON
  scattributes : COMMA AMPERSAND IDENTIFIER scattributes 
  			| 
  		
- declarationListIntFloat : IDENTIFIER EQUAL expressionStatement COMMA declarationListIntFloat {printf("DSL1..\n");}
- 		| IDENTIFIER COMMA declarationListIntFloat
+ declarationListInt : IDENTIFIER EQUAL expressionStatement COMMA declarationListInt {printf("DSL1..\n");}
+ 		| IDENTIFIER COMMA declarationListInt {}
+ 		| IDENTIFIER EQUAL expressionStatement {}
+ 		| IDENTIFIER dimension  {insertInTable($1,strdup("i"),strdup("i"),currScope, -1,NULL,sizes,instDim,true,false);instDim=0;sizes[0]=-1;sizes[1]=-1;}
+ 		| IDENTIFIER {}
+ 		
+ declarationListFloat : IDENTIFIER EQUAL expressionStatement COMMA declarationListFloat {printf("DSL1..\n");}
+ 		| IDENTIFIER COMMA declarationListFloat 
  		| IDENTIFIER EQUAL expressionStatement {printf("DSL3..\n");}
  		| IDENTIFIER dimension  {printf("INTFLOAT ARRAY..\n");}
  		| IDENTIFIER {printf("DSL4..\n");}
- 		
+
  declarationListChar : IDENTIFIER EQUAL CHARVAL COMMA declarationListChar
  		| IDENTIFIER COMMA declarationListChar
  		| IDENTIFIER EQUAL CHARVAL
@@ -375,9 +386,9 @@ paramContinuer : parameter
   
  parameter : type IDENTIFIER {printf("FUNCTION param\n");insertInTable($2,$1,$1,currScope,0,NULL,NULL,0,false,false);}
   
- type : INT {$<Str>$ = strdup("i");} 
- 		| FLOAT {$<Str>$ = strdup("f");}
-		| CHAR  {$<Str>$ = strdup("c");}
+ type : INT {$<Str>$ = strdup("i");instanceParamList[currentParamCount++]=strdup("i");} 
+ 		| FLOAT {$<Str>$ = strdup("f");instanceParamList[currentParamCount++]=strdup("f");}
+		| CHAR  {$<Str>$ = strdup("c");instanceParamList[currentParamCount++]=strdup("c");}
   
  compoundStatements : OPCUR statementList CLCUR {popScope();printf("FUNCTION statements\n");}
   
@@ -392,9 +403,9 @@ paramContinuer : parameter
  returnDec : RETURN expressionStatement SEMICOLON {$<Str>$ = strdup($2);} // Get function type and compare types here
  			| RETURN SEMICOLON 
 
- dimension : BOXOPEN INTVAL BOXCLOSE {int i = $2; if(i<=0){printf("Array size has to be  Positive\n"); return 1;}}
- 		  | BOXOPEN INTVAL BOXCLOSE BOXOPEN INTVAL BOXCLOSE {int a = $2; int b = $5; if(a<=0||b<=0){printf("Array size has to be  Positive\n"); return 1;}}
- 		  | BOXOPEN BOXCLOSE BOXOPEN INTVAL BOXCLOSE {int i = $4; if(i<=0){printf("Array size has to be  Positive\n"); return 1;}}
+ dimension : BOXOPEN INTVAL BOXCLOSE {int i = $2; if(i<=0){printf("Array size has to be  Positive\n"); return 1;}sizes[0] = $2;instDim++;}
+ 		  | BOXOPEN INTVAL BOXCLOSE BOXOPEN INTVAL BOXCLOSE {int a = $2; int b = $5; if(a<=0||b<=0){printf("Array sizes has to be  Positive\n"); return 1;}sizes[0] = $2; sizes[1] = $5;instDim+=2;}
+ 		  | BOXOPEN BOXCLOSE BOXOPEN INTVAL BOXCLOSE {int i = $4; if(i<=0){printf("Array sizes has to be  Positive\n"); return 1;}sizes[1] = $4;instDim+=2;}
  %%
   
  #include "lex.yy.c"
