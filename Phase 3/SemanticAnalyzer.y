@@ -314,18 +314,18 @@ caseContinuer :  statements BREAK SEMICOLON
  	| factor MOD term
  	| factor {printf("Factor..\n");}
  	
- factor : IDENTIFIER
- 	| OPBRAC expressionStatement CLBRAC
- 	| LOGICALNOT expressionStatement
- 	| CHARVAL $<Str>$ = strdup("c");
+ factor : IDENTIFIER {} // need function to get type of IDENTIFIER
+ 	| OPBRAC expressionStatement CLBRAC {$<Str>$ = strdup($2);}
+ 	| LOGICALNOT expressionStatement {$<Str>$ = strdup($2);}
+ 	| CHARVAL {$<Str>$ = strdup("c");}
  	| INTVAL {$<Str>$ = strdup("i");printf("INT VALS.. %d\n",yylval);}
  	| FLOATVAL {$<Str>$ = strdup("f");}
- 	| IDENTIFIER BOXOPEN INTVAL BOXCLOSE {} 
- 	| IDENTIFIER BOXOPEN INTVAL BOXCLOSE BOXOPEN INTVAL BOXCLOSE {} 
+ 	| IDENTIFIER BOXOPEN INTVAL BOXCLOSE {} // need function to get type of IDENTIFIER
+ 	| IDENTIFIER BOXOPEN INTVAL BOXCLOSE BOXOPEN INTVAL BOXCLOSE {} // need function to get type of IDENTIFIER
   
   
- functionCall : IDENTIFIER OPBRAC CLBRAC SEMICOLON
-              | IDENTIFIER OPBRAC argList CLBRAC SEMICOLON 
+ functionCall : IDENTIFIER OPBRAC CLBRAC SEMICOLON {} // need function to get type of IDENTIFIER
+              | IDENTIFIER OPBRAC argList CLBRAC SEMICOLON {} // need function to get type of IDENTIFIER
   
  /* changes to be made - either expressionStatement or expression */
  argList : argList COMMA expressionStatement 
