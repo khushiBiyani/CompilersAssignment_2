@@ -157,7 +157,7 @@ extern int yydebug;
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 union YYSTYPE
 {
-#line 112 "SemanticAnalyzer.y"
+#line 145 "SemanticAnalyzer.y"
 
 		int Int;
 		float Float;

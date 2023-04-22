@@ -1083,12 +1083,12 @@ YY_RULE_SETUP
 case 51:
 YY_RULE_SETUP
 #line 64 "SemanticAnalyzer.l"
-{return INTVAL;}
+{yylval.Int = atoi(yytext);return INTVAL;}
 	YY_BREAK
 case 52:
 YY_RULE_SETUP
 #line 65 "SemanticAnalyzer.l"
-{return FLOATVAL;}
+{yylval.Float = atof(yytext);return FLOATVAL;}
 	YY_BREAK
 case 53:
 YY_RULE_SETUP

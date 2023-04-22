@@ -18,10 +18,10 @@
  		bool isFunction;
  		bool isArray;
  		int scope;
- 		int dimensionofArray;
+ 		int dimensionofArray=-1;
  		char *parameterList[1000];
  		int arrayDimension[1000];
- 		int parameterCount;
+ 		int parameterCount=-1;
  	};
  	symbolTable table[1000];
  	int availableScopes[1000]={-1};
@@ -30,22 +30,22 @@
  	int maxScope=0;
  	int currScope=0;
 	char* instanceParamList[1000];
+	int currentParamCount = 0;
   
  	// insert function
  	void insertInTable(char *token,char *type,char *val,int sc,int paramCount,char *paramList[],int arrayDim[],int dimensionofArr,bool isArr,bool isFunc){
  		symbolTable newEntry;
- 		strcpy(newEntry.lexeme,token);
- 		strcpy(newEntry.value,val);
- 		strcpy(newEntry.dataType,type);
+ 		newEntry.lexeme = strdup(token);
+ 		newEntry.value = strdup(val);
+ 		newEntry.dataType = strdup(type);
  		newEntry.scope=sc;
-  
  		if(isFunc){
      		for(int i =0;i<paramCount;i++){
-     			strcpy(newEntry.parameterList[i],paramList[i]);
+     			newEntry.parameterList[i] = strdup(paramList[i]);
      		}
      		newEntry.parameterCount=paramCount;
      	}
-  
+		
  		newEntry.isArray = isArr;
      	if(isArr){
      		for(int i =0;i<dimensionofArr;i++){
@@ -54,6 +54,7 @@
      		newEntry.dimensionofArray=dimensionofArr;
      	}
  		table[currIndex++]=newEntry;
+		printf("INSIDE TABLE INSERTION\n");
  	}
   
  	// update value of token
@@ -63,7 +64,7 @@
  		int tableIndex=currIndex;
  		for(int i=tableIndex-1;i>=0;i--)
  		{	
- 			if(strcmp(table[i].lexeme,token)){
+ 			if(strcmp(table[i].lexeme,token)==0){
 				for(int j = scopeIndex;j>=0;j--){
 					if(table[i].scope==availableScopes[j]){
 						strcpy(table[i].value,value);
@@ -73,32 +74,63 @@
 			}
  		}
  	}
+	int getIdentifierType(char *token, bool isArray, bool isFunction)
+ 	{
+ 		int tableIndex=currIndex;
+ 		for(int i=tableIndex-1;i>=0;i--)
+ 		{	
+ 			if(strcmp(table[i].lexeme,token)==0){
+				for(int j = scopeIndex;j>=0;j--){
+					if(table[i].scope==availableScopes[j]){
+						return i;
+					}
+				}
+			}
+ 		}
+		return -1;
+ 	}
 	void printTable(){
 		printf("TABLE IS THIS\n\n");
-		printf("Lexeme		Value 		dataType 		isFunc		isArray			scope			paramCount		paramList		dimensionofArray	arrayList\n"); 
+
 		for(int i=0;i<currIndex;i++){
-			printf("%s		",table[i].lexeme);
-			printf("%s		",table[i].value);
-			printf("%s		",table[i].dataType);
-			printf("%d		",table[i].isFunction);
-			printf("%d		",table[i].isArray);
-			printf("%d		",table[i].scope);
-			printf("%d		",table[i].parameterCount);
+			printf("lexeme = %s		",table[i].lexeme);
+			printf("value = %s		",table[i].value);
+			printf("type = %s		",table[i].dataType);
+			printf(" isFunction = %d		",table[i].isFunction);
+			printf("isArray = %d		",table[i].isArray);
+			printf("scope = %d		",table[i].scope);
+			printf("paramCount = %d		",table[i].parameterCount);
 			if(table[i].isFunction){
 				for(int p = 0;p<table[i].parameterCount;p++){
+					printf("Parameter array = ");
 					printf("%s ",table[i].parameterList[p]);
 				}
 			}
 			printf("		");
 			
-			printf("%d		",table[i].dimensionofArray);
+			printf(" dimensionofArr = %d		",table[i].dimensionofArray);
 			if(table[i].isArray){
+				printf("Parameter array = ");
 				for(int p = 0;p<table[i].dimensionofArray;p++){
 					printf("%d ",table[i].arrayDimension[p]);
 				}
 			}
 			printf("\n");
 		}
+	}
+	int getCurrentFunctionIndex(){
+		int tableIndex=currIndex;
+ 		for(int i=tableIndex-1;i>=0;i--)
+ 		{	
+ 			if(table[i].isFunction){
+				for(int j = scopeIndex;j>=0;j--){
+					if(table[i].scope==availableScopes[j]){
+						return i;
+					}
+				}
+			}
+ 		}
+		return -1;
 	}
 	void pushNewScope(){// Put a new scope for every open {
 		availableScopes[++scopeIndex]=++maxScope;
@@ -143,8 +175,12 @@
  %right <Str> LOGICALNOT EQUAL
   
  %token <Str> CHARVAL 
- %token <Str> INTVAL
- %token <Str> FLOATVAL
+ %token <Int> INTVAL
+ %token <Float> FLOATVAL
+
+ %type <Str> expressionStatement type
+
+
   
 %token <Str> IDENTIFIER
  %%
@@ -320,6 +356,8 @@ caseContinuer :  statements BREAK SEMICOLON
  	| CHARVAL {$<Str>$ = strdup("c");}
  	| INTVAL {$<Str>$ = strdup("i");printf("INT VALS.. %d\n",yylval);}
  	| FLOATVAL {$<Str>$ = strdup("f");}
+	| IDENTIFIER OPBRAC CLBRAC 
+	| IDENTIFIER OPBRAC argList CLBRAC 
  	| IDENTIFIER BOXOPEN INTVAL BOXCLOSE {} // need function to get type of IDENTIFIER
  	| IDENTIFIER BOXOPEN INTVAL BOXCLOSE BOXOPEN INTVAL BOXCLOSE {} // need function to get type of IDENTIFIER
   
@@ -331,11 +369,11 @@ caseContinuer :  statements BREAK SEMICOLON
  argList : argList COMMA expressionStatement 
  		| expressionStatement 
   
- parameters : {pushNewScope();} paramContinuer
+ parameters : {pushNewScope(); memset(instanceParamList, '\0',sizeof(instanceParamList)); currentParamCount = 0;} paramContinuer
 paramContinuer : parameter 
 				| parameter COMMA paramContinuer  {printf("FUNCTION params\n");}
   
- parameter : type IDENTIFIER {printf("FUNCTION param\n");insertInTable($2,$1,$1,currScope,0,NULL,NULL.0,false,false);}
+ parameter : type IDENTIFIER {printf("FUNCTION param\n");insertInTable($2,$1,$1,currScope,0,NULL,NULL,0,false,false);}
   
  type : INT {$<Str>$ = strdup("i");} 
  		| FLOAT {$<Str>$ = strdup("f");}
@@ -351,14 +389,12 @@ paramContinuer : parameter
 				| scanner statementList 
 				| 
   
- returnDec : RETURN expressionStatement SEMICOLON {$<Str>$ = strdup($2);} 
+ returnDec : RETURN expressionStatement SEMICOLON {$<Str>$ = strdup($2);} // Get function type and compare types here
  			| RETURN SEMICOLON 
 
- declarator : IDENTIFIER dimension {printf("declarator..\n");}
-
- dimension : BOXOPEN INTVAL BOXCLOSE {printf("size..\n");}
- 		  | BOXOPEN INTVAL BOXCLOSE BOXOPEN INTVAL BOXCLOSE 
- 		  | BOXOPEN BOXCLOSE BOXOPEN INTVAL BOXCLOSE
+ dimension : BOXOPEN INTVAL BOXCLOSE {int i = $2; if(i<=0){printf("Array size has to be  Positive\n"); return 1;}}
+ 		  | BOXOPEN INTVAL BOXCLOSE BOXOPEN INTVAL BOXCLOSE {int a = $2; int b = $5; if(a<=0||b<=0){printf("Array size has to be  Positive\n"); return 1;}}
+ 		  | BOXOPEN BOXCLOSE BOXOPEN INTVAL BOXCLOSE {int i = $4; if(i<=0){printf("Array size has to be  Positive\n"); return 1;}}
  %%
   
  #include "lex.yy.c"

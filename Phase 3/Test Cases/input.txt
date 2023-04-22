@@ -1,4 +1,7 @@
-int main(){
+int main(int u, char t, float p){
     int a=0;
+    int c[5];
+    int d[5][5];
+    int y = p();
     return 0;
 }
