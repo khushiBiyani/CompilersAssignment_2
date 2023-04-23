@@ -159,14 +159,14 @@ union YYSTYPE
 {
 #line 150 "SemanticAnalyzer.y"
 
-		int Int;
-		float Float;
-		char Char;
-		char* Str;
-		struct data{
-
-		};
-	
+    		int Int;
+    		float Float;
+    		char Char;
+    		char* Str;
+    		struct data{
+     
+    		};
+    	
 
 #line 172 "y.tab.h"
 

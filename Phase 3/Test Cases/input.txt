@@ -14,9 +14,16 @@ float rf(){
     int lop = 0;
 }
 int main(int u, char t, float p){
-    int a=0;
-    int c[5];
-    int d[5][5];
-    int y = p(a,k,k,h,h)+ 9;
+    float a=0;
+    float yup;
+    float c[5];
+    int yup;
+    float d[5][5];
+    float y = p(a,k,k,h,h)+ 9;
+    float y = p(a,v,d);
+    p(i,o,p);
     p();
+    float y = P();
+    float u = P() *15;
+    return 53.4;
 }
