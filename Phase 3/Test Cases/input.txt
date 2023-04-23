@@ -20,6 +20,7 @@ int main(int u, char t, float p){
     float c[5];
     float re = c[0];
     float d[5][5];
+    float oi = ref(t);
     float y = d[4][4];
     float y ;
     char ap;

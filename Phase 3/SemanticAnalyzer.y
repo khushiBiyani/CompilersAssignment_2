@@ -33,6 +33,8 @@
     	int currentParamCount = 0;
     	int sizes[2]={-1,-1};
     	int instDim=0;
+		char* arglistArray[500];
+		int argindex = 0;
       
      	// insert function
      	void insertInTable(char *token,char *type,char *val,int sc,int paramCount,char *paramList[],int arrayDim[],int dimensionofArr,bool isArr,bool isFunc){
@@ -153,6 +155,18 @@
 			printf("VARIABLE %s NOT FOUND\n\n\n\n",token);
     		return -1;
 		}
+		bool compareParam(char* args[], char* params[], int arg, int par){
+			int n = arg;
+			if(par>arg){
+				n = par;
+			}
+			for(int i = 0;i<n;i++){
+				if(strcmp(args[i],params[i])!=0){
+					return false;
+				}
+			}
+			return true;
+		}
     	void pushNewScope(){// Put a new scope for every open {
     		availableScopes[++scopeIndex]=++maxScope;
     		currScope = maxScope;
@@ -199,7 +213,7 @@
      %token <Int> INTVAL
      %token <Float> FLOATVAL
      
-     %type <Str> expressionStatement type
+     %type <Str> expressionStatement type term value relationalExpression expression logicalExpression factor
      
      
       
@@ -207,15 +221,15 @@
      %%
       
      /* start of the program */
-     code : declarationList {printf("Starting..\n");}
+     code : declarationList {}
       
-     declarationList :  declarationStatement declarationList {printf("RECURSIVE DECLARATION \n");}
+     declarationList :  declarationStatement declarationList {}
      				|  assignmentStatement declarationList
-     				|  declarationStatement {printf("DECLARATION \n");}
+     				|  declarationStatement {}
      				|  assignmentStatement
       
-     statements : specialStatement statements {printf("Special..\n");}
-     		   | basicStatement statements {printf("Basic123..\n");}
+     statements : specialStatement statements {}
+     		   | basicStatement statements {}
      		   | functionCall statements
      		   | 
     singleStatement : specialStatement
@@ -228,9 +242,9 @@
      				 | switchStatement
      forLoop : forLoop2 | forLoop3 | forLoop1
      /* for loop */
-     forLoop1 :  OPBRAC forAssignStatement forExpStatement SEMICOLON forUpdateStatement  CLBRAC SEMICOLON {popScope(); printf("\nFOR SEMICOLON \n");}
-    forLoop2 : OPBRAC forAssignStatement forExpStatement SEMICOLON forUpdateStatement CLBRAC OPCUR {pushNewScope();} inLoop CLCUR {popScope(); popScope(); printf("\nproper FOR \n");}
-     forLoop3 : OPBRAC forAssignStatement forExpStatement SEMICOLON forUpdateStatement CLBRAC {pushNewScope();} singleLoopStatement {popScope(); popScope(); printf("\nFOR SINGLE STATEMENT \n");}
+     forLoop1 :  OPBRAC forAssignStatement forExpStatement SEMICOLON forUpdateStatement  CLBRAC SEMICOLON {popScope(); }
+    forLoop2 : OPBRAC forAssignStatement forExpStatement SEMICOLON forUpdateStatement CLBRAC OPCUR {pushNewScope();} inLoop CLCUR {popScope(); popScope(); }
+     forLoop3 : OPBRAC forAssignStatement forExpStatement SEMICOLON forUpdateStatement CLBRAC {pushNewScope();} singleLoopStatement {popScope(); popScope(); }
       
      singleLoopStatement : specialStatement 
      					| basicStatement
@@ -253,18 +267,18 @@
       
      /* while loop */
     whileLoop : WHILE OPBRAC {pushNewScope();} expressionStatement CLBRAC whileSuffix
-     whileSuffix : OPCUR {pushNewScope();}inLoop CLCUR { popScope(); popScope(); printf("\nproper WHILE \n");}
+     whileSuffix : OPCUR {pushNewScope();}inLoop CLCUR { popScope(); popScope(); }
      		  | SEMICOLON {popScope(); printf("\nWHILE SEMICOLON \n");}
-     		  | {pushNewScope();} singleLoopStatement { popScope(); popScope(); printf("\nSINGLE WHILE \n");}
+     		  | {pushNewScope();} singleLoopStatement { popScope(); popScope();}
       
-     inLoop : BREAK SEMICOLON inLoop {printf("\n break in loop \n");}
-     		| CONTINUE SEMICOLON inLoop {printf("\ncontinue in loop \n");}
-     		| specialStatement inLoop {printf("\n special statement in loop \n");}
-     		| basicStatement inLoop {printf("\n basic statement in loop \n");}
-      		|functionCall inLoop {printf("\n basic statement in loop \n");}
-     		| ifInLoopStatement inLoop {printf("\n if in loop \n");}
-     		| switchStatement inLoop {printf("\n switch in loop \n");}
-     		| singleLoopStatement inLoop {printf("\n any other statement in loop \n");}
+     inLoop : BREAK SEMICOLON inLoop {}
+     		| CONTINUE SEMICOLON inLoop {}
+     		| specialStatement inLoop {}
+     		| basicStatement inLoop {}
+      		|functionCall inLoop {}
+     		| ifInLoopStatement inLoop {}
+     		| switchStatement inLoop {}
+     		| singleLoopStatement inLoop {}
      		|
       
      ifStatement : IF OPBRAC expressionStatement CLBRAC OPCUR {pushNewScope();} statements {popScope();} CLCUR ifContinuer
@@ -288,29 +302,29 @@
      	| ELSE {pushNewScope();} singleLoopStatement {popScope();}
     	|
       
-     switchStatement : SWITCH OPBRAC IDENTIFIER CLBRAC OPCUR {pushNewScope();} caseStatements defaultStatement {popScope();} CLCUR {printf("SWITCH START..\n");}
-     caseStatements : caseStatementInt | {printf("char/int..\n");}
-     caseStatementInt : {pushNewScope();} caseInt {pushNewScope();} caseStatementInt | {printf("INT CASE..\n");}
+     switchStatement : SWITCH OPBRAC IDENTIFIER CLBRAC OPCUR {pushNewScope();} caseStatements defaultStatement {popScope();} CLCUR {}
+     caseStatements : caseStatementInt | {}
+     caseStatementInt : {pushNewScope();} caseInt {pushNewScope();} caseStatementInt | {}
      caseInt : CASE OPBRAC INTVAL CLBRAC COLON caseContinuer
-     		| CASE INTVAL COLON caseContinuer {printf("CASE INT : ..\n");}
+     		| CASE INTVAL COLON caseContinuer {}
      		| CASE OPBRAC CHARVAL CLBRAC COLON caseContinuer
      		| CASE CHARVAL COLON caseContinuer
     caseContinuer :  statements BREAK SEMICOLON 
     				| statements 
      defaultStatement : DEFAULT COLON {pushNewScope();} statements {popScope();} 
-     					| {printf(" \nDEFAULT : ..\n");}
+     					| {}
       
      /* basic statements */
      basicStatements : basicStatement basicStatements
      		| basicStatement
       
-     basicStatement : expressionStatement {printf("BS->EXPS..\n");}
-     		| declarationStatement {printf("BS->DS..\n");}
-     		| assignmentStatement	{printf("Basic->AS..\n");}
+     basicStatement : expressionStatement {}
+     		| declarationStatement {}
+     		| assignmentStatement	{}
     		| functionCall
      		
-     assignmentStatement : IDENTIFIER EQUAL expressionStatement COMMA assignmentStatement {printf("AS1..\n");}
-     		| IDENTIFIER EQUAL expressionStatement SEMICOLON {printf("AS2..\n");}
+     assignmentStatement : IDENTIFIER EQUAL expressionStatement COMMA assignmentStatement {}
+     		| IDENTIFIER EQUAL expressionStatement SEMICOLON {}
       
      printer : PRINTF OPBRAC STRING prattributes CLBRAC SEMICOLON
      scanner : SCANF OPBRAC STRING scattributes CLBRAC SEMICOLON
@@ -320,7 +334,7 @@
      		| INT IDENTIFIER OPBRAC  {pushNewScope();} CLBRAC compoundStatements {int inst = getIdentifierIndex($2,false,true); if(inst == -1){insertInTable($2,strdup("i"),strdup("i"),currScope,currentParamCount,instanceParamList,NULL,0,false,true);} else{printf("%s is already defined earlier\n",$2);return 1;} memset(instanceParamList, '\0',sizeof(instanceParamList)); currentParamCount = 0;}
      		| FLOAT IDENTIFIER OPBRAC  {pushNewScope();}  CLBRAC compoundStatements {int inst = getIdentifierIndex($2,false,true); if(inst == -1){insertInTable($2,strdup("f"),strdup("f"),currScope,currentParamCount,instanceParamList,NULL,0,false,true);} else{printf("%s is already defined earlier\n",$2);return 1;} memset(instanceParamList, '\0',sizeof(instanceParamList)); currentParamCount = 0;}
      		| CHAR IDENTIFIER OPBRAC  {pushNewScope();}  CLBRAC compoundStatements {int inst = getIdentifierIndex($2,false,true); if(inst == -1){insertInTable($2,strdup("c"),strdup("c"),currScope,currentParamCount,instanceParamList,NULL,0,false,true);} else{printf("%s is already defined earlier\n",$2);return 1;} memset(instanceParamList, '\0',sizeof(instanceParamList)); currentParamCount = 0;}
-     		| INT declarationListInt SEMICOLON {printf("DS1..\n");}
+     		| INT declarationListInt SEMICOLON {}
      		| CHAR IDENTIFIER BOXOPEN INTVAL BOXCLOSE EQUAL STRING SEMICOLON
      		| CHAR IDENTIFIER BOXOPEN BOXCLOSE EQUAL STRING SEMICOLON
      		| CHAR declarationListChar SEMICOLON
@@ -355,39 +369,39 @@
      		| IDENTIFIER dimension {if(checkVariable($1,currScope,true,true)){printf("MULTIPLE DECLARATIONS %s\n\n",$1);return 1;}insertInTable($1,strdup("c"),strdup("c"),currScope, -1,NULL,sizes,instDim,true,false);instDim=0;sizes[0]=-1;sizes[1]=-1;} 
      		| IDENTIFIER { if(checkVariable($1,currScope,false,false)){printf("MULTIPLE DECLARATIONS %s\n\n",$1);return 1;}insertInTable($1,strdup("c"),strdup("c"),currScope, -1,NULL,sizes,instDim,false,false);}
      		
-     expressionStatement : logicalExpression LOGICALOR expressionStatement {printf("ES1..\n");}
-     		| logicalExpression {printf("ES2..\n");}
+     expressionStatement : logicalExpression LOGICALOR expressionStatement {if(strcmp($1,$3)==0){$<Str>$ = strdup($1);}else{printf("TYPES dont match\n\n");return 1;}}
+     		| logicalExpression {$<Str>$ = strdup($1);}
      		
-     logicalExpression : expression LOGICALAND logicalExpression {printf("LE1..\n");}
-     		| expression {printf("LE2..\n");}
+     logicalExpression : expression LOGICALAND logicalExpression {if(strcmp($1,$3)==0){$<Str>$ = strdup($1);}else{printf("TYPES dont match\n\n");return 1;}}
+     		| expression {$<Str>$ = strdup($1);}
      		
-     expression : relationalExpression EQUALS expression {printf("E1..\n");}
-     		| relationalExpression NOTEQUAL expression {printf("E2..\n");}
-     		| relationalExpression {printf("E3..\n");}
+     expression : relationalExpression EQUALS expression {if(strcmp($1,$3)==0){$<Str>$ = strdup($1);}else{printf("TYPES dont match\n\n");return 1;}}
+     		| relationalExpression NOTEQUAL expression {if(strcmp($1,$3)==0){$<Str>$ = strdup($1);}else{printf("TYPES dont match\n\n");return 1;}}
+     		| relationalExpression {$<Str>$ = strdup($1);}
      		
-     relationalExpression : value GREATERTHAN relationalExpression
-     		| value GREATERTHANEQUALTO relationalExpression
-     		| value LESSTHAN relationalExpression
-     		| value LESSTHANEQUALTO relationalExpression
-     		| value {printf("VALUE..\n");}
+     relationalExpression : value GREATERTHAN relationalExpression {if(strcmp($1,$3)==0){$<Str>$ = strdup($1);}else{printf("TYPES dont match\n\n");return 1;}}
+     		| value GREATERTHANEQUALTO relationalExpression {if(strcmp($1,$3)==0){$<Str>$ = strdup($1);}else{printf("TYPES dont match\n\n");return 1;}}
+     		| value LESSTHAN relationalExpression {if(strcmp($1,$3)==0){$<Str>$ = strdup($1);}else{printf("TYPES dont match\n\n");return 1;}}
+     		| value LESSTHANEQUALTO relationalExpression {if(strcmp($1,$3)==0){$<Str>$ = strdup($1);}else{printf("TYPES dont match\n\n");return 1;}}
+     		| value {$<Str>$ = strdup($1);}
      		
-     value : term ADD value {printf("ADD..\n");}
-     	| term SUB value
-     	| term {printf("Basic TERM..\n");}
+     value : term ADD value {if(strcmp($1,$3)==0){$<Str>$ = strdup($1);}else{printf("TYPES dont match\n\n");return 1;}}
+     	| term SUB value {if(strcmp($1,$3)==0){$<Str>$ = strdup($1);}else{printf("TYPES dont match\n\n");return 1;}}
+     	| term {$<Str>$ = strdup($1);}
      	
-     term : factor MULT term {printf("MULT..\n");}
-     	| factor DIV term
-     	| factor MOD term
-     	| factor {printf("Factor..\n");}
+     term : factor MULT term {if(strcmp($1,$3)==0){$<Str>$ = strdup($1);}else{printf("TYPES dont match\n\n");return 1;}}
+     	| factor DIV term {if(strcmp($1,$3)==0){$<Str>$ = strdup($1);}else{printf("TYPES dont match\n\n");return 1;}}
+     	| factor MOD term {if(strcmp($1,$3)==0){$<Str>$ = strdup($1);}else{printf("TYPES dont match\n\n");return 1;}}
+     	| factor {$<Str>$ = strdup($1);}
      	
-     factor : IDENTIFIER {} // need function to get type of IDENTIFIER
+     factor : IDENTIFIER {int inst = checkVariableScope($1,currScope,false,false); if(inst!=-1){$<Str>$ = strdup(table[inst].dataType);}else{printf("Variable %s not found\n\n",$1);return 1;}} // need function to get type of IDENTIFIER
      	| OPBRAC expressionStatement CLBRAC {$<Str>$ = strdup($2);}
      	| LOGICALNOT expressionStatement {$<Str>$ = strdup($2);}
      	| CHARVAL {$<Str>$ = strdup("c");}
      	| INTVAL {$<Str>$ = strdup("i");printf("INT VALS.. %d\n",yylval);}
      	| FLOATVAL {$<Str>$ = strdup("f");}
-    	| IDENTIFIER OPBRAC CLBRAC 
-    	| IDENTIFIER OPBRAC argList CLBRAC 
+    	| IDENTIFIER OPBRAC CLBRAC {memset(arglistArray,'\0',sizeof(arglistArray));argindex=0; int inst = getIdentifierIndex($1,false,true);if(compareParam(arglistArray,table[inst].parameterList,argindex,table[inst].parameterCount)){$<Str>$ = strdup(table[inst].dataType);}else{printf("PARAMETERS DONT MATCH");return 1;}} 
+    	| IDENTIFIER OPBRAC {memset(arglistArray,'\0',sizeof(arglistArray));argindex=0;} argList CLBRAC {int inst = getIdentifierIndex($1,false,true); if(compareParam(arglistArray,table[inst].parameterList,argindex,table[inst].parameterCount)){$<Str>$ = strdup(table[inst].dataType);}else{printf("PARAMETERS DONT MATCH");return 1;}}
      	| IDENTIFIER BOXOPEN INTVAL BOXCLOSE {int inst = checkVariableScope($1,currScope,true,false); if(inst!=-1){$<Str>$ = strdup(table[inst].dataType);}else{printf("Variable %s not found\n\n",$1);return 1;}} // need function to get type of IDENTIFIER
      	| IDENTIFIER BOXOPEN INTVAL BOXCLOSE BOXOPEN INTVAL BOXCLOSE {int inst = checkVariableScope($1,currScope,true,false); if(inst!=-1){$<Str>$ = strdup(table[inst].dataType);}else{printf("Variable %s not found\n\n",$1);return 1;}} // need function to get type of IDENTIFIER
       
@@ -396,8 +410,8 @@
                   | IDENTIFIER OPBRAC argList CLBRAC SEMICOLON{} // need function to get type of IDENTIFIER
       
      /* changes to be made - either expressionStatement or expression */
-     argList : expressionStatement COMMA argList 
-     		| expressionStatement 
+     argList : expressionStatement COMMA argList {arglistArray[argindex++]=strdup($1);}
+     		| expressionStatement {arglistArray[argindex++]=strdup($1);}
       
      parameters : {pushNewScope(); memset(instanceParamList, '\0',sizeof(instanceParamList)); currentParamCount = 0;} paramContinuer
     paramContinuer : parameter 
