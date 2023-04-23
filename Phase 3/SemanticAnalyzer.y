@@ -123,20 +123,20 @@
     			printf("\n");
     		}
     	}
-    	int getCurrentFunctionIndex(){
-    		int tableIndex=currIndex;
+		bool checkVariable(char* token, int scope){
+			int tableIndex=currIndex;
      		for(int i=tableIndex-1;i>=0;i--)
      		{	
-     			if(table[i].isFunction){
+     			if(strcmp(table[i].lexeme,token)==0){
     				for(int j = scopeIndex;j>=0;j--){
-    					if(table[i].scope==availableScopes[j]){
-    						return i;
+    					if(table[i].scope==availableScopes[j]&& availableScopes[j]==scope){
+    						return true;
     					}
     				}
     			}
      		}
-    		return -1;
-    	}
+    		return false;
+		}
     	void pushNewScope(){// Put a new scope for every open {
     		availableScopes[++scopeIndex]=++maxScope;
     		currScope = maxScope;
@@ -322,22 +322,22 @@
      			| 
      		
      declarationListInt : IDENTIFIER EQUAL expressionStatement COMMA declarationListInt {printf("DSL1..\n");}
-     		| IDENTIFIER COMMA declarationListInt {int inst = getIdentifierIndex($1,false,false); if(table[inst].scope==currScope){printf("MULTIPLE DECLARATIONS\n\n");return 1;}insertInTable($1,strdup("i"),strdup("i"),currScope, -1,NULL,sizes,instDim,false,false);}
+     		| IDENTIFIER COMMA declarationListInt { if(checkVariable($1,currScope)){printf("MULTIPLE DECLARATIONS %s\n\n",$1);return 1;}insertInTable($1,strdup("i"),strdup("i"),currScope, -1,NULL,sizes,instDim,false,false);}
      		| IDENTIFIER EQUAL expressionStatement {}
-     		| IDENTIFIER dimension  {int inst = getIdentifierIndex($1,true,false); if(table[inst].scope==currScope){printf("MULTIPLE DECLARATIONS\n\n");return 1;}insertInTable($1,strdup("i"),strdup("i"),currScope, -1,NULL,sizes,instDim,true,false);instDim=0;sizes[0]=-1;sizes[1]=-1;}
-     		| IDENTIFIER {int inst = getIdentifierIndex($1,false,false); if(table[inst].scope==currScope){printf("MULTIPLE DECLARATIONS\n\n");return 1;}insertInTable($1,strdup("i"),strdup("i"),currScope, -1,NULL,sizes,instDim,false,false);}
+     		| IDENTIFIER dimension  {if(checkVariable($1,currScope)){printf("MULTIPLE DECLARATIONS %s\n\n",$1);return 1;}insertInTable($1,strdup("i"),strdup("i"),currScope, -1,NULL,sizes,instDim,true,false);instDim=0;sizes[0]=-1;sizes[1]=-1;}
+     		| IDENTIFIER { if(checkVariable($1,currScope)){printf("MULTIPLE DECLARATIONS %s\n\n",$1);return 1;}insertInTable($1,strdup("i"),strdup("i"),currScope, -1,NULL,sizes,instDim,false,false);}
      		
      declarationListFloat : IDENTIFIER EQUAL expressionStatement COMMA declarationListFloat {printf("DSL1..\n");}
-     		| IDENTIFIER COMMA declarationListFloat {int inst = getIdentifierIndex($1,false,false); if(table[inst].scope==currScope){printf("MULTIPLE DECLARATIONS\n\n");return 1;}insertInTable($1,strdup("f"),strdup("f"),currScope, -1,NULL,sizes,instDim,false,false);}
+     		| IDENTIFIER COMMA declarationListFloat { if(checkVariable($1,currScope)){printf("MULTIPLE DECLARATIONS %s\n\n",$1);return 1;}insertInTable($1,strdup("f"),strdup("f"),currScope, -1,NULL,sizes,instDim,false,false);}
      		| IDENTIFIER EQUAL expressionStatement {printf("DSL3..\n");}
-     		| IDENTIFIER dimension  {int inst = getIdentifierIndex($1,true,false); if(table[inst].scope==currScope){printf("MULTIPLE DECLARATIONS\n\n");return 1;}insertInTable($1,strdup("f"),strdup("f"),currScope, -1,NULL,sizes,instDim,true,false);instDim=0;sizes[0]=-1;sizes[1]=-1;} 
-     		| IDENTIFIER {int inst = getIdentifierIndex($1,false,false); if(table[inst].scope==currScope){printf("MULTIPLE DECLARATIONS\n\n");return 1;}insertInTable($1,strdup("f"),strdup("f"),currScope, -1,NULL,sizes,instDim,false,false);}
+     		| IDENTIFIER dimension  {if(checkVariable($1,currScope)){printf("MULTIPLE DECLARATIONS %s\n\n",$1);return 1;}insertInTable($1,strdup("f"),strdup("f"),currScope, -1,NULL,sizes,instDim,true,false);instDim=0;sizes[0]=-1;sizes[1]=-1;} 
+     		| IDENTIFIER { if(checkVariable($1,currScope)){printf("MULTIPLE DECLARATIONS %s\n\n",$1);return 1;}insertInTable($1,strdup("f"),strdup("f"),currScope, -1,NULL,sizes,instDim,false,false);}
      
-     declarationListChar : IDENTIFIER EQUAL CHARVAL COMMA declarationListChar
+     declarationListChar : IDENTIFIER EQUAL CHARVAL COMMA declarationListChar { if(checkVariable($1,currScope)){printf("MULTIPLE DECLARATIONS %s\n\n",$1);return 1;}insertInTable($1,strdup("c"),strdup("c"),currScope, -1,NULL,sizes,instDim,false,false);}
      		| IDENTIFIER COMMA declarationListChar
      		| IDENTIFIER EQUAL CHARVAL
-     		| IDENTIFIER dimension
-     		| IDENTIFIER
+     		| IDENTIFIER dimension {if(checkVariable($1,currScope)){printf("MULTIPLE DECLARATIONS %s\n\n",$1);return 1;}insertInTable($1,strdup("c"),strdup("c"),currScope, -1,NULL,sizes,instDim,true,false);instDim=0;sizes[0]=-1;sizes[1]=-1;} 
+     		| IDENTIFIER { if(checkVariable($1,currScope)){printf("MULTIPLE DECLARATIONS %s\n\n",$1);return 1;}insertInTable($1,strdup("c"),strdup("c"),currScope, -1,NULL,sizes,instDim,false,false);}
      		
      expressionStatement : logicalExpression LOGICALOR expressionStatement {printf("ES1..\n");}
      		| logicalExpression {printf("ES2..\n");}
@@ -418,12 +418,12 @@
      	if(!yyparse())
      	{
      		printf("\n\nParsed Successfully\n\n");
-				printTable();
+		
      	}
      	else 
      		printf("\n\nParsing Failed\n\n");
     	
-    
+			printTable();
      	exit(0);
      }
       

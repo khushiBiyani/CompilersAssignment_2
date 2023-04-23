@@ -3,7 +3,7 @@ char pot(int y, int u, float tai, char p){
     int a[5];
 }
 float ref(int op){
-    int lop = 0;
+    int lop;
 }
 
 
@@ -11,19 +11,16 @@ char pt(){
     int a[5];
 }
 float rf(){
-    int lop = 0;
+    int lop;
 }
+int yup;
 int main(int u, char t, float p){
-    float a=0;
+    float a;
     float yup;
     float c[5];
-    int yup;
     float d[5][5];
-    float y = p(a,k,k,h,h)+ 9;
-    float y = p(a,v,d);
-    p(i,o,p);
-    p();
-    float y = P();
-    float u = P() *15;
+    float y ;
+    char ap;
+    char ap;
     return 53.4;
 }
