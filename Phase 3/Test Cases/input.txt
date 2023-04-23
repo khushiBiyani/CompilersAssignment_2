@@ -1,10 +1,3 @@
-int main(int u, char t, float p){
-    int a=0;
-    int c[5];
-    int d[5][5];
-    int y = p();
-    return 0;
-}
 
 char pot(int y, int u, float tai, char p){
     int a[5];
@@ -13,13 +6,17 @@ float ref(int op){
     int lop = 0;
 }
 
-int main(){
-    int a=0;
-}
 
-char pot(){
+char pt(){
     int a[5];
 }
-float ref(){
+float rf(){
     int lop = 0;
+}
+int main(int u, char t, float p){
+    int a=0;
+    int c[5];
+    int d[5][5];
+    int y = p(a,k,k,h,h)+ 9;
+    p();
 }

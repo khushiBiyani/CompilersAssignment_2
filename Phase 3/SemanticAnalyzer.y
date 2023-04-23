@@ -78,7 +78,7 @@
 			}
  		}
  	}
-	int getIdentifierType(char *token, bool isArray, bool isFunction)
+	int getIdentifierFunctionType(char *token, bool isArray, bool isFunction)
  	{
  		int tableIndex=currIndex;
  		for(int i=tableIndex-1;i>=0;i--)
@@ -200,11 +200,11 @@
   
  statements : specialStatement statements {printf("Special..\n");}
  		   | basicStatement statements {printf("Basic123..\n");}
- 		   | functionCall statements
+ 		   | functionCall SEMICOLON statements
  		   | 
 singleStatement : specialStatement
  		   | basicStatement 
- 		   | functionCall
+ 		   | functionCall SEMICOLON
   
  specialStatement : FOR {pushNewScope();} forLoop 
  				 | ifStatement
@@ -218,7 +218,7 @@ forLoop2 : OPBRAC forAssignStatement forExpStatement SEMICOLON forUpdateStatemen
   
  singleLoopStatement : specialStatement 
  					| basicStatement
- 					| functionCall
+ 					| functionCall SEMICOLON
  					| BREAK SEMICOLON
  					| CONTINUE SEMICOLON
  					| switchStatement
@@ -245,7 +245,7 @@ whileLoop : WHILE OPBRAC {pushNewScope();} expressionStatement CLBRAC whileSuffi
  		| CONTINUE SEMICOLON inLoop {printf("\ncontinue in loop \n");}
  		| specialStatement inLoop {printf("\n special statement in loop \n");}
  		| basicStatement inLoop {printf("\n basic statement in loop \n");}
-  		|functionCall inLoop {printf("\n basic statement in loop \n");}
+  		|functionCall SEMICOLON inLoop {printf("\n basic statement in loop \n");}
  		| ifInLoopStatement inLoop {printf("\n if in loop \n");}
  		| switchStatement inLoop {printf("\n switch in loop \n");}
  		| singleLoopStatement inLoop {printf("\n any other statement in loop \n");}
@@ -297,12 +297,12 @@ caseContinuer :  statements BREAK SEMICOLON
   
  printer : PRINTF OPBRAC STRING prattributes CLBRAC SEMICOLON
  scanner : SCANF OPBRAC STRING scattributes CLBRAC SEMICOLON
- declarationStatement : INT IDENTIFIER OPBRAC parameters CLBRAC compoundStatements  {insertInTable($2,strdup("i"),strdup("i"),currScope,currentParamCount,instanceParamList,NULL,0,false,true);memset(instanceParamList, '\0',sizeof(instanceParamList)); currentParamCount = 0;}
- 		| CHAR IDENTIFIER OPBRAC   parameters CLBRAC compoundStatements {insertInTable($2,strdup("c"),strdup("c"),currScope,currentParamCount,instanceParamList,NULL,0,false,true);memset(instanceParamList, '\0',sizeof(instanceParamList)); currentParamCount = 0;}
- 		| FLOAT IDENTIFIER OPBRAC  parameters CLBRAC compoundStatements {insertInTable($2,strdup("f"),strdup("f"),currScope,currentParamCount,instanceParamList,NULL,0,false,true);memset(instanceParamList, '\0',sizeof(instanceParamList)); currentParamCount = 0;}
- 		| INT IDENTIFIER OPBRAC  {pushNewScope();} CLBRAC compoundStatements {insertInTable($2,strdup("i"),strdup("i"),currScope,currentParamCount,instanceParamList,NULL,0,false,true);memset(instanceParamList, '\0',sizeof(instanceParamList)); currentParamCount = 0;}
- 		| FLOAT IDENTIFIER OPBRAC  {pushNewScope();}  CLBRAC compoundStatements {insertInTable($2,strdup("f"),strdup("f"),currScope,currentParamCount,instanceParamList,NULL,0,false,true);memset(instanceParamList, '\0',sizeof(instanceParamList)); currentParamCount = 0;}
- 		| CHAR IDENTIFIER OPBRAC  {pushNewScope();}  CLBRAC compoundStatements {insertInTable($2,strdup("c"),strdup("c"),currScope,currentParamCount,instanceParamList,NULL,0,false,true);memset(instanceParamList, '\0',sizeof(instanceParamList)); currentParamCount = 0;}
+ declarationStatement : INT IDENTIFIER OPBRAC parameters CLBRAC compoundStatements  {int inst = getIdentifierFunctionType($2,false,true); if(inst == -1){insertInTable($2,strdup("i"),strdup("i"),currScope,currentParamCount,instanceParamList,NULL,0,false,true);}else{printf("%s is already defined earlier\n",$2);return 1;}memset(instanceParamList, '\0',sizeof(instanceParamList)); currentParamCount = 0;}
+ 		| CHAR IDENTIFIER OPBRAC   parameters CLBRAC compoundStatements {int inst = getIdentifierFunctionType($2,false,true); if(inst ==-1){insertInTable($2,strdup("c"),strdup("c"),currScope,currentParamCount,instanceParamList,NULL,0,false,true);} else{printf("%s is already defined earlier\n",$2);return 1;} memset(instanceParamList, '\0',sizeof(instanceParamList)); currentParamCount = 0;}
+ 		| FLOAT IDENTIFIER OPBRAC  parameters CLBRAC compoundStatements {int inst = getIdentifierFunctionType($2,false,true); if(inst == -1){insertInTable($2,strdup("f"),strdup("f"),currScope,currentParamCount,instanceParamList,NULL,0,false,true);} else{printf("%s is already defined earlier\n",$2);return 1;} memset(instanceParamList, '\0',sizeof(instanceParamList)); currentParamCount = 0;}
+ 		| INT IDENTIFIER OPBRAC  {pushNewScope();} CLBRAC compoundStatements {int inst = getIdentifierFunctionType($2,false,true); if(inst == -1){insertInTable($2,strdup("i"),strdup("i"),currScope,currentParamCount,instanceParamList,NULL,0,false,true);} else{printf("%s is already defined earlier\n",$2);return 1;} memset(instanceParamList, '\0',sizeof(instanceParamList)); currentParamCount = 0;}
+ 		| FLOAT IDENTIFIER OPBRAC  {pushNewScope();}  CLBRAC compoundStatements {int inst = getIdentifierFunctionType($2,false,true); if(inst == -1){insertInTable($2,strdup("f"),strdup("f"),currScope,currentParamCount,instanceParamList,NULL,0,false,true);} else{printf("%s is already defined earlier\n",$2);return 1;} memset(instanceParamList, '\0',sizeof(instanceParamList)); currentParamCount = 0;}
+ 		| CHAR IDENTIFIER OPBRAC  {pushNewScope();}  CLBRAC compoundStatements {int inst = getIdentifierFunctionType($2,false,true); if(inst == -1){insertInTable($2,strdup("c"),strdup("c"),currScope,currentParamCount,instanceParamList,NULL,0,false,true);} else{printf("%s is already defined earlier\n",$2);return 1;} memset(instanceParamList, '\0',sizeof(instanceParamList)); currentParamCount = 0;}
  		| INT declarationListInt SEMICOLON {printf("DS1..\n");}
  		| CHAR IDENTIFIER BOXOPEN INTVAL BOXCLOSE EQUAL STRING SEMICOLON
  		| CHAR IDENTIFIER BOXOPEN BOXCLOSE EQUAL STRING SEMICOLON
@@ -375,11 +375,11 @@ caseContinuer :  statements BREAK SEMICOLON
  	| IDENTIFIER BOXOPEN INTVAL BOXCLOSE BOXOPEN INTVAL BOXCLOSE {} // need function to get type of IDENTIFIER
   
   
- functionCall : IDENTIFIER OPBRAC CLBRAC SEMICOLON {} // need function to get type of IDENTIFIER
-              | IDENTIFIER OPBRAC argList CLBRAC SEMICOLON {} // need function to get type of IDENTIFIER
+ functionCall : IDENTIFIER OPBRAC CLBRAC {} // need function to get type of IDENTIFIER
+              | IDENTIFIER OPBRAC argList CLBRAC {} // need function to get type of IDENTIFIER
   
  /* changes to be made - either expressionStatement or expression */
- argList : argList COMMA expressionStatement 
+ argList : expressionStatement COMMA argList 
  		| expressionStatement 
   
  parameters : {pushNewScope(); memset(instanceParamList, '\0',sizeof(instanceParamList)); currentParamCount = 0;} paramContinuer
@@ -396,7 +396,7 @@ paramContinuer : parameter
   
  statementList : basicStatements statementList 
  				| specialStatement statementList 
-				| functionCall statementList 
+				| functionCall SEMICOLON statementList 
 				| returnDec 
 				| printer statementList 
 				| scanner statementList 
@@ -416,10 +416,10 @@ paramContinuer : parameter
 	availableScopes[0] = 0;
  	if(!yyparse())
  	{
- 		printf("Parsing Done\n");
+ 		printf("\n\nParsed Successfully\n\n");
  	}
  	else 
- 		printf("Failed\n");
+ 		printf("\n\nParsing Failed\n\n");
 	
 	printTable();
  	exit(0);
