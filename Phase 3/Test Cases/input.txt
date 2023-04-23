@@ -24,8 +24,18 @@ int main(int u, char t, float p){
     float re = c[0];
     float d[5][5];
     float oi = ref(u);
-    float y = d[4][4];
-    float y ;
+    float y = 3.12,lk = 9.8;
+    int reds = 9, seds = 89;
+        printf("op%d ",u);
+        printf("op%d %f %c",u,p,t);
+        scanf("%c %d ",&t,&u);
+
+    for(int i = 0;i<5;i=i+2){
+        int y;
+    }
+    y = p;
+    char iot = 'a',poi = 'b';
+
     char ap;
     return u;
 }

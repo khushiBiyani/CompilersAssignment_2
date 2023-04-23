@@ -35,8 +35,34 @@
     	int instDim=0;
 		char* arglistArray[500];
 		int argindex = 0;
+		char* printlistArray[500];
+		int printindex = 0;
+		char* scanlistArray[500];
+		int scanindex = 0;
 		char* presentFunctionType;
-      
+		char* instanceStringList[500];
+		int instanceStringIndex = 0;
+		void populate(char* str, int len){
+			for(int i = 0; i < len; i++) {
+       			 if(str[i] == '%' && str[i+1] != '\0' && strchr("cdfs", str[i+1])) {
+				if(str[i+1]=='d'){
+					instanceStringList[instanceStringIndex++] = strdup("i");
+				}
+				else if(str[i+1]=='f'){
+					instanceStringList[instanceStringIndex++] = strdup("f");
+				}
+				else if(str[i+1]=='c'){
+					instanceStringList[instanceStringIndex++] = strdup("c");
+				}
+         		printf("%c\n", str[i+1]);
+        		}
+	  		}
+			printf("STRING PARAMS = ");
+			for(int i = 0;i<instanceStringIndex;i++){
+				printf("%s ",instanceStringList[i]);
+			}
+			printf("\n");
+		}
      	// insert function
      	void insertInTable(char *token,char *type,char *val,int sc,int paramCount,char *paramList[],int arrayDim[],int dimensionofArr,bool isArr,bool isFunc){
      		symbolTable newEntry;
@@ -172,16 +198,39 @@
     		return -1;
 		}
 		bool compareParam(char* args[], char* params[], int arg, int par){
-			int n = arg;
-			if(par>arg){
-				n = par;
+			if(arg!=par){
+				return false;
 			}
+			int n = arg;
+			
 			for(int i = 0;i<n;i++){
 				if(strcmp(args[i],params[i])!=0){
 					return false;
 				}
 			}
 			return true;
+		}
+		bool compareString(char* str,char* param[],int len,int sizep){
+			int yup = 0;
+			int re = 0;
+			printf("%d %d\n",len,sizep);
+			for(int i = 0; i < len; i++) {
+       			 if(str[i] == '%' && str[i+1] != '\0' && strchr("cdes", str[i+1])) {
+				re++;
+				yup++;
+         		printf("%c\n", str[i+1]);
+            	i++;
+        		}
+				printf("%d %d %d\n",yup,re,i);
+	  		}
+			return true;
+		}
+		void printArray(char* arr[],int len){
+			printf("Args = ");
+			for(int i = 0;i<len;i++){
+				printf("%s ",arr[i]);
+			}
+			printf("\n");
 		}
     	void pushNewScope(){// Put a new scope for every open {
     		availableScopes[++scopeIndex]=++maxScope;
@@ -271,15 +320,15 @@
      					| ifInLoopStatement
       
      forAssignStatement : assignmentStatement 
-     					| INT IDENTIFIER EQUAL expressionStatement SEMICOLON {}
-     					| INT IDENTIFIER EQUAL expressionStatement COMMA  forAssignStatement
-     					| CHAR IDENTIFIER EQUAL expressionStatement SEMICOLON 
-     					| CHAR IDENTIFIER EQUAL expressionStatement COMMA  forAssignStatement
+     					| INT IDENTIFIER EQUAL expressionStatement SEMICOLON { if(checkVariable($2,currScope,false,false)){printf("MULTIPLE DECLARATIONS %s\n\n",$2);return 1;}if(strcmp($4,strdup("i"))!=0){printf("Type Mismatch");return 1;}insertInTable($2,strdup("i"),strdup("i"),currScope, -1,NULL,sizes,instDim,false,false);}
+     					| INT IDENTIFIER EQUAL expressionStatement COMMA  forAssignStatement { if(checkVariable($2,currScope,false,false)){printf("MULTIPLE DECLARATIONS %s\n\n",$2);return 1;}if(strcmp($4,strdup("i"))!=0){printf("Type Mismatch");return 1;}insertInTable($2,strdup("i"),strdup("i"),currScope, -1,NULL,sizes,instDim,false,false);}
+     					| CHAR IDENTIFIER EQUAL expressionStatement SEMICOLON { if(checkVariable($2,currScope,false,false)){printf("MULTIPLE DECLARATIONS %s\n\n",$2);return 1;}if(strcmp($4,strdup("c"))!=0){printf("Type Mismatch");return 1;}insertInTable($2,strdup("c"),strdup("c"),currScope, -1,NULL,sizes,instDim,false,false);}
+     					| CHAR IDENTIFIER EQUAL expressionStatement COMMA  forAssignStatement { if(checkVariable($2,currScope,false,false)){printf("MULTIPLE DECLARATIONS %s\n\n",$2);return 1;}if(strcmp($4,strdup("c"))!=0){printf("Type Mismatch");return 1;}insertInTable($2,strdup("c"),strdup("c"),currScope, -1,NULL,sizes,instDim,false,false);}
      					| SEMICOLON
      forExpStatement : expressionStatement 
      					| 
-     forUpdateStatement : IDENTIFIER EQUAL expressionStatement COMMA forUpdateStatement
-     				   | IDENTIFIER EQUAL expressionStatement 
+     forUpdateStatement : IDENTIFIER EQUAL expressionStatement COMMA forUpdateStatement {int inst = getIdentifierIndex($1,false,false); if(inst==-1){printf("VARIABLE NOT FOUND");return 1;}if(strcmp(table[inst].dataType,$3)!=0){printf("VARIABLE NOT FOUND");return 1;}}
+     				   | IDENTIFIER EQUAL expressionStatement {int inst = getIdentifierIndex($1,false,false); if(inst==-1){printf("VARIABLE NOT FOUND");return 1;}if(strcmp(table[inst].dataType,$3)!=0){printf("VARIABLE NOT FOUND");return 1;}}
       
      /* while loop */
     whileLoop : WHILE OPBRAC {pushNewScope();} expressionStatement CLBRAC whileSuffix
@@ -295,7 +344,9 @@
      		| ifInLoopStatement inLoop {}
      		| switchStatement inLoop {}
      		| singleLoopStatement inLoop {}
-     		|
+     		| printer {memset(printlistArray,'\0',sizeof(printlistArray));printindex = 0;} inLoop
+			| scanner {memset(scanlistArray,'\0',sizeof(scanlistArray));scanindex = 0;} inLoop
+			|
       
      ifStatement : IF OPBRAC expressionStatement CLBRAC OPCUR {pushNewScope();} statements {popScope();} CLCUR ifContinuer
     			| IF OPBRAC expressionStatement CLBRAC {pushNewScope();} singleStatement {popScope();} ifContinuer
@@ -339,11 +390,13 @@
      		| assignmentStatement	{}
     		| functionCall
      		
-     assignmentStatement : IDENTIFIER EQUAL expressionStatement COMMA assignmentStatement {}
-     		| IDENTIFIER EQUAL expressionStatement SEMICOLON {}
+     assignmentStatement : IDENTIFIER EQUAL expressionStatement COMMA assignmentStatement {int inst = getIdentifierIndex($1,false,false);if(inst>=0){if(strcmp(table[inst].dataType,$3)!=0){printf("Type Mismatch");return 1;}}else{printf("VARIABLE NOT FOUND"); return 1;}}
+     		| IDENTIFIER EQUAL expressionStatement SEMICOLON {int inst = getIdentifierIndex($1,false,false);if(inst>=0){if(strcmp(table[inst].dataType,$3)!=0){printf("Type Mismatch");return 1;}}else{printf("VARIABLE NOT FOUND"); return 1;}}
+			| IDENTIFIER dimension EQUAL expressionStatement COMMA assignmentStatement {int inst = getIdentifierIndex($1,true,false);if(inst>=0){if(strcmp(table[inst].dataType,$3)!=0){printf("Type Mismatch");return 1;}}else{printf("VARIABLE NOT FOUND"); return 1;}}
+     		| IDENTIFIER dimension EQUAL expressionStatement SEMICOLON {int inst = getIdentifierIndex($1,true,false);if(inst>=0){if(strcmp(table[inst].dataType,$3)!=0){printf("Type Mismatch");return 1;}}else{printf("VARIABLE NOT FOUND"); return 1;}}
       
-     printer : PRINTF OPBRAC STRING prattributes CLBRAC SEMICOLON
-     scanner : SCANF OPBRAC STRING scattributes CLBRAC SEMICOLON
+     printer : PRINTF OPBRAC STRING prattributes CLBRAC SEMICOLON {char* presentPrintString = strdup($3); int len = strlen(presentPrintString); printf("s = %s \n",presentPrintString);printArray(printlistArray,printindex);populate(presentPrintString,len);if(!compareParam(instanceStringList,printlistArray,instanceStringIndex,printindex)){printf("PRINTF TYPE DONOT MATCH\n\n");return 1;}else{printf("Correct printf");}printf("PRINTF DONE");memset(instanceStringList,'\0',sizeof(instanceStringList));memset(printlistArray,'\0',sizeof(printlistArray));instanceStringIndex = 0;printindex = 0;}
+     scanner : SCANF OPBRAC STRING scattributes CLBRAC SEMICOLON {char* presentPrintString = strdup($3); int len = strlen(presentPrintString); printf("s = %s \n",presentPrintString);printArray(scanlistArray,scanindex);populate(presentPrintString,len);if(!compareParam(instanceStringList,scanlistArray,instanceStringIndex,scanindex)){printf("SCANF TYPE DONOT MATCH\n\n");return 1;}else{printf("Correct printf");}printf("PRINTF DONE");memset(instanceStringList,'\0',sizeof(instanceStringList));memset(scanlistArray,'\0',sizeof(scanlistArray));instanceStringIndex = 0;scanindex = 0;}
      declarationStatement : INT IDENTIFIER OPBRAC parameters {presentFunctionType = strdup("i");} CLBRAC compoundStatements  {int inst = getIdentifierIndex($2,false,true); if(inst == -1){insertInTable($2,strdup("i"),strdup("i"),currScope,currentParamCount,instanceParamList,NULL,0,false,true);}else{printf("%s is already defined earlier\n",$2);return 1;}memset(instanceParamList, '\0',sizeof(instanceParamList)); currentParamCount = 0;}
      		| CHAR IDENTIFIER OPBRAC   parameters {presentFunctionType = strdup("c");} CLBRAC compoundStatements {int inst = getIdentifierIndex($2,false,true); if(inst ==-1){insertInTable($2,strdup("c"),strdup("c"),currScope,currentParamCount,instanceParamList,NULL,0,false,true);} else{printf("%s is already defined earlier\n",$2);return 1;} memset(instanceParamList, '\0',sizeof(instanceParamList)); currentParamCount = 0;}
      		| FLOAT IDENTIFIER OPBRAC  parameters CLBRAC {presentFunctionType = strdup("f");} compoundStatements {int inst = getIdentifierIndex($2,false,true); if(inst == -1){insertInTable($2,strdup("f"),strdup("f"),currScope,currentParamCount,instanceParamList,NULL,0,false,true);} else{printf("%s is already defined earlier\n",$2);return 1;} memset(instanceParamList, '\0',sizeof(instanceParamList)); currentParamCount = 0;}
@@ -351,37 +404,40 @@
      		| FLOAT IDENTIFIER OPBRAC  {pushNewScope();}{presentFunctionType = strdup("f");}   CLBRAC compoundStatements {int inst = getIdentifierIndex($2,false,true); if(inst == -1){insertInTable($2,strdup("f"),strdup("f"),currScope,currentParamCount,instanceParamList,NULL,0,false,true);} else{printf("%s is already defined earlier\n",$2);return 1;} memset(instanceParamList, '\0',sizeof(instanceParamList)); currentParamCount = 0;}
      		| CHAR IDENTIFIER OPBRAC  {pushNewScope();}{presentFunctionType = strdup("c");}   CLBRAC compoundStatements {int inst = getIdentifierIndex($2,false,true); if(inst == -1){insertInTable($2,strdup("c"),strdup("c"),currScope,currentParamCount,instanceParamList,NULL,0,false,true);} else{printf("%s is already defined earlier\n",$2);return 1;} memset(instanceParamList, '\0',sizeof(instanceParamList)); currentParamCount = 0;}
      		| INT declarationListInt SEMICOLON {}
-     		| CHAR IDENTIFIER BOXOPEN INTVAL BOXCLOSE EQUAL STRING SEMICOLON
-     		| CHAR IDENTIFIER BOXOPEN BOXCLOSE EQUAL STRING SEMICOLON
+     		| CHAR IDENTIFIER BOXOPEN INTVAL BOXCLOSE EQUAL STRING SEMICOLON {if(checkVariable($2,currScope,true,true)){printf("MULTIPLE DECLARATIONS %s\n\n",$2);return 1;}insertInTable($2,strdup("c"),strdup("c"),currScope, -1,NULL,sizes,instDim,true,false);instDim=0;sizes[0]=-1;sizes[1]=-1;} 
+     		| CHAR IDENTIFIER BOXOPEN BOXCLOSE EQUAL STRING SEMICOLON {if(checkVariable($2,currScope,true,true)){printf("MULTIPLE DECLARATIONS %s\n\n",$2);return 1;}insertInTable($2,strdup("c"),strdup("c"),currScope, -1,NULL,sizes,instDim,true,false);instDim=0;sizes[0]=-1;sizes[1]=-1;} 
      		| CHAR declarationListChar SEMICOLON
      		| FLOAT declarationListFloat SEMICOLON
-     		| INT IDENTIFIER BOXOPEN BOXCLOSE EQUAL OPCUR arrayValues CLCUR SEMICOLON {}
-     		| INT IDENTIFIER BOXOPEN BOXCLOSE EQUAL OPCUR CLCUR SEMICOLON {}
+     		| INT IDENTIFIER BOXOPEN BOXCLOSE EQUAL OPCUR arrayValues CLCUR SEMICOLON {if(checkVariable($2,currScope,true,false)){printf("MULTIPLE DECLARATIONS %s\n\n",$2);return 1;}insertInTable($2,strdup("i"),strdup("i"),currScope, -1,NULL,sizes,instDim,true,false);instDim=0;sizes[0]=-1;sizes[1]=-1;}
+     		| INT IDENTIFIER BOXOPEN BOXCLOSE EQUAL OPCUR CLCUR SEMICOLON {if(checkVariable($2,currScope,true,false)){printf("MULTIPLE DECLARATIONS %s\n\n",$2);return 1;}insertInTable($2,strdup("i"),strdup("i"),currScope, -1,NULL,sizes,instDim,true,false);instDim=0;sizes[0]=-1;sizes[1]=-1;}
+			| FLOAT IDENTIFIER BOXOPEN BOXCLOSE EQUAL OPCUR arrayValuesF CLCUR SEMICOLON {if(checkVariable($2,currScope,true,false)){printf("MULTIPLE DECLARATIONS %s\n\n",$2);return 1;}insertInTable($2,strdup("f"),strdup("f"),currScope, -1,NULL,sizes,instDim,true,false);instDim=0;sizes[0]=-1;sizes[1]=-1;} 
+     		| FLOAT IDENTIFIER BOXOPEN BOXCLOSE EQUAL OPCUR CLCUR SEMICOLON {if(checkVariable($2,currScope,true,false)){printf("MULTIPLE DECLARATIONS %s\n\n",$2);return 1;}insertInTable($2,strdup("f"),strdup("f"),currScope, -1,NULL,sizes,instDim,true,false);instDim=0;sizes[0]=-1;sizes[1]=-1;} 
      
     		// IF FLOAT ALLOW ONLY FLOAT IN EXP, same for char and INT 
-      
+      arrayValuesF :  FLOATVAL COMMA arrayValuesF 
+     			| FLOATVAL 
      arrayValues :  INTVAL COMMA arrayValues 
      			| INTVAL 
-     prattributes : COMMA IDENTIFIER prattributes 
+     prattributes : prattributes COMMA factor {printlistArray[printindex++]=strdup($3);printf("PRINT ARG ADDED\n");}
      			| 
-     scattributes : COMMA AMPERSAND IDENTIFIER scattributes 
+     scattributes : scattributes COMMA AMPERSAND factor {scanlistArray[scanindex++]=strdup($4); printf("SCANF ARG ADDED\n");}
      			| 
      		
-     declarationListInt : IDENTIFIER EQUAL expressionStatement COMMA declarationListInt {printf("DSL1..\n");}
+     declarationListInt : IDENTIFIER EQUAL expressionStatement COMMA declarationListInt { if(checkVariable($1,currScope,false,false)){printf("MULTIPLE DECLARATIONS %s\n\n",$1);return 1;}if(strcmp($3,strdup("i"))!=0){printf("Type Mismatch");return 1;}insertInTable($1,strdup("i"),strdup("i"),currScope, -1,NULL,sizes,instDim,false,false);}
      		| IDENTIFIER COMMA declarationListInt { if(checkVariable($1,currScope,false,false)){printf("MULTIPLE DECLARATIONS %s\n\n",$1);return 1;}insertInTable($1,strdup("i"),strdup("i"),currScope, -1,NULL,sizes,instDim,false,false);}
-     		| IDENTIFIER EQUAL expressionStatement {}
+     		| IDENTIFIER EQUAL expressionStatement { if(checkVariable($1,currScope,false,false)){printf("MULTIPLE DECLARATIONS %s\n\n",$1);return 1;}if(strcmp($3,strdup("i"))!=0){printf("Type Mismatch");return 1;}insertInTable($1,strdup("i"),strdup("i"),currScope, -1,NULL,sizes,instDim,false,false);}
      		| IDENTIFIER dimension  {if(checkVariable($1,currScope,true,false)){printf("MULTIPLE DECLARATIONS %s\n\n",$1);return 1;}insertInTable($1,strdup("i"),strdup("i"),currScope, -1,NULL,sizes,instDim,true,false);instDim=0;sizes[0]=-1;sizes[1]=-1;}
      		| IDENTIFIER { if(checkVariable($1,currScope,false,false)){printf("MULTIPLE DECLARATIONS %s\n\n",$1);return 1;}insertInTable($1,strdup("i"),strdup("i"),currScope, -1,NULL,sizes,instDim,false,false);}
      		
-     declarationListFloat : IDENTIFIER EQUAL expressionStatement COMMA declarationListFloat {printf("DSL1..\n");}
+     declarationListFloat : IDENTIFIER EQUAL expressionStatement COMMA declarationListFloat { if(checkVariable($1,currScope,false,false)){printf("MULTIPLE DECLARATIONS %s\n\n",$1);return 1;}if(strcmp($3,strdup("f"))!=0){printf("Type Mismatch");return 1;}insertInTable($1,strdup("f"),strdup("f"),currScope, -1,NULL,sizes,instDim,false,false);}
      		| IDENTIFIER COMMA declarationListFloat { if(checkVariable($1,currScope,false,false)){printf("MULTIPLE DECLARATIONS %s\n\n",$1);return 1;}insertInTable($1,strdup("f"),strdup("f"),currScope, -1,NULL,sizes,instDim,false,false);}
-     		| IDENTIFIER EQUAL expressionStatement {printf("DSL3..\n");}
+     		| IDENTIFIER EQUAL expressionStatement { if(checkVariable($1,currScope,false,false)){printf("MULTIPLE DECLARATIONS %s\n\n",$1);return 1;}if(strcmp($3,strdup("f"))!=0){printf("Type Mismatch");return 1;}insertInTable($1,strdup("f"),strdup("f"),currScope, -1,NULL,sizes,instDim,false,false);}
      		| IDENTIFIER dimension  {if(checkVariable($1,currScope,true,false)){printf("MULTIPLE DECLARATIONS %s\n\n",$1);return 1;}insertInTable($1,strdup("f"),strdup("f"),currScope, -1,NULL,sizes,instDim,true,false);instDim=0;sizes[0]=-1;sizes[1]=-1;} 
      		| IDENTIFIER { if(checkVariable($1,currScope,false,false)){printf("MULTIPLE DECLARATIONS %s\n\n",$1);return 1;}insertInTable($1,strdup("f"),strdup("f"),currScope, -1,NULL,sizes,instDim,false,false);}
      
-     declarationListChar : IDENTIFIER EQUAL CHARVAL COMMA declarationListChar 
+     declarationListChar : IDENTIFIER EQUAL CHARVAL COMMA declarationListChar {if(checkVariable($1,currScope,false,false)){printf("MULTIPLE DECLARATIONS %s\n\n",$1);return 1;}insertInTable($1,strdup("c"),strdup("c"),currScope, -1,NULL,sizes,instDim,false,false);}
      		| IDENTIFIER COMMA declarationListChar { if(checkVariable($1,currScope,false,false)){printf("MULTIPLE DECLARATIONS %s\n\n",$1);return 1;}insertInTable($1,strdup("c"),strdup("c"),currScope, -1,NULL,sizes,instDim,false,false);}
-     		| IDENTIFIER EQUAL CHARVAL
+     		| IDENTIFIER EQUAL CHARVAL {if(checkVariable($1,currScope,false,false)){printf("MULTIPLE DECLARATIONS %s\n\n",$1);return 1;}insertInTable($1,strdup("c"),strdup("c"),currScope, -1,NULL,sizes,instDim,false,false);}
      		| IDENTIFIER dimension {if(checkVariable($1,currScope,true,true)){printf("MULTIPLE DECLARATIONS %s\n\n",$1);return 1;}insertInTable($1,strdup("c"),strdup("c"),currScope, -1,NULL,sizes,instDim,true,false);instDim=0;sizes[0]=-1;sizes[1]=-1;} 
      		| IDENTIFIER { if(checkVariable($1,currScope,false,false)){printf("MULTIPLE DECLARATIONS %s\n\n",$1);return 1;}insertInTable($1,strdup("c"),strdup("c"),currScope, -1,NULL,sizes,instDim,false,false);}
      		
@@ -445,8 +501,10 @@
      				| basicStatements statementList 
      				| specialStatement statementList
     				| returnDec 
-    				| printer statementList 
-    				| scanner statementList 
+    				| printer {memset(printlistArray,'\0',sizeof(printlistArray));
+		printindex = 0;} statementList 
+    				| scanner {memset(scanlistArray,'\0',sizeof(scanlistArray));
+		scanindex = 0;} statementList 
     				| 
      
      returnDec : RETURN expressionStatement SEMICOLON {if(strcmp(presentFunctionType,$2)==0){$<Str>$ = strdup($2);}else{printf("INVALID RETURN");return 1;}} 

@@ -1098,7 +1098,7 @@ YY_RULE_SETUP
 case 54:
 YY_RULE_SETUP
 #line 67 "SemanticAnalyzer.l"
-{return STRING;}
+{yylval.Str = strdup(yytext);return STRING;}
 	YY_BREAK
 case 55:
 /* rule 55 can match eol */

@@ -64,7 +64,7 @@
 [-]?[0-9]+([eE][+-]?[1-9][0-9]*)? {yylval.Int = atoi(yytext);return INTVAL;}
 [-]?[0-9]*\.[0-9]+([eE][+-]?[1-9][0-9]*)? {yylval.Float = atof(yytext);return FLOATVAL;}
 \'[^\'\n]\' {return CHARVAL;}   
-\"[^\"\n]*\" {return STRING;}
+\"[^\"\n]*\" {yylval.Str = strdup(yytext);return STRING;}
 \n {lineCount++;}
 . {return yytext[0];}
 %%
