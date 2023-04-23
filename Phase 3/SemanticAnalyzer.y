@@ -416,14 +416,14 @@
      	| CHARVAL {$<Str>$ = strdup("c");}
      	| INTVAL {$<Str>$ = strdup("i");printf("INT VALS.. %d\n",yylval);}
      	| FLOATVAL {$<Str>$ = strdup("f");}
-    	| IDENTIFIER OPBRAC CLBRAC {memset(arglistArray,'\0',sizeof(arglistArray));argindex=0; int inst = getIdentifierIndex($1,false,true);if(compareParam(arglistArray,table[inst].parameterList,argindex,table[inst].parameterCount)){$<Str>$ = strdup(table[inst].dataType);}else{printf("PARAMETERS DONT MATCH");return 1;}} 
-    	| IDENTIFIER OPBRAC {memset(arglistArray,'\0',sizeof(arglistArray));argindex=0;} argList CLBRAC {int inst = getIdentifierIndex($1,false,true); if(compareParam(arglistArray,table[inst].parameterList,argindex,table[inst].parameterCount)){$<Str>$ = strdup(table[inst].dataType);}else{printf("PARAMETERS DONT MATCH");return 1;}}
+    	| IDENTIFIER OPBRAC CLBRAC {memset(arglistArray,'\0',sizeof(arglistArray));argindex=0; int inst = getIdentifierIndex($1,false,true);if(compareParam(arglistArray,table[inst].parameterList,argindex,table[inst].parameterCount)){$<Str>$ = strdup(table[inst].dataType);}else{printf("PARAMETERS DONT MATCH");return 1;}memset(arglistArray,'\0',sizeof(arglistArray));argindex=0;} 
+    	| IDENTIFIER OPBRAC {memset(arglistArray,'\0',sizeof(arglistArray));argindex=0;} argList CLBRAC {int inst = getIdentifierIndex($1,false,true); if(compareParam(arglistArray,table[inst].parameterList,argindex,table[inst].parameterCount)){$<Str>$ = strdup(table[inst].dataType);}else{printf("PARAMETERS DONT MATCH");return 1;}memset(arglistArray,'\0',sizeof(arglistArray));argindex=0;}
      	| IDENTIFIER BOXOPEN INTVAL BOXCLOSE {int inst = checkVariableScope($1,currScope,true,false); if(inst!=-1){$<Str>$ = strdup(table[inst].dataType);}else{printf("Variable %s not found\n\n",$1);return 1;}} // need function to get type of IDENTIFIER
-     	| IDENTIFIER BOXOPEN INTVAL BOXCLOSE BOXOPEN INTVAL BOXCLOSE {int inst = checkVariableScope($1,currScope,true,false); if(inst!=-1){$<Str>$ = strdup(table[inst].dataType);}else{printf("Variable %s not found\n\n",$1);return 1;}} // need function to get type of IDENTIFIER
+     	| IDENTIFIER BOXOPEN INTVAL BOXCLOSE BOXOPEN INTVAL BOXCLOSE {int inst = checkVariableScope($1,currScope,true,false); if(inst!=-1){$<Str>$ = strdup(table[inst].dataType);}else{printf("Variable %s not found\n\n",$1);return 1;}memset(arglistArray,'\0',sizeof(arglistArray));argindex=0;} // need function to get type of IDENTIFIER
       
       
-     functionCall : IDENTIFIER OPBRAC CLBRAC SEMICOLON{} // need function to get type of IDENTIFIER
-                  | IDENTIFIER OPBRAC argList CLBRAC SEMICOLON{} // need function to get type of IDENTIFIER
+     functionCall : IDENTIFIER OPBRAC CLBRAC SEMICOLON{memset(arglistArray,'\0',sizeof(arglistArray));argindex=0; int inst = getIdentifierIndex($1,false,true);if(compareParam(arglistArray,table[inst].parameterList,argindex,table[inst].parameterCount)){$<Str>$ = strdup(table[inst].dataType);}else{printf("PARAMETERS DONT MATCH");return 1;}memset(arglistArray,'\0',sizeof(arglistArray));argindex=0;} // need function to get type of IDENTIFIER
+                  | IDENTIFIER OPBRAC argList CLBRAC SEMICOLON {int inst = getIdentifierIndex($1,false,true); if(compareParam(arglistArray,table[inst].parameterList,argindex,table[inst].parameterCount)){$<Str>$ = strdup(table[inst].dataType);}else{printf("PARAMETERS DONT MATCH");return 1;}memset(arglistArray,'\0',sizeof(arglistArray));argindex=0;} // need function to get type of IDENTIFIER
       
      /* changes to be made - either expressionStatement or expression */
      argList : expressionStatement COMMA argList {arglistArray[argindex++]=strdup($1);}
@@ -441,7 +441,7 @@
       
      compoundStatements : OPCUR statementList CLCUR {popScope();printf("FUNCTION statements\n");}
       
-     statementList : functionCall {printf("checked if function call");}statementList {printf("direct function call in list");}
+     statementList : functionCall statementList 
      				| basicStatements statementList 
      				| specialStatement statementList
     				| returnDec 
@@ -464,12 +464,12 @@
      	if(!yyparse())
      	{
      		printf("\n\nParsed Successfully\n\n");
-		
+			printTable();
      	}
      	else 
      		printf("\n\nParsing Failed\n\n");
     	
-			printTable();
+			
      	exit(0);
      }
       
