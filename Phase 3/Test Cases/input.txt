@@ -5,7 +5,9 @@ char pot(int y, int u, float tai, char p){
 float ref(int op){
     int lop;
 }
-
+int pi(){
+    return 0.34;
+}
 
 char pt(){
     int a[5];
@@ -20,9 +22,9 @@ int main(int u, char t, float p){
     float c[5];
     float re = c[0];
     float d[5][5];
-    float oi = ref(t);
+    float oi = ref(u);
     float y = d[4][4];
     float y ;
     char ap;
-    return 53.4;
+    return u;
 }
