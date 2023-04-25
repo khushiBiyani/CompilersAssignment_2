@@ -12,235 +12,6 @@
  	}
 	FILE *outFile=fopen("astString.txt","w");
  	// symbol table structure
- 	struct symbolTable{
- 		char *lexeme;
- 		char *value;
- 		char *dataType;
- 		bool isFunction;
- 		bool isArray;
- 		int scope;
- 		int dimensionofArray=-1;
- 		char *parameterList[1000];
- 		int arrayDimension[2]={-1,-1};
- 		int parameterCount=-1;
- 	};
- 	struct symbolTable table[1000];
- 	int availableScopes[1000]={-1};
- 	int scopeIndex=0;// AvailableScopes array index points to the current 
- 	int currIndex=0;// table array index points to the next empty one
- 	int maxScope=0;
- 	int currScope=0;
-	char* instanceParamList[1000];
-	int currentParamCount = 0;
-	int sizes[2]={-1,-1};
-	int instDim=0;
-	char* arglistArray[500];
-	int argindex = 0;
-	char* printlistArray[500];
-	int printindex = 0;
-	char* scanlistArray[500];
-	int scanindex = 0;
-	char* presentFunctionType;
-	char* instanceStringList[500];
-	int instanceStringIndex = 0;
-	void populate(char* str, int len){
-		for(int i = 0; i < len; i++) {
-   			 if(str[i] == '%' && str[i+1] != '\0' && strchr("cdfs", str[i+1])) {
-			if(str[i+1]=='d'){
-				instanceStringList[instanceStringIndex++] = strdup("i");
-			}
-			else if(str[i+1]=='f'){
-				instanceStringList[instanceStringIndex++] = strdup("f");
-			}
-			else if(str[i+1]=='c'){
-				instanceStringList[instanceStringIndex++] = strdup("c");
-			}
-     		printf("%c\n", str[i+1]);
-    		}
-  		}
-		printf("STRING PARAMS = ");
-		for(int i = 0;i<instanceStringIndex;i++){
-			printf("%s ",instanceStringList[i]);
-		}
-		printf("\n");
-	}
- 	// insert function
- 	void insertInTable(char *token,char *type,char *val,int sc,int paramCount,char *paramList[],int arrayDim[],int dimensionofArr,bool isArr,bool isFunc){
- 		symbolTable newEntry;
- 		newEntry.lexeme = strdup(token);
- 		newEntry.value = strdup(val);
- 		newEntry.dataType = strdup(type);
- 		newEntry.scope=sc;
- 
- 		if(isFunc){
-     		for(int i =0;i<paramCount;i++){
-     			newEntry.parameterList[i] = strdup(paramList[i]);
-     		}
-     		newEntry.parameterCount=paramCount;
-     	}
-		newEntry.isFunction = isFunc;
-		
- 		newEntry.isArray = isArr;
-     	if(isArr){
-     		for(int i =0;i<dimensionofArr;i++){
-     				newEntry.arrayDimension[i]=arrayDim[i];
-     		}
-     		newEntry.dimensionofArray=dimensionofArr;
-     	}
- 		table[currIndex++]=newEntry;
-		printf("INSIDE TABLE INSERTION\n");
- 	}
-  
- 	// update value of token
- 	void updateVal(int sc,char *token,char *value)
- 	{
- 		int instScopeIndex=sc;
- 		int tableIndex=currIndex;
- 		for(int i=tableIndex-1;i>=0;i--)
- 		{	
- 			if(strcmp(table[i].lexeme,token)==0){
-				for(int j = scopeIndex;j>=0;j--){
-					if(table[i].scope==availableScopes[j]){
-						strcpy(table[i].value,value);
-						return;
-					}
-				}
-			}
- 		}
- 	}
-	int getIdentifierIndex(char *token, bool isArray, bool isFunction)
- 	{
- 		int tableIndex=currIndex;
- 		for(int i=tableIndex-1;i>=0;i--)
- 		{	
- 			if(strcmp(table[i].lexeme,token)==0){
-				for(int j = scopeIndex;j>=0;j--){
-					if(table[i].scope==availableScopes[j]&&table[i].isArray==isArray&&isFunction==table[i].isFunction){
-						return i;
-					}
-				}
-			}
- 		}
-		return -1;
- 	}
-	int getPresentFunctionIndex()
- 	{
- 		int tableIndex=currIndex;
- 		for(int i=tableIndex-1;i>=0;i--)
- 		{	
- 			if(table[i].isFunction){
-				for(int j = scopeIndex;j>=0;j--){
-					if(table[i].scope==availableScopes[j]&&table[i].isFunction){
-						return i;
-					}
-				}
-			}
- 		}
-		return -1;
- 	}
-	void printTable(){
-		printf("TABLE IS THIS\n\n");
- 
-		for(int i=0;i<currIndex;i++){
-			printf("lexeme = %s		",table[i].lexeme);
-			printf("value = %s		",table[i].value);
-			printf("type = %s		",table[i].dataType);
-			printf(" isFunction = %d		",table[i].isFunction);
-			printf("isArray = %d		",table[i].isArray);
-			printf("scope = %d		",table[i].scope);
-			printf("paramCount = %d		",table[i].parameterCount);
-			if(table[i].isFunction){
-				printf("Parameter array = ");
-				for(int p = 0;p<table[i].parameterCount;p++){
-					
-					printf("%s ",table[i].parameterList[p]);
-				}
-			}
-			printf("		");
-			
-			printf(" dimensionofArr = %d		",table[i].dimensionofArray);
-			if(table[i].isArray){
-				printf("Parameter array = ");
-				for(int p = 0;p<table[i].dimensionofArray;p++){
-					printf("%d ",table[i].arrayDimension[p]);
-				}
-			}
-			printf("\n");
-		}
-	}
-	bool checkVariable(char* token, int scope, bool isArray, bool isFunction){
-		int tableIndex=currIndex;
- 		for(int i=tableIndex-1;i>=0;i--)
- 		{	
- 			if(strcmp(table[i].lexeme,token)==0&&table[i].isArray==isArray&&table[i].isFunction==isFunction){
-				for(int j = scopeIndex;j>=0;j--){
-					if(table[i].scope==availableScopes[j]&& availableScopes[j]==scope){
-						return true;
-					}
-				}
-			}
- 		}
-		return false;
-	}
-	int checkVariableScope(char* token, int scope, bool isArray, bool isFunction){
-		int tableIndex=currIndex;
- 		for(int i=tableIndex-1;i>=0;i--)
- 		{	
- 			if(strcmp(table[i].lexeme,token)==0&&table[i].isArray==isArray&&table[i].isFunction==isFunction){
-				for(int j = scopeIndex;j>=0;j--){
-					if(table[i].scope==availableScopes[j]){
-						printf("VARIABLE %s FOUND\n\n\n\n",token);
-						return i;
-					}
-				}
-			}
- 		}
-		printf("VARIABLE %s NOT FOUND\n\n\n\n",token);
-		return -1;
-	}
-	bool compareParam(char* args[], char* params[], int arg, int par){
-		if(arg!=par){
-			return false;
-		}
-		int n = arg;
-		
-		for(int i = 0;i<n;i++){
-			if(strcmp(args[i],params[i])!=0){
-				return false;
-			}
-		}
-		return true;
-	}
-	bool compareString(char* str,char* param[],int len,int sizep){
-		int yup = 0;
-		int re = 0;
-		printf("%d %d\n",len,sizep);
-		for(int i = 0; i < len; i++) {
-   			 if(str[i] == '%' && str[i+1] != '\0' && strchr("cdes", str[i+1])) {
-			re++;
-			yup++;
-     		printf("%c\n", str[i+1]);
-        	i++;
-    		}
-			printf("%d %d %d\n",yup,re,i);
-  		}
-		return true;
-	}
-	void printArray(char* arr[],int len){
-		printf("Args = ");
-		for(int i = 0;i<len;i++){
-			printf("%s ",arr[i]);
-		}
-		printf("\n");
-	}
-	void pushNewScope(){// Put a new scope for every open {
-		availableScopes[++scopeIndex]=++maxScope;
-		currScope = maxScope;
-	}
-	void popScope(){ // pop latest scope on every }
-		availableScopes[scopeIndex--]=-1;
-		currScope = availableScopes[scopeIndex];
-	}
  %}
  
  %union{
@@ -309,11 +80,11 @@ specialStatement : FOR forLoop {char* temp; temp=(char *)malloc(sizeof(char)*100
 
 forLoop : forLoop2 {char* temp; temp=(char *)malloc(sizeof(char)*10000);strcat(temp,"#FLMany#");strcat(temp,$1);strcat(temp,"@@");$<Str>$=strdup(temp);}
 		| forLoop3 {char* temp; temp=(char *)malloc(sizeof(char)*10000);strcat(temp,"#FL1#");strcat(temp,$1);strcat(temp,"@@");$<Str>$=strdup(temp);}
-		| forLoop1 {char* temp; temp=(char *)malloc(sizeof(char)*10000);strcat(temp,"#FL;#");strcat(temp,$1);strcat(temp,"@@");$<Str>$=strdup(temp);}
+		| forLoop1 {char* temp; temp=(char *)malloc(sizeof(char)*10000);strcat(temp,"#FL#");strcat(temp,$1);strcat(temp,"@@");$<Str>$=strdup(temp);}
 		
  /* for loop */
 forLoop1 :  OPBRAC forAssignStatement forExpStatement SEMICOLON forUpdateStatement  CLBRAC SEMICOLON {char* temp; temp=(char *)malloc(sizeof(char)*10000);strcat(temp,"#(@#");strcat(temp,"ForA#");strcat(temp,$2);strcat(temp,"@@#ForE#");strcat(temp,$3);strcat(temp,"@@#;@#ForU#");strcat(temp,$5);strcat(temp,"@@#)@#;@");$<Str>$=strdup(temp);}
-forLoop2 : OPBRAC forAssignStatement forExpStatement SEMICOLON forUpdateStatement CLBRAC OPCUR inLoop CLCUR {char* temp; temp=(char *)malloc(sizeof(char)*10000);strcat(temp,"#(@#");strcat(temp,"ForA#");strcat(temp,$2);strcat(temp,"@@#ForE#");strcat(temp,$3);strcat(temp,"@@#;@#ForU#");strcat(temp,$5);strcat(temp,"@@#)@#{@");strcat(temp,"#InL#");strcat(temp,$8);strcat("@@#}@");$<Str>$=strdup(temp);}
+forLoop2 : OPBRAC forAssignStatement forExpStatement SEMICOLON forUpdateStatement CLBRAC OPCUR inLoop CLCUR {char* temp; temp=(char *)malloc(sizeof(char)*10000);strcat(temp,"#(@#");strcat(temp,"ForA#");strcat(temp,$2);strcat(temp,"@@#ForE#");strcat(temp,$3);strcat(temp,"@@#;@#ForU#");strcat(temp,$5);strcat(temp,"@@#)@#{@");strcat(temp,"#InL#");strcat(temp,$8);strcat(temp,"@@#}@");$<Str>$=strdup(temp);}
 forLoop3 : OPBRAC forAssignStatement forExpStatement SEMICOLON forUpdateStatement CLBRAC singleLoopStatement {char* temp; temp=(char *)malloc(sizeof(char)*10000);strcat(temp,"#(@#");strcat(temp,"ForA#");strcat(temp,$2);strcat(temp,"@@#ForE#");strcat(temp,$3);strcat(temp,"@@#;@#ForU#");strcat(temp,$5);strcat(temp,"@@#)@#");strcat(temp,"SL#");strcat(temp,$7);strcat(temp,"@@");$<Str>$=strdup(temp);}
   
 singleLoopStatement : specialStatement {char* temp; temp=(char *)malloc(sizeof(char)*10000);strcat(temp,"#SS#");strcat(temp,$1);strcat(temp,"@@");$<Str>$=strdup(temp);}
@@ -325,15 +96,17 @@ singleLoopStatement : specialStatement {char* temp; temp=(char *)malloc(sizeof(c
 					| ifInLoopStatement {char* temp; temp=(char *)malloc(sizeof(char)*10000);strcat(temp,"#IfLoop#");strcat(temp,$1);strcat(temp,"@@");$<Str>$=strdup(temp);}
  
 forAssignStatement : assignmentStatement {char* temp; temp=(char *)malloc(sizeof(char)*10000);strcat(temp,"#FA#");strcat(temp,$1);strcat(temp,"@@");$<Str>$=strdup(temp);}
-					| INT IDENTIFIER EQUAL expressionStatement SEMICOLON {char *temp;temp=(char *)malloc(sizeof(char)*10000);strcat(temp,"#int@#");strcat(temp,$2);strcat("@#=@#ES#");strcat(temp,$4);strcat(temp,"@@#;@");$<Str>$=strdup(temp);}
-					| INT IDENTIFIER EQUAL expressionStatement COMMA forAssignStatement {char *temp;temp=(char *)malloc(sizeof(char)*10000);strcat(temp,"#int@#");strcat(temp,$2);strcat("@#=@#ES#");strcat(temp,$4);strcat(temp,"@@#,@#FA#")strcat(temp,$6);strcat(temp,"@@");$<Str>$=strdup(temp);}
-					| CHAR IDENTIFIER EQUAL expressionStatement COMMA forAssignStatement {char *temp;temp=(char *)malloc(sizeof(char)*10000);strcat(temp,"#char@#");strcat(temp,$2);strcat("@#=@#ES#");strcat(temp,$4);strcat(temp,"@@#,@#FA#")strcat(temp,$6);strcat(temp,"@@");$<Str>$=strdup(temp);}
+					| INT IDENTIFIER EQUAL expressionStatement SEMICOLON {char *temp;temp=(char *)malloc(sizeof(char)*10000);strcat(temp,"#int@#");strcat(temp,$2);strcat(temp,"@#=@#ES#");strcat(temp,$4);strcat(temp,"@@#;@");$<Str>$=strdup(temp);}
+					| INT IDENTIFIER EQUAL expressionStatement COMMA forAssignStatement {char *temp;temp=(char *)malloc(sizeof(char)*10000);strcat(temp,"#int@#");strcat(temp,$2);strcat(temp,"@#=@#ES#");strcat(temp,$4);strcat(temp,"@@#,@#FA#");strcat(temp,$6);strcat(temp,"@@");$<Str>$=strdup(temp);}
+					| CHAR IDENTIFIER EQUAL expressionStatement COMMA forAssignStatement {char *temp;temp=(char *)malloc(sizeof(char)*10000);strcat(temp,"#char@#");strcat(temp,$2);strcat(temp,"@#=@#ES#");strcat(temp,$4);strcat(temp,"@@#,@#FA#");strcat(temp,$6);strcat(temp,"@@");$<Str>$=strdup(temp);}
+					| SEMICOLON
+					| CHAR IDENTIFIER EQUAL expressionStatement COMMA forAssignStatement
 
 forExpStatement : expressionStatement {char* temp; temp=(char *)malloc(sizeof(char)*10000);strcat(temp,"#ES#");strcat(temp,$1);strcat(temp,"@@");$<Str>$=strdup(temp);}
 				| {$<Str>$=strdup("#Epsilon@");}
 
-forUpdateStatement : IDENTIFIER EQUAL expressionStatement COMMA forUpdateStatement {char *temp;temp=(char *)malloc(sizeof(char)*10000);strcat(temp,"#identifier#");strcat(temp,$1);strcat("@@#=@#ES#");strcat(temp,$3);strcat(temp,"@@#,@#ForU#");strcat(temp,$5);strcat(temp,"@@");$<Str>$=strdup(temp);}
-  
+forUpdateStatement : IDENTIFIER EQUAL expressionStatement COMMA forUpdateStatement {char *temp;temp=(char *)malloc(sizeof(char)*10000);strcat(temp,"#identifier#");strcat(temp,$1);strcat(temp,"@@#=@#ES#");strcat(temp,$3);strcat(temp,"@@#,@#ForU#");strcat(temp,$5);strcat(temp,"@@");$<Str>$=strdup(temp);}
+					| IDENTIFIER EQUAL expressionStatement 
  /* while loop */
 whileLoop : WHILE OPBRAC expressionStatement CLBRAC whileSuffix {char* temp; temp=(char *)malloc(sizeof(char)*10000);strcat(temp,"#while@#(@#ES#");strcat(temp,$3);strcat(temp,"@@#)@#WSuffix#");strcat(temp,$5);strcat(temp,"@@");$<Str>$=strdup(temp);}
 
@@ -523,8 +296,7 @@ dimension : BOXOPEN INTVAL BOXCLOSE {char* temp; temp=(char *)malloc(sizeof(char
  
 #include "lex.yy.c"
 int main(){
-	yyin = fopen("./Test Cases/inputSWITCH.txt","r");	
-	availableScopes[0] = 0;
+	yyin = fopen("./Test Cases/inputComplex.txt","r");	
 	if(!yyparse())
 	{
 		printf("\n\nParsed Successfully\n\n");		
@@ -534,5 +306,3 @@ int main(){
 		printf("\n\nParsing Failed\n\n");			
 	exit(0);
 }
-     
-     
