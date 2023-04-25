@@ -1,269 +1,46 @@
-int g;
-g=10;
-g = (r>3) || 5<6;
-int b(){
 
+ int a[5];
+char pot(int y, int u, float tai, char p){
+   
 }
-int c(){
-    
-     for(int i=8,p=3;i<=8;i=i+1){
-        int y;
-        int j;
-        break;
-        continue;
-        if(a==0){
-
-        }
-        else if(a==9){
-
-        }
-        else{
-
-        }
-        if(p ==0){
-
-        }
-        else{
-
-        }
-        switch(a){
-            case 'a':  int y = 0; int a[5];break;
-            case 1:  for(int i=0;i<9;i=i+2){int u=0;}break;
-            case 'b':  break;
-            
-        }
-        for(int i=8;i<=8;i=i+1)
-            for(int i=8;i<9;i=i+1)
-                int y = 0;
-        
-    }
-    while(a==9){
-        int y;
-        int j;
-        break;
-        continue;
-        if(a==0){
-
-        }
-        else if(a==9){
-
-        }
-        else{
-
-        }
-        if(p ==0){
-
-        }
-        else{
-
-        }
-        switch(a){
-            case 1:  break;
-            case 1:  break;
-            case 1:  break;
-            
-        }
-        for(int i=8;i<=8;i=i+1)
-        for(int i=8;i<9;i=i+1)
-            int y = 0;
-        
-    }
-     for(char i='a';i<'z';i=i+1)
-        switch(a){
-            default : int y;
-        }
-    
-    for(int i=8;i<=8;i=i+1)
-        for(int i=8;i<9;i=i+1)
-            int y = 0,c=0;
-    for(int i=8;i<9;i=i+1)
-        break;
-    for(int i=8;i<9;i=i+1)
-        continue;
-    for(int i=8;i<9;i=i+1)
-        switch(a){
-            case 1:  break;
-            case 1:  break;
-            case 1:  break;
-            default : int y;
-        }
-
-    for(int i=8;i<9;i=i+1)
-        switch(a){
-            case 1:  break;
-            case 1:  break;
-            case 1:  break;
-            
-        }
-    for(int i=8;i<9;i=i+1)
-        switch(a){
-            default : int y;
-        }
-    for(int i=8;i<9;i=i+1)
-        if(a==5){
-            int y;
-        }
-        if(a==3){
-
-        }
-        else if(a==3){
-
-        }
-        else if(a==3){
-
-        }
-    for(int i=8;i<9;i=i+1)
-        if(a==5){
-            int y;
-        }
-        if(a==3){
-
-        }
-        else if(a==3){
-
-        }
-        else if(a==3){
-
-        }
-        else{
-
-        }
-    if(u==0){
-
-    }
-     else{
-       int j;        
-    }
-      
+float ref(int op){
+    int lop;
 }
-int a()
-{   
-    for(int i=8,p=3;i<=8;i=i+1){
+int pi(){
+    return 0;
+}
+
+char pt(){
+    int a[5];
+}
+float rf(){
+    int lop;
+}
+int yup;
+int main(int u, char t, float p){
+    float a;
+    float yup;
+    float c[5];
+    float re = c[0];
+    float d[5][5];
+    float oi = ref(u);
+    float y = 3.12,lk = 9.8;
+    int reds = 9, seds = 89;
+        printf("op%d ",u);
+        printf("op%d %f %c",u,p,t);
+        scanf("%c %d ",&t,&u);
+
+    for(int i = 0;i<5;i=i+2){
         int y;
-        int j;
-        break;
-        continue;
-        if(a==0){
-
-        }
-        else if(a==9){
-
-        }
-        else{
-
-        }
-        if(p ==0){
-
-        }
-        else{
-
-        }
-        switch(a){
-            case 1:  int y = 0; int a[5];break;
-            case 1:  for(int i=0;i<9;i=i+2){int u=0;}break;
-            case 1:  break;
-            
-        }
-        for(int i=8;i<=8;i=i+1)
-            for(int i=8;i<9;i=i+1)
-                int y = 0;
-        
     }
-    while(a==9){
-        int y;
-        int j;
-        break;
-        continue;
-        if(a==0){
+    for(int i = 0;i<5;i=i+2);
+    y = p;
 
-        }
-        else if(a==9){
+    for(int i = 0;i<5;i=i+2)
+        y = p;
+    float up = rf();
+    char iot = 'a',poi = pot(reds,reds,yup,t);
 
-        }
-        else{
-
-        }
-        if(p ==0){
-
-        }
-        else{
-
-        }
-        switch(a){
-            case 1:  break;
-            case 1:  break;
-            case 1:  break;
-            
-        }
-        for(int i=8;i<=8;i=i+1)
-        for(int i=8;i<9;i=i+1)
-            int y = 0;
-        
-    }
-
-    
-    for(int i=8;i<=8;i=i+1)
-        for(int i=8;i<9;i=i+1)
-            int y = 0,c=0;
-    for(int i=8;i<9;i=i+1)
-        break;
-    for(int i=8;i<9;i=i+1)
-        continue;
-    for(int i=8;i<9;i=i+1)
-        switch(a){
-            case 1:  break;
-            case 1:  break;
-            case 1:  break;
-            default : int y;
-        }
-
-    for(int i=8;i<9;i=i+1)
-        switch(a){
-            case 1:  break;
-            case 1:  break;
-            case 1:  break;
-            
-        }
-    for(int i=8;i<9;i=i+1)
-        switch(a){
-            default : int y;
-        }
-    for(int i=8;i<9;i=i+1)
-        if(a==5){
-            int y;
-        }
-        if(a==3){
-
-        }
-        else if(a==3){
-
-        }
-        else if(a==3){
-
-        }
-    for(int i=8;i<9;i=i+1)
-        if(a==5){
-            int y;
-        }
-        if(a==3){
-
-        }
-        else if(a==3){
-
-        }
-        else if(a==3){
-
-        }
-        else{
-
-        }
-    if(u==0){
-
-    }
-     else{
-       int j;        
-    }
-    printf("ll123[p[ll'l;';'.klk");
-    printf("%d %d %d",a,b,c);
-    scanf("%d %d %d",&a,&b,&c);
+    char ap;
+    return u;
 }
