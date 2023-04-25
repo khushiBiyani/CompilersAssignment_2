@@ -473,7 +473,7 @@
      	| INTVAL {$<Str>$ = strdup("i");printf("INT VALS.. %d\n",yylval);}
      	| FLOATVAL {$<Str>$ = strdup("f");}
     	| IDENTIFIER OPBRAC CLBRAC {memset(arglistArray,'\0',sizeof(arglistArray));argindex=0; int inst = getIdentifierIndex($1,false,true);if(compareParam(arglistArray,table[inst].parameterList,argindex,table[inst].parameterCount)){$<Str>$ = strdup(table[inst].dataType);}else{printf("PARAMETERS DONT MATCH");return 1;}memset(arglistArray,'\0',sizeof(arglistArray));argindex=0;} 
-    	| IDENTIFIER OPBRAC {memset(arglistArray,'\0',sizeof(arglistArray));argindex=0;} argList CLBRAC {int inst = getIdentifierIndex($1,false,true); if(compareParam(arglistArray,table[inst].parameterList,argindex,table[inst].parameterCount)){$<Str>$ = strdup(table[inst].dataType);}else{printf("PARAMETERS DONT MATCH");return 1;}memset(arglistArray,'\0',sizeof(arglistArray));argindex=0;}
+    	| IDENTIFIER OPBRAC {memset(arglistArray,'\0',sizeof(arglistArray));argindex=0;} argList CLBRAC {int inst = getIdentifierIndex($1,false,true); printArray(arglistArray,argindex); if(compareParam(arglistArray,table[inst].parameterList,argindex,table[inst].parameterCount)){$<Str>$ = strdup(table[inst].dataType);}else{printf("PARAMETERS DONT MATCH");return 1;}memset(arglistArray,'\0',sizeof(arglistArray));argindex=0;}
      	| IDENTIFIER BOXOPEN INTVAL BOXCLOSE {int inst = checkVariableScope($1,currScope,true,false); if(inst!=-1){$<Str>$ = strdup(table[inst].dataType);}else{printf("Variable %s not found\n\n",$1);return 1;}} // need function to get type of IDENTIFIER
      	| IDENTIFIER BOXOPEN INTVAL BOXCLOSE BOXOPEN INTVAL BOXCLOSE {int inst = checkVariableScope($1,currScope,true,false); if(inst!=-1){$<Str>$ = strdup(table[inst].dataType);}else{printf("Variable %s not found\n\n",$1);return 1;}memset(arglistArray,'\0',sizeof(arglistArray));argindex=0;} // need function to get type of IDENTIFIER
       
@@ -482,7 +482,7 @@
                   | IDENTIFIER OPBRAC argList CLBRAC SEMICOLON {int inst = getIdentifierIndex($1,false,true); if(compareParam(arglistArray,table[inst].parameterList,argindex,table[inst].parameterCount)){$<Str>$ = strdup(table[inst].dataType);}else{printf("PARAMETERS DONT MATCH");return 1;}memset(arglistArray,'\0',sizeof(arglistArray));argindex=0;} // need function to get type of IDENTIFIER
       
      /* changes to be made - either expressionStatement or expression */
-     argList : expressionStatement COMMA argList {arglistArray[argindex++]=strdup($1);}
+     argList : argList COMMA expressionStatement  {arglistArray[argindex++]=strdup($3);}
      		| expressionStatement {arglistArray[argindex++]=strdup($1);}
       
      parameters : {pushNewScope(); memset(instanceParamList, '\0',sizeof(instanceParamList)); currentParamCount = 0;} paramContinuer
