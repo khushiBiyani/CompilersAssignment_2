@@ -67,252 +67,253 @@
 
 
 /* First part of user prologue.  */
-#line 1 "SemanticAnalyzer.y"
+#line 1 "AST.y"
 
-     	#include <stdio.h>
-     	#include <stdlib.h>
-     	#include <string.h>
-     	#include <stdbool.h>
-     	int yylex();
-      
-     	// error function
-     	void yyerror(const char*){
-     	printf("Invalid Statement");
-     	exit(0);
+ 	#include <stdio.h>
+ 	#include <stdlib.h>
+ 	#include <string.h>
+ 	#include <stdbool.h>
+ 	int yylex();
+  
+ 	// error function
+ 	void yyerror(const char*){
+ 	printf("Invalid Statement");
+ 	exit(0);
+ 	}
+	FILE *outFile=fopen("astString.txt","w");
+ 	// symbol table structure
+ 	struct symbolTable{
+ 		char *lexeme;
+ 		char *value;
+ 		char *dataType;
+ 		bool isFunction;
+ 		bool isArray;
+ 		int scope;
+ 		int dimensionofArray=-1;
+ 		char *parameterList[1000];
+ 		int arrayDimension[2]={-1,-1};
+ 		int parameterCount=-1;
+ 	};
+ 	struct symbolTable table[1000];
+ 	int availableScopes[1000]={-1};
+ 	int scopeIndex=0;// AvailableScopes array index points to the current 
+ 	int currIndex=0;// table array index points to the next empty one
+ 	int maxScope=0;
+ 	int currScope=0;
+	char* instanceParamList[1000];
+	int currentParamCount = 0;
+	int sizes[2]={-1,-1};
+	int instDim=0;
+	char* arglistArray[500];
+	int argindex = 0;
+	char* printlistArray[500];
+	int printindex = 0;
+	char* scanlistArray[500];
+	int scanindex = 0;
+	char* presentFunctionType;
+	char* instanceStringList[500];
+	int instanceStringIndex = 0;
+	void populate(char* str, int len){
+		for(int i = 0; i < len; i++) {
+   			 if(str[i] == '%' && str[i+1] != '\0' && strchr("cdfs", str[i+1])) {
+			if(str[i+1]=='d'){
+				instanceStringList[instanceStringIndex++] = strdup("i");
+			}
+			else if(str[i+1]=='f'){
+				instanceStringList[instanceStringIndex++] = strdup("f");
+			}
+			else if(str[i+1]=='c'){
+				instanceStringList[instanceStringIndex++] = strdup("c");
+			}
+     		printf("%c\n", str[i+1]);
+    		}
+  		}
+		printf("STRING PARAMS = ");
+		for(int i = 0;i<instanceStringIndex;i++){
+			printf("%s ",instanceStringList[i]);
+		}
+		printf("\n");
+	}
+ 	// insert function
+ 	void insertInTable(char *token,char *type,char *val,int sc,int paramCount,char *paramList[],int arrayDim[],int dimensionofArr,bool isArr,bool isFunc){
+ 		symbolTable newEntry;
+ 		newEntry.lexeme = strdup(token);
+ 		newEntry.value = strdup(val);
+ 		newEntry.dataType = strdup(type);
+ 		newEntry.scope=sc;
+ 
+ 		if(isFunc){
+     		for(int i =0;i<paramCount;i++){
+     			newEntry.parameterList[i] = strdup(paramList[i]);
+     		}
+     		newEntry.parameterCount=paramCount;
      	}
-     	// symbol table structure
-     	struct symbolTable{
-     		char *lexeme;
-     		char *value;
-     		char *dataType;
-     		bool isFunction;
-     		bool isArray;
-     		int scope;
-     		int dimensionofArray=-1;
-     		char *parameterList[1000];
-     		int arrayDimension[2]={-1,-1};
-     		int parameterCount=-1;
-     	};
-     	symbolTable table[1000];
-     	int availableScopes[1000]={-1};
-     	int scopeIndex=0;// AvailableScopes array index points to the current 
-     	int currIndex=0;// table array index points to the next empty one
-     	int maxScope=0;
-     	int currScope=0;
-    	char* instanceParamList[1000];
-    	int currentParamCount = 0;
-    	int sizes[2]={-1,-1};
-    	int instDim=0;
-		char* arglistArray[500];
-		int argindex = 0;
-		char* printlistArray[500];
-		int printindex = 0;
-		char* scanlistArray[500];
-		int scanindex = 0;
-		char* presentFunctionType;
-		char* instanceStringList[500];
-		int instanceStringIndex = 0;
-		void populate(char* str, int len){
-			for(int i = 0; i < len; i++) {
-       			 if(str[i] == '%' && str[i+1] != '\0' && strchr("cdfs", str[i+1])) {
-				if(str[i+1]=='d'){
-					instanceStringList[instanceStringIndex++] = strdup("i");
+		newEntry.isFunction = isFunc;
+		
+ 		newEntry.isArray = isArr;
+     	if(isArr){
+     		for(int i =0;i<dimensionofArr;i++){
+     				newEntry.arrayDimension[i]=arrayDim[i];
+     		}
+     		newEntry.dimensionofArray=dimensionofArr;
+     	}
+ 		table[currIndex++]=newEntry;
+		printf("INSIDE TABLE INSERTION\n");
+ 	}
+  
+ 	// update value of token
+ 	void updateVal(int sc,char *token,char *value)
+ 	{
+ 		int instScopeIndex=sc;
+ 		int tableIndex=currIndex;
+ 		for(int i=tableIndex-1;i>=0;i--)
+ 		{	
+ 			if(strcmp(table[i].lexeme,token)==0){
+				for(int j = scopeIndex;j>=0;j--){
+					if(table[i].scope==availableScopes[j]){
+						strcpy(table[i].value,value);
+						return;
+					}
 				}
-				else if(str[i+1]=='f'){
-					instanceStringList[instanceStringIndex++] = strdup("f");
+			}
+ 		}
+ 	}
+	int getIdentifierIndex(char *token, bool isArray, bool isFunction)
+ 	{
+ 		int tableIndex=currIndex;
+ 		for(int i=tableIndex-1;i>=0;i--)
+ 		{	
+ 			if(strcmp(table[i].lexeme,token)==0){
+				for(int j = scopeIndex;j>=0;j--){
+					if(table[i].scope==availableScopes[j]&&table[i].isArray==isArray&&isFunction==table[i].isFunction){
+						return i;
+					}
 				}
-				else if(str[i+1]=='c'){
-					instanceStringList[instanceStringIndex++] = strdup("c");
+			}
+ 		}
+		return -1;
+ 	}
+	int getPresentFunctionIndex()
+ 	{
+ 		int tableIndex=currIndex;
+ 		for(int i=tableIndex-1;i>=0;i--)
+ 		{	
+ 			if(table[i].isFunction){
+				for(int j = scopeIndex;j>=0;j--){
+					if(table[i].scope==availableScopes[j]&&table[i].isFunction){
+						return i;
+					}
 				}
-         		printf("%c\n", str[i+1]);
-        		}
-	  		}
-			printf("STRING PARAMS = ");
-			for(int i = 0;i<instanceStringIndex;i++){
-				printf("%s ",instanceStringList[i]);
+			}
+ 		}
+		return -1;
+ 	}
+	void printTable(){
+		printf("TABLE IS THIS\n\n");
+ 
+		for(int i=0;i<currIndex;i++){
+			printf("lexeme = %s		",table[i].lexeme);
+			printf("value = %s		",table[i].value);
+			printf("type = %s		",table[i].dataType);
+			printf(" isFunction = %d		",table[i].isFunction);
+			printf("isArray = %d		",table[i].isArray);
+			printf("scope = %d		",table[i].scope);
+			printf("paramCount = %d		",table[i].parameterCount);
+			if(table[i].isFunction){
+				printf("Parameter array = ");
+				for(int p = 0;p<table[i].parameterCount;p++){
+					
+					printf("%s ",table[i].parameterList[p]);
+				}
+			}
+			printf("		");
+			
+			printf(" dimensionofArr = %d		",table[i].dimensionofArray);
+			if(table[i].isArray){
+				printf("Parameter array = ");
+				for(int p = 0;p<table[i].dimensionofArray;p++){
+					printf("%d ",table[i].arrayDimension[p]);
+				}
 			}
 			printf("\n");
 		}
-     	// insert function
-     	void insertInTable(char *token,char *type,char *val,int sc,int paramCount,char *paramList[],int arrayDim[],int dimensionofArr,bool isArr,bool isFunc){
-     		symbolTable newEntry;
-     		newEntry.lexeme = strdup(token);
-     		newEntry.value = strdup(val);
-     		newEntry.dataType = strdup(type);
-     		newEntry.scope=sc;
-     
-     		if(isFunc){
-         		for(int i =0;i<paramCount;i++){
-         			newEntry.parameterList[i] = strdup(paramList[i]);
-         		}
-         		newEntry.parameterCount=paramCount;
-         	}
-    		newEntry.isFunction = isFunc;
-    		
-     		newEntry.isArray = isArr;
-         	if(isArr){
-         		for(int i =0;i<dimensionofArr;i++){
-         				newEntry.arrayDimension[i]=arrayDim[i];
-         		}
-         		newEntry.dimensionofArray=dimensionofArr;
-         	}
-     		table[currIndex++]=newEntry;
-    		printf("INSIDE TABLE INSERTION\n");
-     	}
-      
-     	// update value of token
-     	void updateVal(int sc,char *token,char *value)
-     	{
-     		int instScopeIndex=sc;
-     		int tableIndex=currIndex;
-     		for(int i=tableIndex-1;i>=0;i--)
-     		{	
-     			if(strcmp(table[i].lexeme,token)==0){
-    				for(int j = scopeIndex;j>=0;j--){
-    					if(table[i].scope==availableScopes[j]){
-    						strcpy(table[i].value,value);
-    						return;
-    					}
-    				}
-    			}
-     		}
-     	}
-    	int getIdentifierIndex(char *token, bool isArray, bool isFunction)
-     	{
-     		int tableIndex=currIndex;
-     		for(int i=tableIndex-1;i>=0;i--)
-     		{	
-     			if(strcmp(table[i].lexeme,token)==0){
-    				for(int j = scopeIndex;j>=0;j--){
-    					if(table[i].scope==availableScopes[j]&&table[i].isArray==isArray&&isFunction==table[i].isFunction){
-    						return i;
-    					}
-    				}
-    			}
-     		}
-    		return -1;
-     	}
-		int getPresentFunctionIndex()
-     	{
-     		int tableIndex=currIndex;
-     		for(int i=tableIndex-1;i>=0;i--)
-     		{	
-     			if(table[i].isFunction){
-    				for(int j = scopeIndex;j>=0;j--){
-    					if(table[i].scope==availableScopes[j]&&table[i].isFunction){
-    						return i;
-    					}
-    				}
-    			}
-     		}
-    		return -1;
-     	}
-    	void printTable(){
-    		printf("TABLE IS THIS\n\n");
-     
-    		for(int i=0;i<currIndex;i++){
-    			printf("lexeme = %s		",table[i].lexeme);
-    			printf("value = %s		",table[i].value);
-    			printf("type = %s		",table[i].dataType);
-    			printf(" isFunction = %d		",table[i].isFunction);
-    			printf("isArray = %d		",table[i].isArray);
-    			printf("scope = %d		",table[i].scope);
-    			printf("paramCount = %d		",table[i].parameterCount);
-    			if(table[i].isFunction){
-    				printf("Parameter array = ");
-    				for(int p = 0;p<table[i].parameterCount;p++){
-    					
-    					printf("%s ",table[i].parameterList[p]);
-    				}
-    			}
-    			printf("		");
-    			
-    			printf(" dimensionofArr = %d		",table[i].dimensionofArray);
-    			if(table[i].isArray){
-    				printf("Parameter array = ");
-    				for(int p = 0;p<table[i].dimensionofArray;p++){
-    					printf("%d ",table[i].arrayDimension[p]);
-    				}
-    			}
-    			printf("\n");
-    		}
-    	}
-		bool checkVariable(char* token, int scope, bool isArray, bool isFunction){
-			int tableIndex=currIndex;
-     		for(int i=tableIndex-1;i>=0;i--)
-     		{	
-     			if(strcmp(table[i].lexeme,token)==0&&table[i].isArray==isArray&&table[i].isFunction==isFunction){
-    				for(int j = scopeIndex;j>=0;j--){
-    					if(table[i].scope==availableScopes[j]&& availableScopes[j]==scope){
-    						return true;
-    					}
-    				}
-    			}
-     		}
-    		return false;
+	}
+	bool checkVariable(char* token, int scope, bool isArray, bool isFunction){
+		int tableIndex=currIndex;
+ 		for(int i=tableIndex-1;i>=0;i--)
+ 		{	
+ 			if(strcmp(table[i].lexeme,token)==0&&table[i].isArray==isArray&&table[i].isFunction==isFunction){
+				for(int j = scopeIndex;j>=0;j--){
+					if(table[i].scope==availableScopes[j]&& availableScopes[j]==scope){
+						return true;
+					}
+				}
+			}
+ 		}
+		return false;
+	}
+	int checkVariableScope(char* token, int scope, bool isArray, bool isFunction){
+		int tableIndex=currIndex;
+ 		for(int i=tableIndex-1;i>=0;i--)
+ 		{	
+ 			if(strcmp(table[i].lexeme,token)==0&&table[i].isArray==isArray&&table[i].isFunction==isFunction){
+				for(int j = scopeIndex;j>=0;j--){
+					if(table[i].scope==availableScopes[j]){
+						printf("VARIABLE %s FOUND\n\n\n\n",token);
+						return i;
+					}
+				}
+			}
+ 		}
+		printf("VARIABLE %s NOT FOUND\n\n\n\n",token);
+		return -1;
+	}
+	bool compareParam(char* args[], char* params[], int arg, int par){
+		if(arg!=par){
+			return false;
 		}
-		int checkVariableScope(char* token, int scope, bool isArray, bool isFunction){
-			int tableIndex=currIndex;
-     		for(int i=tableIndex-1;i>=0;i--)
-     		{	
-     			if(strcmp(table[i].lexeme,token)==0&&table[i].isArray==isArray&&table[i].isFunction==isFunction){
-    				for(int j = scopeIndex;j>=0;j--){
-    					if(table[i].scope==availableScopes[j]){
-							printf("VARIABLE %s FOUND\n\n\n\n",token);
-    						return i;
-    					}
-    				}
-    			}
-     		}
-			printf("VARIABLE %s NOT FOUND\n\n\n\n",token);
-    		return -1;
-		}
-		bool compareParam(char* args[], char* params[], int arg, int par){
-			if(arg!=par){
+		int n = arg;
+		
+		for(int i = 0;i<n;i++){
+			if(strcmp(args[i],params[i])!=0){
 				return false;
 			}
-			int n = arg;
-			
-			for(int i = 0;i<n;i++){
-				if(strcmp(args[i],params[i])!=0){
-					return false;
-				}
-			}
-			return true;
 		}
-		bool compareString(char* str,char* param[],int len,int sizep){
-			int yup = 0;
-			int re = 0;
-			printf("%d %d\n",len,sizep);
-			for(int i = 0; i < len; i++) {
-       			 if(str[i] == '%' && str[i+1] != '\0' && strchr("cdes", str[i+1])) {
-				re++;
-				yup++;
-         		printf("%c\n", str[i+1]);
-            	i++;
-        		}
-				printf("%d %d %d\n",yup,re,i);
-	  		}
-			return true;
+		return true;
+	}
+	bool compareString(char* str,char* param[],int len,int sizep){
+		int yup = 0;
+		int re = 0;
+		printf("%d %d\n",len,sizep);
+		for(int i = 0; i < len; i++) {
+   			 if(str[i] == '%' && str[i+1] != '\0' && strchr("cdes", str[i+1])) {
+			re++;
+			yup++;
+     		printf("%c\n", str[i+1]);
+        	i++;
+    		}
+			printf("%d %d %d\n",yup,re,i);
+  		}
+		return true;
+	}
+	void printArray(char* arr[],int len){
+		printf("Args = ");
+		for(int i = 0;i<len;i++){
+			printf("%s ",arr[i]);
 		}
-		void printArray(char* arr[],int len){
-			printf("Args = ");
-			for(int i = 0;i<len;i++){
-				printf("%s ",arr[i]);
-			}
-			printf("\n");
-		}
-    	void pushNewScope(){// Put a new scope for every open {
-    		availableScopes[++scopeIndex]=++maxScope;
-    		currScope = maxScope;
-    	}
-    	void popScope(){ // pop latest scope on every }
-    		availableScopes[scopeIndex--]=-1;
-    		currScope = availableScopes[scopeIndex];
-		}
-     
+		printf("\n");
+	}
+	void pushNewScope(){// Put a new scope for every open {
+		availableScopes[++scopeIndex]=++maxScope;
+		currScope = maxScope;
+	}
+	void popScope(){ // pop latest scope on every }
+		availableScopes[scopeIndex--]=-1;
+		currScope = availableScopes[scopeIndex];
+	}
+ 
 
-#line 316 "y.tab.c"
+#line 317 "y.tab.c"
 
 # ifndef YY_CAST
 #  ifdef __cplusplus
@@ -459,18 +460,18 @@ extern int yydebug;
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 union YYSTYPE
 {
-#line 245 "SemanticAnalyzer.y"
+#line 246 "AST.y"
 
-    		int Int;
-    		float Float;
-    		char Char;
-    		char* Str;
-    		struct data{
-     
-    		};
-    	
+		int Int;
+		float Float;
+		char Char;
+		char* Str;
+		struct data{
+ 
+		};
+	
 
-#line 474 "y.tab.c"
+#line 475 "y.tab.c"
 
 };
 typedef union YYSTYPE YYSTYPE;
@@ -544,105 +545,52 @@ enum yysymbol_kind_t
   YYSYMBOL_statements = 51,                /* statements  */
   YYSYMBOL_singleStatement = 52,           /* singleStatement  */
   YYSYMBOL_specialStatement = 53,          /* specialStatement  */
-  YYSYMBOL_54_1 = 54,                      /* $@1  */
-  YYSYMBOL_forLoop = 55,                   /* forLoop  */
-  YYSYMBOL_forLoop1 = 56,                  /* forLoop1  */
-  YYSYMBOL_forLoop2 = 57,                  /* forLoop2  */
-  YYSYMBOL_58_2 = 58,                      /* $@2  */
-  YYSYMBOL_forLoop3 = 59,                  /* forLoop3  */
-  YYSYMBOL_60_3 = 60,                      /* $@3  */
-  YYSYMBOL_singleLoopStatement = 61,       /* singleLoopStatement  */
-  YYSYMBOL_forAssignStatement = 62,        /* forAssignStatement  */
-  YYSYMBOL_forExpStatement = 63,           /* forExpStatement  */
-  YYSYMBOL_forUpdateStatement = 64,        /* forUpdateStatement  */
-  YYSYMBOL_whileLoop = 65,                 /* whileLoop  */
-  YYSYMBOL_66_4 = 66,                      /* $@4  */
-  YYSYMBOL_whileSuffix = 67,               /* whileSuffix  */
-  YYSYMBOL_68_5 = 68,                      /* $@5  */
-  YYSYMBOL_69_6 = 69,                      /* $@6  */
-  YYSYMBOL_inLoop = 70,                    /* inLoop  */
-  YYSYMBOL_71_7 = 71,                      /* $@7  */
-  YYSYMBOL_72_8 = 72,                      /* $@8  */
-  YYSYMBOL_ifStatement = 73,               /* ifStatement  */
-  YYSYMBOL_74_9 = 74,                      /* $@9  */
-  YYSYMBOL_75_10 = 75,                     /* $@10  */
-  YYSYMBOL_76_11 = 76,                     /* $@11  */
-  YYSYMBOL_77_12 = 77,                     /* $@12  */
-  YYSYMBOL_ifContinuer = 78,               /* ifContinuer  */
-  YYSYMBOL_ES = 79,                        /* ES  */
-  YYSYMBOL_80_13 = 80,                     /* $@13  */
-  YYSYMBOL_81_14 = 81,                     /* $@14  */
-  YYSYMBOL_82_15 = 82,                     /* $@15  */
-  YYSYMBOL_83_16 = 83,                     /* $@16  */
-  YYSYMBOL_84_17 = 84,                     /* $@17  */
-  YYSYMBOL_85_18 = 85,                     /* $@18  */
-  YYSYMBOL_86_19 = 86,                     /* $@19  */
-  YYSYMBOL_ifInLoopStatement = 87,         /* ifInLoopStatement  */
-  YYSYMBOL_88_20 = 88,                     /* $@20  */
-  YYSYMBOL_89_21 = 89,                     /* $@21  */
-  YYSYMBOL_ifInLoopContinuer = 90,         /* ifInLoopContinuer  */
-  YYSYMBOL_ESLoop = 91,                    /* ESLoop  */
-  YYSYMBOL_92_22 = 92,                     /* $@22  */
-  YYSYMBOL_93_23 = 93,                     /* $@23  */
-  YYSYMBOL_94_24 = 94,                     /* $@24  */
-  YYSYMBOL_95_25 = 95,                     /* $@25  */
-  YYSYMBOL_96_26 = 96,                     /* $@26  */
-  YYSYMBOL_97_27 = 97,                     /* $@27  */
-  YYSYMBOL_98_28 = 98,                     /* $@28  */
-  YYSYMBOL_switchStatement = 99,           /* switchStatement  */
-  YYSYMBOL_100_29 = 100,                   /* $@29  */
-  YYSYMBOL_101_30 = 101,                   /* $@30  */
-  YYSYMBOL_caseStatements = 102,           /* caseStatements  */
-  YYSYMBOL_caseStatementInt = 103,         /* caseStatementInt  */
-  YYSYMBOL_104_31 = 104,                   /* $@31  */
-  YYSYMBOL_105_32 = 105,                   /* $@32  */
-  YYSYMBOL_caseInt = 106,                  /* caseInt  */
-  YYSYMBOL_caseContinuer = 107,            /* caseContinuer  */
-  YYSYMBOL_defaultStatement = 108,         /* defaultStatement  */
-  YYSYMBOL_109_33 = 109,                   /* $@33  */
-  YYSYMBOL_basicStatements = 110,          /* basicStatements  */
-  YYSYMBOL_basicStatement = 111,           /* basicStatement  */
-  YYSYMBOL_assignmentStatement = 112,      /* assignmentStatement  */
-  YYSYMBOL_printer = 113,                  /* printer  */
-  YYSYMBOL_scanner = 114,                  /* scanner  */
-  YYSYMBOL_declarationStatement = 115,     /* declarationStatement  */
-  YYSYMBOL_116_34 = 116,                   /* $@34  */
-  YYSYMBOL_117_35 = 117,                   /* $@35  */
-  YYSYMBOL_118_36 = 118,                   /* $@36  */
-  YYSYMBOL_119_37 = 119,                   /* $@37  */
-  YYSYMBOL_120_38 = 120,                   /* $@38  */
-  YYSYMBOL_121_39 = 121,                   /* $@39  */
-  YYSYMBOL_122_40 = 122,                   /* $@40  */
-  YYSYMBOL_123_41 = 123,                   /* $@41  */
-  YYSYMBOL_124_42 = 124,                   /* $@42  */
-  YYSYMBOL_arrayValuesF = 125,             /* arrayValuesF  */
-  YYSYMBOL_arrayValues = 126,              /* arrayValues  */
-  YYSYMBOL_prattributes = 127,             /* prattributes  */
-  YYSYMBOL_scattributes = 128,             /* scattributes  */
-  YYSYMBOL_declarationListInt = 129,       /* declarationListInt  */
-  YYSYMBOL_declarationListFloat = 130,     /* declarationListFloat  */
-  YYSYMBOL_declarationListChar = 131,      /* declarationListChar  */
-  YYSYMBOL_expressionStatement = 132,      /* expressionStatement  */
-  YYSYMBOL_logicalExpression = 133,        /* logicalExpression  */
-  YYSYMBOL_expression = 134,               /* expression  */
-  YYSYMBOL_relationalExpression = 135,     /* relationalExpression  */
-  YYSYMBOL_value = 136,                    /* value  */
-  YYSYMBOL_term = 137,                     /* term  */
-  YYSYMBOL_factor = 138,                   /* factor  */
-  YYSYMBOL_139_43 = 139,                   /* $@43  */
-  YYSYMBOL_functionCall = 140,             /* functionCall  */
-  YYSYMBOL_argList = 141,                  /* argList  */
-  YYSYMBOL_parameters = 142,               /* parameters  */
-  YYSYMBOL_143_44 = 143,                   /* $@44  */
-  YYSYMBOL_paramContinuer = 144,           /* paramContinuer  */
-  YYSYMBOL_parameter = 145,                /* parameter  */
-  YYSYMBOL_type = 146,                     /* type  */
-  YYSYMBOL_compoundStatements = 147,       /* compoundStatements  */
-  YYSYMBOL_statementList = 148,            /* statementList  */
-  YYSYMBOL_149_45 = 149,                   /* $@45  */
-  YYSYMBOL_150_46 = 150,                   /* $@46  */
-  YYSYMBOL_returnDec = 151,                /* returnDec  */
-  YYSYMBOL_dimension = 152                 /* dimension  */
+  YYSYMBOL_singleLoopStatement = 54,       /* singleLoopStatement  */
+  YYSYMBOL_whileLoop = 55,                 /* whileLoop  */
+  YYSYMBOL_whileSuffix = 56,               /* whileSuffix  */
+  YYSYMBOL_inLoop = 57,                    /* inLoop  */
+  YYSYMBOL_ifStatement = 58,               /* ifStatement  */
+  YYSYMBOL_ifContinuer = 59,               /* ifContinuer  */
+  YYSYMBOL_ES = 60,                        /* ES  */
+  YYSYMBOL_ifInLoopStatement = 61,         /* ifInLoopStatement  */
+  YYSYMBOL_ifInLoopContinuer = 62,         /* ifInLoopContinuer  */
+  YYSYMBOL_ESLoop = 63,                    /* ESLoop  */
+  YYSYMBOL_switchStatement = 64,           /* switchStatement  */
+  YYSYMBOL_caseStatements = 65,            /* caseStatements  */
+  YYSYMBOL_caseStatementInt = 66,          /* caseStatementInt  */
+  YYSYMBOL_caseInt = 67,                   /* caseInt  */
+  YYSYMBOL_caseContinuer = 68,             /* caseContinuer  */
+  YYSYMBOL_defaultStatement = 69,          /* defaultStatement  */
+  YYSYMBOL_basicStatements = 70,           /* basicStatements  */
+  YYSYMBOL_basicStatement = 71,            /* basicStatement  */
+  YYSYMBOL_assignmentStatement = 72,       /* assignmentStatement  */
+  YYSYMBOL_printer = 73,                   /* printer  */
+  YYSYMBOL_Scanner = 74,                   /* Scanner  */
+  YYSYMBOL_declarationStatement = 75,      /* declarationStatement  */
+  YYSYMBOL_arrayValuesF = 76,              /* arrayValuesF  */
+  YYSYMBOL_arrayValues = 77,               /* arrayValues  */
+  YYSYMBOL_prattributes = 78,              /* prattributes  */
+  YYSYMBOL_scattributes = 79,              /* scattributes  */
+  YYSYMBOL_declarationListInt = 80,        /* declarationListInt  */
+  YYSYMBOL_declarationListFloat = 81,      /* declarationListFloat  */
+  YYSYMBOL_declarationListChar = 82,       /* declarationListChar  */
+  YYSYMBOL_expressionStatement = 83,       /* expressionStatement  */
+  YYSYMBOL_logicalExpression = 84,         /* logicalExpression  */
+  YYSYMBOL_expression = 85,                /* expression  */
+  YYSYMBOL_relationalExpression = 86,      /* relationalExpression  */
+  YYSYMBOL_value = 87,                     /* value  */
+  YYSYMBOL_term = 88,                      /* term  */
+  YYSYMBOL_factor = 89,                    /* factor  */
+  YYSYMBOL_functionCall = 90,              /* functionCall  */
+  YYSYMBOL_argList = 91,                   /* argList  */
+  YYSYMBOL_parameters = 92,                /* parameters  */
+  YYSYMBOL_paramContinuer = 93,            /* paramContinuer  */
+  YYSYMBOL_parameter = 94,                 /* parameter  */
+  YYSYMBOL_type = 95,                      /* type  */
+  YYSYMBOL_compoundStatements = 96,        /* compoundStatements  */
+  YYSYMBOL_statementList = 97,             /* statementList  */
+  YYSYMBOL_returnDec = 98,                 /* returnDec  */
+  YYSYMBOL_dimension = 99                  /* dimension  */
 };
 typedef enum yysymbol_kind_t yysymbol_kind_t;
 
@@ -970,16 +918,16 @@ union yyalloc
 /* YYFINAL -- State number of the termination state.  */
 #define YYFINAL  18
 /* YYLAST -- Last index in YYTABLE.  */
-#define YYLAST   569
+#define YYLAST   688
 
 /* YYNTOKENS -- Number of terminals.  */
 #define YYNTOKENS  48
 /* YYNNTS -- Number of nonterminals.  */
-#define YYNNTS  105
+#define YYNNTS  52
 /* YYNRULES -- Number of rules.  */
-#define YYNRULES  234
+#define YYNRULES  171
 /* YYNSTATES -- Number of states.  */
-#define YYNSTATES  463
+#define YYNSTATES  386
 
 /* YYMAXUTOK -- Last valid token kind.  */
 #define YYMAXUTOK   302
@@ -1033,30 +981,24 @@ static const yytype_int8 yytranslate[] =
 /* YYRLINE[YYN] -- Source line where rule number YYN was defined.  */
 static const yytype_int16 yyrline[] =
 {
-       0,   289,   289,   291,   292,   293,   294,   296,   297,   298,
-     299,   300,   301,   302,   304,   304,   305,   306,   307,   308,
-     308,   308,   310,   311,   311,   312,   312,   314,   315,   316,
-     317,   318,   319,   320,   322,   323,   324,   325,   326,   327,
-     328,   329,   330,   331,   334,   334,   335,   335,   336,   337,
-     337,   339,   340,   341,   342,   343,   344,   345,   346,   347,
-     347,   348,   348,   349,   351,   351,   351,   352,   352,   352,
-     353,   354,   356,   356,   356,   357,   357,   357,   358,   358,
-     358,   359,   359,   360,   362,   362,   362,   363,   364,   366,
-     366,   366,   367,   367,   367,   368,   368,   368,   369,   369,
-     370,   372,   372,   372,   373,   373,   374,   374,   374,   374,
-     375,   376,   377,   378,   379,   380,   381,   381,   382,   385,
-     386,   388,   389,   390,   391,   393,   394,   395,   396,   398,
-     399,   400,   400,   401,   401,   402,   402,   403,   403,   403,
-     404,   404,   404,   405,   405,   405,   406,   407,   408,   409,
-     410,   411,   412,   413,   414,   417,   418,   419,   420,   421,
-     422,   423,   424,   426,   427,   428,   429,   430,   432,   433,
-     434,   435,   436,   438,   439,   440,   441,   442,   444,   445,
-     447,   448,   450,   451,   452,   454,   455,   456,   457,   458,
-     460,   461,   462,   464,   465,   466,   467,   469,   470,   471,
-     472,   473,   474,   475,   476,   476,   477,   478,   481,   482,
-     485,   486,   488,   488,   489,   490,   492,   494,   495,   496,
-     498,   500,   501,   502,   503,   504,   504,   506,   506,   508,
-     510,   511,   513,   514,   515
+       0,   290,   290,   292,   293,   294,   295,   297,   298,   299,
+     300,   301,   302,   303,   306,   307,   308,   319,   320,   321,
+     322,   323,   324,   325,   338,   340,   341,   342,   344,   345,
+     346,   347,   348,   349,   350,   351,   352,   353,   354,   356,
+     357,   359,   360,   362,   363,   364,   365,   365,   367,   367,
+     367,   369,   370,   371,   372,   372,   374,   376,   377,   379,
+     380,   382,   383,   384,   385,   387,   388,   390,   391,   394,
+     395,   397,   398,   399,   399,   401,   402,   402,   403,   405,
+     406,   408,   409,   410,   411,   412,   413,   414,   415,   416,
+     417,   418,   419,   420,   420,   421,   424,   425,   427,   428,
+     430,   431,   433,   434,   436,   437,   438,   439,   440,   442,
+     443,   444,   445,   446,   448,   449,   450,   451,   452,   454,
+     455,   457,   458,   460,   461,   462,   464,   465,   466,   467,
+     468,   470,   471,   472,   474,   475,   476,   477,   479,   480,
+     481,   482,   483,   484,   484,   484,   485,   486,   489,   490,
+     493,   494,   496,   497,   498,   500,   502,   503,   504,   506,
+     508,   509,   510,   511,   512,   513,   514,   516,   517,   519,
+     520,   521
 };
 #endif
 
@@ -1081,24 +1023,18 @@ static const char *const yytname[] =
   "OPCUR", "CLCUR", "BOXOPEN", "BOXCLOSE", "LOGICALNOT", "EQUAL",
   "CHARVAL", "INTVAL", "FLOATVAL", "IDENTIFIER", "$accept", "code",
   "declarationList", "statements", "singleStatement", "specialStatement",
-  "$@1", "forLoop", "forLoop1", "forLoop2", "$@2", "forLoop3", "$@3",
-  "singleLoopStatement", "forAssignStatement", "forExpStatement",
-  "forUpdateStatement", "whileLoop", "$@4", "whileSuffix", "$@5", "$@6",
-  "inLoop", "$@7", "$@8", "ifStatement", "$@9", "$@10", "$@11", "$@12",
-  "ifContinuer", "ES", "$@13", "$@14", "$@15", "$@16", "$@17", "$@18",
-  "$@19", "ifInLoopStatement", "$@20", "$@21", "ifInLoopContinuer",
-  "ESLoop", "$@22", "$@23", "$@24", "$@25", "$@26", "$@27", "$@28",
-  "switchStatement", "$@29", "$@30", "caseStatements", "caseStatementInt",
-  "$@31", "$@32", "caseInt", "caseContinuer", "defaultStatement", "$@33",
+  "singleLoopStatement", "whileLoop", "whileSuffix", "inLoop",
+  "ifStatement", "ifContinuer", "ES", "ifInLoopStatement",
+  "ifInLoopContinuer", "ESLoop", "switchStatement", "caseStatements",
+  "caseStatementInt", "caseInt", "caseContinuer", "defaultStatement",
   "basicStatements", "basicStatement", "assignmentStatement", "printer",
-  "scanner", "declarationStatement", "$@34", "$@35", "$@36", "$@37",
-  "$@38", "$@39", "$@40", "$@41", "$@42", "arrayValuesF", "arrayValues",
+  "Scanner", "declarationStatement", "arrayValuesF", "arrayValues",
   "prattributes", "scattributes", "declarationListInt",
   "declarationListFloat", "declarationListChar", "expressionStatement",
   "logicalExpression", "expression", "relationalExpression", "value",
-  "term", "factor", "$@43", "functionCall", "argList", "parameters",
-  "$@44", "paramContinuer", "parameter", "type", "compoundStatements",
-  "statementList", "$@45", "$@46", "returnDec", "dimension", YY_NULLPTR
+  "term", "factor", "functionCall", "argList", "parameters",
+  "paramContinuer", "parameter", "type", "compoundStatements",
+  "statementList", "returnDec", "dimension", YY_NULLPTR
 };
 
 static const char *
@@ -1108,12 +1044,12 @@ yysymbol_name (yysymbol_kind_t yysymbol)
 }
 #endif
 
-#define YYPACT_NINF (-344)
+#define YYPACT_NINF (-333)
 
 #define yypact_value_is_default(Yyn) \
   ((Yyn) == YYPACT_NINF)
 
-#define YYTABLE_NINF (-234)
+#define YYTABLE_NINF (-171)
 
 #define yytable_value_is_error(Yyn) \
   0
@@ -1122,53 +1058,45 @@ yysymbol_name (yysymbol_kind_t yysymbol)
    STATE-NUM.  */
 static const yytype_int16 yypact[] =
 {
-      90,   -31,    61,    81,   148,    40,  -344,    90,    90,    13,
-      58,   150,    80,   156,   123,    93,   198,   107,  -344,  -344,
-    -344,   101,   122,   117,   198,  -344,  -344,   124,   163,   135,
-     229,  -344,  -344,   166,   189,   144,   198,  -344,  -344,   195,
-     200,   198,   198,  -344,  -344,  -344,   176,   203,   236,   243,
-     288,   289,   307,   338,   198,    87,  -344,  -344,  -344,   334,
-     154,   241,   161,  -344,  -344,  -344,   171,   211,   245,  -344,
-     162,  -344,  -344,   240,   213,   263,   255,   248,   265,  -344,
-     267,   285,   302,  -344,   198,   198,   198,   198,   198,   198,
-     198,   198,   198,   198,   198,   198,   198,   305,   295,   299,
-    -344,  -344,  -344,  -344,   346,   318,   335,   101,   345,   351,
-     367,   249,   124,   355,  -344,   353,   166,   352,   349,  -344,
-    -344,   198,   356,  -344,  -344,  -344,  -344,  -344,  -344,  -344,
-    -344,  -344,  -344,  -344,  -344,  -344,  -344,   302,  -344,   357,
-     357,   334,  -344,   -11,  -344,   357,   357,   379,   380,  -344,
-     357,   357,    67,  -344,  -344,   360,   390,   371,   375,  -344,
-     411,  -344,  -344,  -344,   399,   402,   387,  -344,  -344,  -344,
-     412,  -344,  -344,   413,   403,   389,  -344,   198,  -344,   391,
-     398,  -344,   405,   406,   137,   414,   415,    46,   411,  -344,
-    -344,  -344,   411,    79,  -344,  -344,  -344,  -344,  -344,   411,
-     409,  -344,  -344,   419,   442,  -344,  -344,   420,   452,  -344,
-     430,   198,   438,  -344,   428,  -344,   459,   455,   456,   186,
-     184,  -344,  -344,  -344,  -344,   411,   411,  -344,  -344,  -344,
-    -344,  -344,  -344,  -344,   443,    16,  -344,  -344,  -344,  -344,
-     198,   444,  -344,  -344,  -344,   465,   447,   451,  -344,  -344,
-     461,  -344,   450,   453,   198,  -344,   457,   463,    28,    34,
-    -344,   485,   273,  -344,   469,   460,   464,   487,  -344,     4,
-    -344,   198,   489,   490,   492,  -344,   467,   469,  -344,  -344,
-    -344,  -344,   198,   198,   470,  -344,  -344,  -344,   441,   480,
-    -344,  -344,   198,  -344,   477,  -344,   469,   469,   469,   301,
-     330,   341,   476,   483,   378,   486,   504,   506,  -344,  -344,
-    -344,  -344,  -344,  -344,   496,  -344,   495,  -344,   484,   491,
-    -344,  -344,  -344,    -7,  -344,  -344,  -344,    16,  -344,    16,
-    -344,   198,    50,   509,   511,   378,   378,   493,   378,   378,
-     378,  -344,  -344,   378,   198,  -344,  -344,   510,  -344,    97,
-    -344,   301,   497,  -344,   469,  -344,  -344,   515,  -344,  -344,
-     441,   378,   378,  -344,  -344,  -344,  -344,  -344,  -344,   378,
-     378,  -344,   498,  -344,   499,   332,   517,   518,   480,  -344,
-     198,   469,  -344,   470,   378,  -344,  -344,  -344,  -344,  -344,
-     501,   469,  -344,   503,   505,   469,   469,  -344,   507,  -344,
-    -344,   502,   251,  -344,   524,   526,   516,  -344,  -344,   508,
-     512,  -344,   378,   469,   469,   531,  -344,   469,  -344,  -344,
-    -344,  -344,  -344,   469,  -344,   513,  -344,   525,   354,   514,
-    -344,   519,    -6,  -344,  -344,  -344,   525,   198,   520,  -344,
-     441,  -344,   521,   198,   378,  -344,   522,   527,  -344,  -344,
-     523,   528,  -344,   441,  -344,   378,  -344,  -344,   529,   530,
-    -344,   529,  -344
+       7,   -30,     2,    10,   133,    47,  -333,     7,     7,    -6,
+      16,     0,    53,     5,    84,   116,   285,    60,  -333,  -333,
+    -333,    72,    45,   166,   285,  -333,  -333,    86,   101,   225,
+     641,  -333,  -333,    93,   172,   228,   285,  -333,  -333,   105,
+     109,   285,   285,  -333,  -333,  -333,   240,   219,   160,   171,
+     253,   287,   256,   203,   285,    34,  -333,  -333,  -333,  -333,
+     208,   161,  -333,   235,   194,   144,   237,    64,  -333,   208,
+     238,   157,   311,   310,  -333,    69,  -333,   208,   291,   165,
+     341,   321,   329,   342,  -333,   183,   345,   350,  -333,   285,
+     285,   285,   285,   285,   285,   285,   285,   285,   285,   285,
+     285,   285,   274,   338,  -333,   208,   319,  -333,   360,    72,
+    -333,   208,   376,   234,    86,  -333,   208,   362,    93,   361,
+     356,  -333,  -333,   387,   367,   365,  -333,  -333,  -333,  -333,
+    -333,  -333,  -333,  -333,  -333,  -333,  -333,  -333,  -333,  -333,
+     350,  -333,   372,   379,   380,   168,   381,   382,    43,   338,
+    -333,  -333,  -333,   338,   218,  -333,   338,   338,  -333,  -333,
+     338,   386,  -333,  -333,  -333,    39,  -333,  -333,   402,   397,
+    -333,  -333,    59,  -333,  -333,   385,   285,  -333,   390,  -333,
+     285,   285,   374,  -333,   418,   414,   417,   278,   248,  -333,
+    -333,  -333,  -333,  -333,  -333,  -333,  -333,   424,   426,   405,
+    -333,   429,   430,   432,   411,  -333,  -333,   413,   423,   431,
+     436,  -333,  -333,   445,   446,   437,   442,  -333,   427,   461,
+    -333,  -333,   438,   468,   448,   522,   407,   453,    -5,   474,
+     457,  -333,   482,   258,  -333,  -333,  -333,  -333,  -333,   634,
+     284,  -333,  -333,  -333,  -333,   464,   484,   486,   435,  -333,
+    -333,  -333,  -333,  -333,  -333,  -333,   476,   285,   492,   470,
+     502,  -333,   475,   483,   634,   634,   634,   550,  -333,  -333,
+    -333,   285,  -333,  -333,   507,   510,   435,   435,   489,   435,
+     435,   435,   435,   435,   435,   198,   501,  -333,   476,  -333,
+    -333,   445,  -333,   490,   284,  -333,  -333,  -333,   497,   634,
+    -333,   498,   435,   435,  -333,  -333,  -333,  -333,  -333,  -333,
+    -333,  -333,  -333,   302,   515,   518,   526,   508,  -333,  -333,
+     505,  -333,   285,   511,   578,  -333,  -333,   516,   517,   634,
+     634,   634,  -333,   519,  -333,   435,   533,   536,   528,  -333,
+    -333,  -333,   606,   435,   523,   435,   435,   634,   634,   540,
+     634,   284,   294,  -333,  -333,  -333,   524,  -333,   525,   466,
+    -333,  -333,  -333,   284,   285,   529,   435,  -333,  -333,   538,
+     285,   534,   542,   539,  -333,   435,   494,   435,  -333,   553,
+    -333,  -333,   543,  -333,   294,  -333
 };
 
 /* YYDEFACT[STATE-NUM] -- Default reduction number in state STATE-NUM.
@@ -1176,85 +1104,67 @@ static const yytype_int16 yypact[] =
    means the default is an error.  */
 static const yytype_uint8 yydefact[] =
 {
-       0,     0,     0,     0,     0,     0,     2,     6,     5,   167,
-       0,   177,     0,   172,     0,     0,     0,     0,     1,     4,
-       3,     0,   212,     0,     0,   166,   146,     0,   212,     0,
-       0,   176,   149,     0,   212,     0,     0,   171,   150,     0,
-       0,     0,     0,   200,   201,   202,   197,     0,   179,   181,
-     184,   189,   192,   196,     0,   167,   164,   138,   131,     0,
-       0,   165,   177,   174,   144,   133,     0,     0,   200,   175,
-     172,   169,   141,     0,     0,   170,     0,   232,     0,   199,
-     204,     0,     0,   126,     0,     0,     0,     0,     0,     0,
+       0,     0,     0,     0,     0,     0,     2,     6,     5,   108,
+       0,   118,     0,   113,     0,     0,     0,     0,     1,     4,
+       3,     0,     0,     0,     0,   107,    87,     0,     0,     0,
+       0,   117,    90,     0,     0,     0,     0,   112,    91,     0,
+       0,     0,     0,   141,   142,   143,   138,     0,   120,   122,
+     125,   130,   133,   137,     0,   108,   105,   156,   158,   157,
+       0,     0,   152,   153,     0,     0,   106,   118,   115,     0,
+       0,     0,     0,   141,   116,   113,   110,     0,     0,     0,
+     111,     0,   169,     0,   140,     0,     0,     0,    76,     0,
        0,     0,     0,     0,     0,     0,     0,     0,     0,     0,
-     217,   219,   218,   213,   214,     0,     0,     0,     0,     0,
-       0,   232,     0,     0,   135,     0,     0,     0,     0,   198,
-     203,     0,     0,   125,   178,   180,   182,   183,   185,   186,
-     187,   188,   190,   191,   193,   194,   195,     0,   128,     0,
-       0,     0,   216,     0,   163,     0,     0,     0,     0,   173,
-       0,     0,     0,   168,   234,     0,   211,     0,   206,   127,
-     229,   139,   132,   215,     0,   158,     0,   145,   134,   148,
-       0,   142,   136,     0,   156,     0,   233,     0,   205,     0,
-       0,    14,     0,     0,     0,     0,     0,   197,   229,    17,
-      16,    18,   229,   120,   123,   225,   227,   122,   121,   124,
-       0,   224,   152,     0,     0,   147,   154,     0,     0,   210,
-       0,     0,     0,    44,     0,   231,     0,     0,     0,     0,
-       0,   223,   222,   119,   124,   229,   229,   221,   220,   157,
-     151,   155,   153,   207,     0,     0,    15,    21,    19,    20,
-       0,     0,   230,   160,   162,   203,     0,     0,   226,   228,
-      67,    39,     0,     0,    41,    34,     0,     0,     0,     0,
-     208,     0,   206,    64,     0,     0,     0,     0,    40,    49,
-     101,     0,     0,     0,     0,   209,     0,    10,    68,    11,
-      12,    13,     0,     0,     0,    48,    46,    45,     0,   105,
-     159,   129,     0,   130,     0,    65,    10,    10,    10,    83,
-       0,     0,     0,     0,    63,     0,     0,     0,    27,    50,
-      33,    18,    28,    29,   118,   104,     0,   161,   207,     0,
-       7,     8,     9,    81,    71,    69,    70,     0,    35,     0,
-      37,     0,    25,     0,     0,    27,    63,     0,    33,    18,
-      28,    59,    61,    29,     0,    30,    31,     0,   102,     0,
-     107,    83,     0,    75,     0,    36,    38,    43,    22,    23,
-       0,    30,    31,    53,    58,    47,    56,    57,    54,    63,
-      63,    55,     0,   116,     0,     0,     0,     0,   109,    66,
-       0,    10,    82,     0,    63,    26,    51,    52,    60,    62,
-      67,    10,   103,     0,     0,    10,    10,   108,     0,    76,
-      42,     0,    64,   117,     0,     0,   115,   113,   111,    78,
-       0,    24,    63,    10,    10,     0,    72,     0,    77,    85,
-     112,   110,   114,    10,    79,     0,    73,    83,   100,     0,
-      80,     0,    98,    88,    86,    87,    83,     0,     0,    92,
-       0,    74,     0,     0,    63,    99,     0,     0,    93,    84,
-      95,     0,    89,     0,    94,    63,    96,    90,   100,     0,
-      97,   100,    91
+       0,     0,     0,   166,    84,     0,     0,   155,     0,     0,
+      86,     0,     0,   169,     0,    85,     0,     0,     0,     0,
+       0,   139,   144,   151,     0,     0,    75,   119,   121,   123,
+     124,   126,   127,   128,   129,   131,   132,   134,   135,   136,
+       0,    78,     0,     0,     0,     0,     0,     0,   138,   166,
+      15,    14,    16,   166,    70,    73,   166,   166,    72,    71,
+      74,     0,   163,    81,   154,     0,   104,    82,     0,     0,
+     114,    83,     0,   109,   171,     0,     0,   145,   146,    77,
+       0,     0,     0,   168,     0,     0,     0,     0,     0,   162,
+     161,    69,    74,   164,   165,   160,   159,     0,    99,     0,
+      89,     0,     0,    97,     0,   170,   150,     0,     0,     0,
+       0,   167,   101,   103,   144,     0,     0,    93,     0,     0,
+      88,    95,     0,     0,     0,     0,     0,     0,     0,     0,
+       0,   148,   145,   146,    98,    92,    96,    94,   147,    10,
+      47,    11,    12,    13,    26,     0,     0,     0,    38,    17,
+      27,    24,    23,    16,    18,    19,    58,     0,     0,     0,
+       0,   149,     0,     0,    10,    10,    10,     0,    42,    40,
+      41,     0,    20,    21,     0,     0,    17,    38,     0,    23,
+      16,    18,    38,    38,    19,     0,    68,    57,    60,   100,
+      79,   103,    80,     0,    47,     7,     8,     9,     0,    10,
+      46,     0,    20,    21,    30,    35,    25,    33,    34,    31,
+      36,    37,    32,     0,     0,     0,     0,     0,    59,   102,
+     147,    39,     0,     0,     0,    28,    29,     0,     0,    10,
+      10,    10,    56,     0,    44,    10,     0,     0,    66,    64,
+      62,    67,     0,    10,     0,    10,    10,    10,    10,     0,
+      10,    47,    55,    63,    61,    65,     0,    41,     0,     0,
+      50,    48,    49,    47,     0,     0,    38,    54,    41,     0,
+       0,     0,     0,     0,    52,    38,     0,    10,    11,    55,
+      12,    13,     0,    53,    55,    49
 };
 
 /* YYPGOTO[NTERM-NUM].  */
 static const yytype_int16 yypgoto[] =
 {
-    -344,  -344,   373,  -274,  -343,   -90,  -344,  -344,  -344,  -344,
-    -344,  -344,  -344,  -284,  -207,  -344,   151,  -344,  -344,  -344,
-    -344,  -344,     5,  -344,  -344,  -287,  -344,  -344,  -344,  -344,
-     206,  -342,  -344,  -344,  -344,  -344,  -344,  -344,  -344,  -283,
-    -344,  -344,  -344,  -144,  -344,  -344,  -344,  -344,  -344,  -344,
-    -344,    -1,  -344,  -344,  -344,   181,  -344,  -344,  -344,  -267,
-    -344,  -344,   369,  -145,     2,  -147,  -130,   210,  -344,  -344,
-    -344,  -344,  -344,  -344,  -344,  -344,  -344,   342,   362,  -344,
-    -344,   -20,   -26,   -21,   -16,   478,   298,   221,   294,   276,
-    -188,  -344,  -133,  -158,    23,  -344,   425,  -344,  -344,   109,
-    -153,  -344,  -344,  -344,   105
+    -333,  -333,   343,    18,  -261,    46,  -225,  -333,  -333,   130,
+    -231,  -287,  -332,  -222,  -333,  -248,  -187,  -333,   293,  -333,
+    -295,  -333,   433,   -98,    15,   -85,    21,   118,   363,   366,
+    -333,   292,   -18,   -31,   -15,   -16,   499,   264,   242,   289,
+     243,   333,   -43,  -163,   119,   485,  -333,  -333,    75,   -14,
+    -333,    33
 };
 
 /* YYDEFGOTO[NTERM-NUM].  */
 static const yytype_int16 yydefgoto[] =
 {
-       0,     5,     6,   406,   278,   335,   212,   236,   237,   238,
-     384,   239,   360,   336,   254,   267,   303,   189,   240,   287,
-     304,   288,   337,   369,   370,   190,   277,   319,   264,   299,
-     325,   326,   423,   429,   381,   410,   417,   427,   354,   338,
-     412,   425,   434,   435,   455,   459,   444,   451,   453,   458,
-     440,   191,   289,   374,   314,   315,   316,   378,   350,   407,
-     348,   391,   192,   340,   194,   341,   342,   197,    99,   109,
-     151,    57,    98,    72,   113,    64,   108,   175,   166,   258,
-     259,    10,    14,    12,   198,    48,    49,    50,    51,    52,
-      53,   121,   343,   157,    58,    59,   103,   104,   105,   161,
-     200,   225,   226,   201,    17
+       0,     5,     6,   338,   240,   276,   277,   150,   251,   304,
+     151,   269,   270,   279,   361,   362,   152,   286,   287,   288,
+     339,   317,   153,   281,   155,   282,   283,   158,   204,   199,
+     228,   230,    10,    14,    12,   159,    48,    49,    50,    51,
+      52,    53,   284,   124,    61,    62,    63,    64,   104,   161,
+     162,    17
 };
 
 /* YYTABLE[YYPACT[STATE-NUM]] -- What to do in state STATE-NUM.  If
@@ -1262,235 +1172,239 @@ static const yytype_int16 yydefgoto[] =
    number is the opposite.  If YYTABLE_NINF, syntax error.  */
 static const yytype_int16 yytable[] =
 {
-      47,    56,     7,   295,   309,   310,    63,    71,    61,     7,
-       7,   382,   324,   195,    69,   193,     9,   352,   438,   209,
-      75,   285,   320,   321,   322,    78,    79,   199,   164,    21,
-     196,   353,   439,   251,   165,   221,   252,   253,    97,   222,
-      18,   195,   286,   193,   271,   195,   227,   193,   193,    22,
-     273,    65,   195,    23,   193,   199,    24,    73,   196,   199,
-     224,   246,   196,     4,   324,   272,   199,   358,   124,   196,
-     188,   274,   248,   249,   424,    26,   385,   310,   195,   195,
-     193,   193,   219,   290,   123,   430,   220,   144,   359,    16,
-     153,   149,   199,   199,   441,   196,   196,    32,   188,     1,
-       2,     3,   188,    21,   317,   156,   173,   399,    11,   188,
-       1,     2,     3,   174,    25,    41,    31,   403,    37,   280,
-     355,    42,   356,    43,    44,    45,   187,    15,    13,   408,
-      24,   281,   297,   375,    39,   188,   188,     4,    40,   159,
-      38,   376,   377,   312,   298,   433,   420,   421,    55,   426,
-      54,   297,   297,   297,   215,   313,   445,   310,    60,  -137,
-      25,   156,    40,   298,   298,   298,    27,    31,   216,   456,
-     310,    62,    33,    41,   279,    37,    66,    27,    33,    42,
-      67,    43,    44,    45,    46,    74,    28,   296,    15,    40,
-      29,    16,    34,    30,    76,   234,    35,   106,   308,    36,
-    -143,    15,    15,   156,    30,    36,   296,   296,   296,   280,
-       8,    76,    80,    70,   110,   312,    81,     8,     8,    82,
-      83,   281,    41,   245,   256,    39,  -140,   313,    42,   247,
-      43,    44,    45,    46,    41,    76,   297,   255,   268,    84,
-      42,    77,    43,    44,    45,    46,   297,    85,   298,   162,
-     297,   297,   111,    76,   167,   168,   115,   107,   298,   171,
-     172,   112,   298,   298,   279,    41,   300,   301,   297,   297,
-     308,    42,   280,    68,    44,    45,    46,   114,   297,   116,
-     298,   298,   -84,   -84,   281,   -84,   -84,   311,   118,   118,
-     298,   296,   148,    86,    87,   312,    88,    89,    90,    91,
-     117,   296,   119,   339,   120,   296,   296,   313,   312,   128,
-     129,   130,   131,   276,   460,   357,  -232,   462,    92,    93,
-     313,   137,   138,   296,   296,   180,   323,   279,   372,   255,
-     122,   255,   139,   296,   339,   339,   140,   339,   339,   339,
-     363,   364,   339,   366,   367,   368,   327,   328,   371,     4,
-     308,    94,    95,    96,   100,   101,   102,   329,   330,   311,
-     339,   339,   141,   308,   398,   142,   386,   387,   339,   339,
-     134,   135,   136,   143,   388,   389,   393,   394,   431,   432,
-      19,    20,   145,   339,   126,   127,   132,   133,   146,   401,
-     147,   152,   150,   154,   155,   160,   169,   158,     1,     2,
-       3,   176,   305,   170,   181,   182,   177,   183,   178,   333,
-     334,   339,   185,   186,    41,   179,   202,   419,   203,   207,
-      42,   442,    43,    44,    45,   187,   204,   447,   208,   205,
-     206,     1,     2,     3,   211,   180,   210,   181,   182,   311,
-     183,   213,   214,   339,   184,   185,   186,    41,   228,   448,
-     217,   218,   311,    42,   339,    43,    44,    45,   187,   230,
-     457,     1,     2,     3,   165,   305,   174,   181,   182,   232,
-     183,   233,   306,   307,   235,   241,   242,    41,   243,   244,
-     250,   257,   260,    42,   261,    43,    44,    45,   187,     1,
-       2,     3,   262,   180,   269,   181,   182,   265,   183,   263,
-     266,   270,   275,   282,   284,    41,   291,   283,   292,   293,
-    -106,    42,   294,    43,    44,    45,   187,   302,   318,   331,
-     332,   345,   344,   346,   347,   349,   361,  -233,   362,   373,
-     351,   383,   365,   380,   400,   390,   395,   396,   392,   402,
-     404,   411,   405,   413,   409,   414,   416,   415,   422,   231,
-     323,   418,   428,   436,   432,   437,   443,   379,   446,   397,
-     449,   452,   223,   125,   450,   229,   163,   454,     0,   461
+      47,   250,    76,    56,   252,   154,   300,   321,    66,   268,
+      21,   257,    68,   206,    74,     7,    27,     9,   156,   357,
+      80,    33,     7,     7,   215,    83,    84,     1,     2,     3,
+      22,   368,   258,    26,    23,   340,    28,    24,   102,   253,
+      29,    34,    25,    30,    31,    35,    37,    18,    36,    11,
+      21,   154,   353,   354,     4,   154,   154,    13,   154,   154,
+     160,   280,   154,   268,   156,    57,    58,    59,   156,   123,
+      32,   156,   156,   127,    15,   156,   321,    24,   197,   187,
+      27,   351,    60,   188,   198,    33,    16,   173,    25,   280,
+     280,   166,   280,   280,   280,   280,   280,   280,   202,   170,
+      31,    38,   126,    54,    15,   203,   160,    30,    37,    15,
+     160,   192,    36,   160,   160,   280,   280,   160,     8,    55,
+     268,    57,    58,    59,   157,     8,     8,   242,   254,   184,
+     360,   383,   268,    67,   367,   189,   385,   252,    69,   190,
+      75,   265,   193,   194,   110,    81,   195,    70,   280,   149,
+      82,   379,   115,    78,   252,   179,   280,    39,   280,   280,
+     123,    40,   360,    89,   208,   209,   265,   265,   265,   242,
+     157,   123,   253,    15,   157,    90,    16,   157,   157,   280,
+     163,   157,   243,   255,    81,   183,   167,   108,   280,   253,
+     280,   171,    57,    58,    59,   149,   266,    81,   105,   149,
+     112,   265,   149,   149,    41,    81,   149,    65,   117,    77,
+      42,    40,    43,    44,    45,    46,    99,   100,   101,    41,
+     122,   266,   266,   266,   243,    42,   242,    43,    44,    45,
+      46,   265,   265,   265,   313,    87,    88,   345,     1,     2,
+       3,   107,   314,   315,   242,   345,   103,   345,   345,   265,
+     265,   106,   265,   109,    41,   301,   266,   263,    91,    92,
+      42,   254,    43,    44,    45,   148,    71,    97,    98,    79,
+      72,   241,   249,    40,   120,   111,    85,   169,   380,   345,
+      86,   243,   295,   296,   297,   264,   266,   266,   266,    39,
+     140,   141,   346,   216,    93,    94,    95,    96,   262,   243,
+     346,  -169,   346,   346,   266,   266,   333,   266,   142,   267,
+     264,   264,   264,   241,    41,   214,   255,   323,   358,   359,
+      42,    41,    43,    44,    45,    46,   114,    42,   116,    43,
+      44,    45,    46,   381,   346,   131,   132,   133,   134,    57,
+      58,    59,   137,   138,   139,   264,   327,   328,   369,   341,
+      19,    20,   113,   263,   373,   129,   130,   118,     1,     2,
+       3,   295,   142,   296,   297,   143,   119,   144,   356,   120,
+     241,   145,   146,   147,    41,   264,   264,   264,   278,   121,
+      42,   343,    43,    44,    45,   148,   135,   136,   241,   343,
+     125,   343,   343,   264,   264,   263,   264,     4,   165,   168,
+     172,   175,   174,   176,   177,   249,   178,   305,   180,   307,
+     308,   309,   310,   311,   312,   181,   182,   185,   186,   200,
+     201,   210,   378,   343,   244,   196,   205,     1,     2,     3,
+     207,   245,   325,   326,   143,   211,   144,   212,   246,   247,
+     213,   217,   218,    41,   219,   248,   220,   221,   222,    42,
+     223,    43,    44,    45,   148,     1,     2,     3,   224,   245,
+     225,   229,   143,   231,   144,   344,   274,   275,   226,   146,
+     147,    41,   198,   227,   232,   309,   312,    42,   235,    43,
+      44,    45,   148,   233,   203,   237,     1,     2,     3,   238,
+     365,   256,   259,   143,   260,   144,   371,   246,   247,   261,
+     271,   272,    41,   273,   366,   344,   285,   382,    42,   290,
+      43,    44,    45,   148,     1,     2,     3,   291,   245,   292,
+     293,   143,   294,   144,   302,   246,   247,   303,   306,   316,
+      41,   320,   377,   322,   329,   324,    42,   330,    43,    44,
+      45,   148,     1,     2,     3,   331,   142,   332,  -170,   143,
+     334,   144,   347,   336,   337,   348,   342,   355,    41,   349,
+     239,   364,   352,   363,    42,   370,    43,    44,    45,   148,
+       1,     2,     3,   374,   298,   372,   376,   143,   359,   144,
+     375,   318,   384,   319,   234,   236,    41,   191,   299,   128,
+     289,   164,    42,     0,    43,    44,    45,   148,     1,     2,
+       3,     0,   142,     0,     0,   143,     0,   144,     0,     0,
+       0,     0,     0,     0,    41,     0,   335,     0,     0,     0,
+      42,     0,    43,    44,    45,   148,     1,     2,     3,     0,
+     142,     0,     0,   143,     0,   144,     0,     0,     0,     0,
+       0,     0,    41,     0,   350,     0,     0,     0,    42,     0,
+      43,    44,    45,   148,     1,     2,     3,     0,   142,     0,
+       0,   143,     0,   144,     0,     0,     0,     0,     0,     0,
+      41,     0,     0,     0,     0,     0,    42,    41,    43,    44,
+      45,   148,     0,    42,     0,    73,    44,    45,    46
 };
 
 static const yytype_int16 yycheck[] =
 {
-      16,    21,     0,   277,   288,   288,    27,    33,    24,     7,
-       8,   354,   299,   160,    30,   160,    47,    24,    24,   177,
-      36,    17,   296,   297,   298,    41,    42,   160,    39,    16,
-     160,    38,    38,    17,    45,   188,    20,    21,    54,   192,
-       0,   188,    38,   188,    16,   192,   199,   192,   193,    36,
-      16,    28,   199,    40,   199,   188,    43,    34,   188,   192,
-     193,   219,   192,    47,   351,    37,   199,    17,    84,   199,
-     160,    37,   225,   226,   417,    17,   360,   360,   225,   226,
-     225,   226,    36,   271,    82,   427,    40,   107,    38,    43,
-     116,   112,   225,   226,   436,   225,   226,    17,   188,    20,
-      21,    22,   192,    16,   292,   121,    39,   381,    47,   199,
-      20,    21,    22,    46,     9,    36,    11,   391,    13,   264,
-     327,    42,   329,    44,    45,    46,    47,    40,    47,   396,
-      43,   264,   277,    36,    41,   225,   226,    47,    45,   137,
-      17,    44,    45,   288,   277,   428,   413,   414,    47,   423,
-      43,   296,   297,   298,    17,   288,   440,   440,    41,    37,
-      55,   177,    45,   296,   297,   298,    16,    62,   184,   453,
-     453,    47,    16,    36,   264,    70,    41,    16,    16,    42,
-      45,    44,    45,    46,    47,    41,    36,   277,    40,    45,
-      40,    43,    36,    43,    40,   211,    40,    43,   288,    43,
-      37,    40,    40,   219,    43,    43,   296,   297,   298,   354,
-       0,    40,    36,    47,    43,   360,    40,     7,     8,    16,
-      17,   354,    36,    37,   240,    41,    37,   360,    42,    45,
-      44,    45,    46,    47,    36,    40,   381,   235,   254,     3,
-      42,    41,    44,    45,    46,    47,   391,     4,   381,   140,
-     395,   396,    41,    40,   145,   146,    43,    16,   391,   150,
-     151,    16,   395,   396,   354,    36,   282,   283,   413,   414,
-     360,    42,   417,    44,    45,    46,    47,    37,   423,    16,
-     413,   414,    31,    32,   417,    34,    35,   288,    40,    40,
-     423,   381,    43,     5,     6,   440,     7,     8,     9,    10,
-      45,   391,    37,   304,    37,   395,   396,   440,   453,    88,
-      89,    90,    91,    40,   458,   331,    43,   461,    11,    12,
-     453,    16,    17,   413,   414,    24,    25,   417,   344,   327,
-      45,   329,    37,   423,   335,   336,    37,   338,   339,   340,
-     335,   336,   343,   338,   339,   340,    16,    17,   343,    47,
-     440,    13,    14,    15,    20,    21,    22,    16,    17,   360,
-     361,   362,    16,   453,   380,    47,   361,   362,   369,   370,
-      94,    95,    96,    38,   369,   370,    44,    45,    24,    25,
-       7,     8,    37,   384,    86,    87,    92,    93,    37,   384,
-      23,    38,    37,    41,    45,    38,    17,    41,    20,    21,
-      22,    41,    24,    23,    26,    27,    16,    29,    37,    31,
-      32,   412,    34,    35,    36,    40,    17,   412,    16,    16,
-      42,   437,    44,    45,    46,    47,    39,   443,    39,    17,
-      17,    20,    21,    22,    36,    24,    45,    26,    27,   440,
-      29,    36,    36,   444,    33,    34,    35,    36,    39,   444,
-      36,    36,   453,    42,   455,    44,    45,    46,    47,    17,
-     455,    20,    21,    22,    45,    24,    46,    26,    27,    17,
-      29,    41,    31,    32,    36,    47,    17,    36,    23,    23,
-      37,    37,    17,    42,    37,    44,    45,    46,    47,    20,
-      21,    22,    41,    24,    37,    26,    27,    47,    29,    38,
-      47,    38,    17,    43,    17,    36,    17,    43,    18,    17,
-      30,    42,    45,    44,    45,    46,    47,    47,    41,    43,
-      37,    17,    36,    17,    28,    30,    17,    43,    17,    19,
-      39,    16,    39,    36,   383,    37,    19,    19,    39,    38,
-      37,    39,    37,    19,    37,    19,    38,    31,    17,   207,
-      25,    39,    39,    39,    25,    36,    36,   351,    37,   378,
-      38,    38,   193,    85,    37,   203,   141,    39,    -1,    39
+      16,   226,    33,    21,   226,   103,   267,   294,    24,   240,
+      16,    16,    27,   176,    30,     0,    16,    47,   103,   351,
+      36,    16,     7,     8,   187,    41,    42,    20,    21,    22,
+      36,   363,    37,    17,    40,   330,    36,    43,    54,   226,
+      40,    36,     9,    43,    11,    40,    13,     0,    43,    47,
+      16,   149,   347,   348,    47,   153,   154,    47,   156,   157,
+     103,   248,   160,   294,   149,    20,    21,    22,   153,    85,
+      17,   156,   157,    89,    40,   160,   363,    43,    39,    36,
+      16,   342,    37,    40,    45,    16,    43,   118,    55,   276,
+     277,   109,   279,   280,   281,   282,   283,   284,    39,   114,
+      67,    17,    87,    43,    40,    46,   149,    43,    75,    40,
+     153,   154,    43,   156,   157,   302,   303,   160,     0,    47,
+     351,    20,    21,    22,   103,     7,     8,   225,   226,   145,
+     352,   379,   363,    47,   359,   149,   384,   359,    37,   153,
+      47,   239,   156,   157,    69,    40,   160,    28,   335,   103,
+      41,   376,    77,    34,   376,   140,   343,    41,   345,   346,
+     176,    45,   384,     3,   180,   181,   264,   265,   266,   267,
+     149,   187,   359,    40,   153,     4,    43,   156,   157,   366,
+     105,   160,   225,   226,    40,    17,   111,    43,   375,   376,
+     377,   116,    20,    21,    22,   149,   239,    40,    37,   153,
+      43,   299,   156,   157,    36,    40,   160,    41,    43,    37,
+      42,    45,    44,    45,    46,    47,    13,    14,    15,    36,
+      37,   264,   265,   266,   267,    42,   324,    44,    45,    46,
+      47,   329,   330,   331,    36,    16,    17,   335,    20,    21,
+      22,    47,    44,    45,   342,   343,    38,   345,   346,   347,
+     348,    16,   350,    16,    36,   271,   299,   239,     5,     6,
+      42,   359,    44,    45,    46,    47,    41,    11,    12,    41,
+      45,   225,   226,    45,    40,    37,    36,    43,   376,   377,
+      40,   324,   264,   265,   266,   239,   329,   330,   331,    41,
+      16,    17,   335,    45,     7,     8,     9,    10,    40,   342,
+     343,    43,   345,   346,   347,   348,   322,   350,    24,    25,
+     264,   265,   266,   267,    36,    37,   359,   299,    24,    25,
+      42,    36,    44,    45,    46,    47,    16,    42,    37,    44,
+      45,    46,    47,   376,   377,    93,    94,    95,    96,    20,
+      21,    22,    99,   100,   101,   299,    44,    45,   364,   331,
+       7,     8,    41,   335,   370,    91,    92,    16,    20,    21,
+      22,   343,    24,   345,   346,    27,    45,    29,   350,    40,
+     324,    33,    34,    35,    36,   329,   330,   331,   248,    37,
+      42,   335,    44,    45,    46,    47,    97,    98,   342,   343,
+      45,   345,   346,   347,   348,   377,   350,    47,    38,    23,
+      38,    45,    41,    16,    37,   359,    41,   277,    36,   279,
+     280,   281,   282,   283,   284,    36,    36,    36,    36,    17,
+      23,    47,   376,   377,    17,    39,    41,    20,    21,    22,
+      40,    24,   302,   303,    27,    17,    29,    23,    31,    32,
+      23,    17,    16,    36,    39,    38,    17,    17,    16,    42,
+      39,    44,    45,    46,    47,    20,    21,    22,    45,    24,
+      37,    16,    27,    17,    29,   335,    31,    32,    37,    34,
+      35,    36,    45,    37,    37,   345,   346,    42,    17,    44,
+      45,    46,    47,    41,    46,    17,    20,    21,    22,    41,
+      24,    38,    18,    27,    37,    29,   366,    31,    32,    17,
+      36,    17,    36,    17,    38,   375,    30,   377,    42,    17,
+      44,    45,    46,    47,    20,    21,    22,    47,    24,    17,
+      45,    27,    39,    29,    17,    31,    32,    17,    39,    28,
+      36,    41,    38,    36,    19,    37,    42,    19,    44,    45,
+      46,    47,    20,    21,    22,    19,    24,    39,    43,    27,
+      39,    29,    19,    37,    37,    19,    37,    17,    36,    31,
+      38,    36,    39,    39,    42,    36,    44,    45,    46,    47,
+      20,    21,    22,    39,    24,    37,    37,    27,    25,    29,
+      38,   288,    39,   291,   218,   222,    36,   154,    38,    90,
+     257,   106,    42,    -1,    44,    45,    46,    47,    20,    21,
+      22,    -1,    24,    -1,    -1,    27,    -1,    29,    -1,    -1,
+      -1,    -1,    -1,    -1,    36,    -1,    38,    -1,    -1,    -1,
+      42,    -1,    44,    45,    46,    47,    20,    21,    22,    -1,
+      24,    -1,    -1,    27,    -1,    29,    -1,    -1,    -1,    -1,
+      -1,    -1,    36,    -1,    38,    -1,    -1,    -1,    42,    -1,
+      44,    45,    46,    47,    20,    21,    22,    -1,    24,    -1,
+      -1,    27,    -1,    29,    -1,    -1,    -1,    -1,    -1,    -1,
+      36,    -1,    -1,    -1,    -1,    -1,    42,    36,    44,    45,
+      46,    47,    -1,    42,    -1,    44,    45,    46,    47
 };
 
 /* YYSTOS[STATE-NUM] -- The symbol kind of the accessing symbol of
    state STATE-NUM.  */
-static const yytype_uint8 yystos[] =
+static const yytype_int8 yystos[] =
 {
-       0,    20,    21,    22,    47,    49,    50,   112,   115,    47,
-     129,    47,   131,    47,   130,    40,    43,   152,     0,    50,
-      50,    16,    36,    40,    43,   152,    17,    16,    36,    40,
-      43,   152,    17,    16,    36,    40,    43,   152,    17,    41,
-      45,    36,    42,    44,    45,    46,    47,   132,   133,   134,
-     135,   136,   137,   138,    43,    47,   129,   119,   142,   143,
-      41,   132,    47,   131,   123,   142,    41,    45,    44,   132,
-      47,   130,   121,   142,    41,   132,    40,    41,   132,   132,
-      36,    40,    16,    17,     3,     4,     5,     6,     7,     8,
-       9,    10,    11,    12,    13,    14,    15,   132,   120,   116,
-      20,    21,    22,   144,   145,   146,    43,    16,   124,   117,
-      43,    41,    16,   122,    37,    43,    16,    45,    40,    37,
-      37,   139,    45,   112,   132,   133,   134,   134,   135,   135,
-     135,   135,   136,   136,   137,   137,   137,    16,    17,    37,
-      37,    16,    47,    38,   129,    37,    37,    23,    43,   131,
-      37,   118,    38,   130,    41,    45,   132,   141,    41,   112,
-      38,   147,   147,   144,    39,    45,   126,   147,   147,    17,
-      23,   147,   147,    39,    46,   125,    41,    16,    37,    40,
-      24,    26,    27,    29,    33,    34,    35,    47,    53,    65,
-      73,    99,   110,   111,   112,   113,   114,   115,   132,   140,
-     148,   151,    17,    16,    39,    17,    17,    16,    39,   141,
-      45,    36,    54,    36,    36,    17,   132,    36,    36,    36,
-      40,   148,   148,   110,   140,   149,   150,   148,    39,   126,
-      17,   125,    17,    41,   132,    36,    55,    56,    57,    59,
-      66,    47,    17,    23,    23,    37,   141,    45,   148,   148,
-      37,    17,    20,    21,    62,   112,   132,    37,   127,   128,
-      17,    37,    41,    38,    76,    47,    47,    63,   132,    37,
-      38,    16,    37,    16,    37,    17,    40,    74,    52,    53,
-     111,   140,    43,    43,    17,    17,    38,    67,    69,   100,
-     138,    17,    18,    17,    45,    51,    53,   111,   140,    77,
-     132,   132,    47,    64,    68,    24,    31,    32,    53,    61,
-      87,    99,   111,   140,   102,   103,   104,   138,    41,    75,
-      51,    51,    51,    25,    73,    78,    79,    16,    17,    16,
-      17,    43,    37,    31,    32,    53,    61,    70,    87,    99,
-     111,   113,   114,   140,    36,    17,    17,    28,   108,    30,
-     106,    39,    24,    38,    86,    62,    62,   132,    17,    38,
-      60,    17,    17,    70,    70,    39,    70,    70,    70,    71,
-      72,    70,   132,    19,   101,    36,    44,    45,   105,    78,
-      36,    82,    52,    16,    58,    61,    70,    70,    70,    70,
-      37,   109,    39,    44,    45,    19,    19,   103,   132,    51,
-      64,    70,    38,    51,    37,    37,    51,   107,   107,    37,
-      83,    39,    88,    19,    19,    31,    38,    84,    39,    70,
-     107,   107,    17,    80,    52,    89,    51,    85,    39,    81,
-      79,    24,    25,    87,    90,    91,    39,    36,    24,    38,
-      98,    79,   132,    36,    94,    61,    37,   132,    70,    38,
-      37,    95,    38,    96,    39,    92,    61,    70,    97,    93,
-      91,    39,    91
+       0,    20,    21,    22,    47,    49,    50,    72,    75,    47,
+      80,    47,    82,    47,    81,    40,    43,    99,     0,    50,
+      50,    16,    36,    40,    43,    99,    17,    16,    36,    40,
+      43,    99,    17,    16,    36,    40,    43,    99,    17,    41,
+      45,    36,    42,    44,    45,    46,    47,    83,    84,    85,
+      86,    87,    88,    89,    43,    47,    80,    20,    21,    22,
+      37,    92,    93,    94,    95,    41,    83,    47,    82,    37,
+      92,    41,    45,    44,    83,    47,    81,    37,    92,    41,
+      83,    40,    41,    83,    83,    36,    40,    16,    17,     3,
+       4,     5,     6,     7,     8,     9,    10,    11,    12,    13,
+      14,    15,    83,    38,    96,    37,    16,    47,    43,    16,
+      96,    37,    43,    41,    16,    96,    37,    43,    16,    45,
+      40,    37,    37,    83,    91,    45,    72,    83,    84,    85,
+      85,    86,    86,    86,    86,    87,    87,    88,    88,    88,
+      16,    17,    24,    27,    29,    33,    34,    35,    47,    53,
+      55,    58,    64,    70,    71,    72,    73,    74,    75,    83,
+      90,    97,    98,    96,    93,    38,    80,    96,    23,    43,
+      82,    96,    38,    81,    41,    45,    16,    37,    41,    72,
+      36,    36,    36,    17,    83,    36,    36,    36,    40,    97,
+      97,    70,    90,    97,    97,    97,    39,    39,    45,    77,
+      17,    23,    39,    46,    76,    41,    91,    40,    83,    83,
+      47,    17,    23,    23,    37,    91,    45,    17,    16,    39,
+      17,    17,    16,    39,    45,    37,    37,    37,    78,    16,
+      79,    17,    37,    41,    77,    17,    76,    17,    41,    38,
+      52,    53,    71,    90,    17,    24,    31,    32,    38,    53,
+      54,    56,    61,    64,    71,    90,    38,    16,    37,    18,
+      37,    17,    40,    51,    53,    71,    90,    25,    58,    59,
+      60,    36,    17,    17,    31,    32,    53,    54,    57,    61,
+      64,    71,    73,    74,    90,    30,    65,    66,    67,    89,
+      17,    47,    17,    45,    39,    51,    51,    51,    24,    38,
+      52,    83,    17,    17,    57,    57,    39,    57,    57,    57,
+      57,    57,    57,    36,    44,    45,    28,    69,    66,    79,
+      41,    59,    36,    51,    37,    57,    57,    44,    45,    19,
+      19,    19,    39,    83,    39,    38,    37,    37,    51,    68,
+      68,    51,    37,    53,    57,    71,    90,    19,    19,    31,
+      38,    52,    39,    68,    68,    17,    51,    60,    24,    25,
+      61,    62,    63,    39,    36,    24,    38,    54,    60,    83,
+      36,    57,    37,    83,    39,    38,    37,    38,    53,    54,
+      71,    90,    57,    63,    39,    63
 };
 
 /* YYR1[RULE-NUM] -- Symbol kind of the left-hand side of rule RULE-NUM.  */
-static const yytype_uint8 yyr1[] =
+static const yytype_int8 yyr1[] =
 {
        0,    48,    49,    50,    50,    50,    50,    51,    51,    51,
-      51,    52,    52,    52,    54,    53,    53,    53,    53,    55,
-      55,    55,    56,    58,    57,    60,    59,    61,    61,    61,
-      61,    61,    61,    61,    62,    62,    62,    62,    62,    62,
-      63,    63,    64,    64,    66,    65,    68,    67,    67,    69,
-      67,    70,    70,    70,    70,    70,    70,    70,    70,    71,
-      70,    72,    70,    70,    74,    75,    73,    76,    77,    73,
-      78,    78,    80,    81,    79,    82,    83,    79,    84,    85,
-      79,    86,    79,    79,    88,    89,    87,    90,    90,    92,
-      93,    91,    94,    95,    91,    96,    97,    91,    98,    91,
-      91,   100,   101,    99,   102,   102,   104,   105,   103,   103,
-     106,   106,   106,   106,   107,   107,   109,   108,   108,   110,
-     110,   111,   111,   111,   111,   112,   112,   112,   112,   113,
-     114,   116,   115,   117,   115,   118,   115,   119,   120,   115,
-     121,   122,   115,   123,   124,   115,   115,   115,   115,   115,
-     115,   115,   115,   115,   115,   125,   125,   126,   126,   127,
-     127,   128,   128,   129,   129,   129,   129,   129,   130,   130,
-     130,   130,   130,   131,   131,   131,   131,   131,   132,   132,
-     133,   133,   134,   134,   134,   135,   135,   135,   135,   135,
-     136,   136,   136,   137,   137,   137,   137,   138,   138,   138,
-     138,   138,   138,   138,   139,   138,   138,   138,   140,   140,
-     141,   141,   143,   142,   144,   144,   145,   146,   146,   146,
-     147,   148,   148,   148,   148,   149,   148,   150,   148,   148,
-     151,   151,   152,   152,   152
+      51,    52,    52,    52,    53,    53,    53,    54,    54,    54,
+      54,    54,    54,    54,    55,    56,    56,    56,    57,    57,
+      57,    57,    57,    57,    57,    57,    57,    57,    57,    58,
+      58,    59,    59,    60,    60,    60,    60,    60,    61,    62,
+      62,    63,    63,    63,    63,    63,    64,    65,    65,    66,
+      66,    67,    67,    67,    67,    68,    68,    69,    69,    70,
+      70,    71,    71,    71,    71,    72,    72,    72,    72,    73,
+      74,    75,    75,    75,    75,    75,    75,    75,    75,    75,
+      75,    75,    75,    75,    75,    75,    76,    76,    77,    77,
+      78,    78,    79,    79,    80,    80,    80,    80,    80,    81,
+      81,    81,    81,    81,    82,    82,    82,    82,    82,    83,
+      83,    84,    84,    85,    85,    85,    86,    86,    86,    86,
+      86,    87,    87,    87,    88,    88,    88,    88,    89,    89,
+      89,    89,    89,    89,    89,    89,    89,    89,    90,    90,
+      91,    91,    92,    93,    93,    94,    95,    95,    95,    96,
+      97,    97,    97,    97,    97,    97,    97,    98,    98,    99,
+      99,    99
 };
 
 /* YYR2[RULE-NUM] -- Number of symbols on the right-hand side of rule RULE-NUM.  */
 static const yytype_int8 yyr2[] =
 {
        0,     2,     1,     2,     2,     1,     1,     2,     2,     2,
-       0,     1,     1,     1,     0,     3,     1,     1,     1,     1,
-       1,     1,     7,     0,    10,     0,     8,     1,     1,     1,
-       2,     2,     1,     1,     1,     5,     6,     5,     6,     1,
-       1,     0,     5,     3,     0,     6,     0,     4,     1,     0,
-       2,     3,     3,     2,     2,     2,     2,     2,     2,     0,
-       3,     0,     3,     0,     0,     0,    10,     0,     0,     8,
-       1,     1,     0,     0,    11,     0,     0,     6,     0,     0,
-       9,     0,     3,     0,     0,     0,    10,     1,     1,     0,
-       0,    11,     0,     0,     6,     0,     0,     9,     0,     3,
-       0,     0,     0,    10,     1,     0,     0,     0,     4,     0,
-       6,     4,     6,     4,     3,     1,     0,     4,     0,     2,
+       0,     1,     1,     1,     1,     1,     1,     1,     1,     1,
+       2,     2,     1,     1,     5,     3,     1,     1,     3,     3,
+       2,     2,     2,     2,     2,     2,     2,     2,     0,     8,
+       6,     1,     1,     9,     4,     7,     2,     0,     8,     1,
+       1,     9,     4,     7,     2,     0,     8,     1,     0,     2,
+       0,     6,     4,     6,     4,     3,     1,     3,     0,     2,
        1,     1,     1,     1,     1,     5,     4,     6,     5,     6,
-       6,     0,     7,     0,     7,     0,     7,     0,     0,     7,
-       0,     0,     7,     0,     0,     7,     3,     8,     7,     3,
-       3,     9,     8,     9,     8,     3,     1,     3,     1,     3,
-       0,     4,     0,     5,     3,     3,     2,     1,     5,     3,
-       3,     2,     1,     5,     3,     3,     2,     1,     3,     1,
-       3,     1,     3,     3,     1,     3,     3,     3,     3,     1,
-       3,     3,     1,     3,     3,     3,     1,     1,     3,     2,
-       1,     1,     1,     3,     0,     5,     4,     7,     4,     5,
-       3,     1,     0,     2,     1,     3,     2,     1,     1,     1,
-       3,     2,     2,     2,     1,     0,     3,     0,     3,     0,
-       3,     2,     3,     6,     5
+       6,     6,     6,     6,     5,     5,     5,     3,     8,     7,
+       3,     3,     9,     8,     9,     8,     3,     1,     3,     1,
+       3,     0,     4,     0,     5,     3,     3,     2,     1,     5,
+       3,     3,     2,     1,     5,     3,     3,     2,     1,     3,
+       1,     3,     1,     3,     3,     1,     3,     3,     3,     3,
+       1,     3,     3,     1,     3,     3,     3,     1,     1,     3,
+       2,     1,     1,     1,     3,     4,     4,     7,     4,     5,
+       3,     1,     1,     1,     3,     2,     1,     1,     1,     3,
+       2,     2,     2,     1,     2,     2,     0,     3,     2,     3,
+       6,     5
 };
 
 
@@ -1954,981 +1868,1027 @@ yyreduce:
   switch (yyn)
     {
   case 2: /* code: declarationList  */
-#line 289 "SemanticAnalyzer.y"
-                            {}
-#line 1960 "y.tab.c"
+#line 290 "AST.y"
+                       {char* temp; temp=(char *)malloc(sizeof(char)*10000);strcat(temp,"#code#DL#");strcat(temp,(yyvsp[0].Str));strcat(temp,"@@@");(yyval.Str)=strdup(temp);fprintf(outFile,"%s",(yyval.Str));}
+#line 1874 "y.tab.c"
     break;
 
   case 3: /* declarationList: declarationStatement declarationList  */
-#line 291 "SemanticAnalyzer.y"
-                                                             {}
-#line 1966 "y.tab.c"
+#line 292 "AST.y"
+                                                        {char* temp; temp=(char *)malloc(sizeof(char)*10000);strcat(temp,"#DS#");strcat(temp,(yyvsp[-1].Str));strcat(temp,"@@#DL#");strcat(temp,(yyvsp[0].Str));strcat(temp,"@@");(yyval.Str)=strdup(temp);}
+#line 1880 "y.tab.c"
+    break;
+
+  case 4: /* declarationList: assignmentStatement declarationList  */
+#line 293 "AST.y"
+                                                                       {char* temp; temp=(char *)malloc(sizeof(char)*10000);strcat(temp,"#AS#");strcat(temp,(yyvsp[-1].Str));strcat(temp,"@@#DL#");strcat(temp,(yyvsp[0].Str));strcat(temp,"@@");(yyval.Str)=strdup(temp);}
+#line 1886 "y.tab.c"
     break;
 
   case 5: /* declarationList: declarationStatement  */
-#line 293 "SemanticAnalyzer.y"
-                                                        {}
-#line 1972 "y.tab.c"
+#line 294 "AST.y"
+                                                        {char* temp; temp=(char *)malloc(sizeof(char)*10000);strcat(temp,"#DS#");strcat(temp,(yyvsp[0].Str));strcat(temp,"@@");(yyval.Str)=strdup(temp);}
+#line 1892 "y.tab.c"
+    break;
+
+  case 6: /* declarationList: assignmentStatement  */
+#line 295 "AST.y"
+                                                       {char* temp; temp=(char *)malloc(sizeof(char)*10000);strcat(temp,"#AS#");strcat(temp,(yyvsp[0].Str));strcat(temp,"@@");(yyval.Str)=strdup(temp);}
+#line 1898 "y.tab.c"
     break;
 
   case 7: /* statements: specialStatement statements  */
-#line 296 "SemanticAnalyzer.y"
-                                              {}
-#line 1978 "y.tab.c"
+#line 297 "AST.y"
+                                         {char* temp; temp=(char *)malloc(sizeof(char)*10000);strcat(temp,"#SS#");strcat(temp,(yyvsp[-1].Str));strcat(temp,"@@#Satements#");strcat(temp,(yyvsp[0].Str));strcat(temp,"@@");(yyval.Str)=strdup(temp);}
+#line 1904 "y.tab.c"
     break;
 
   case 8: /* statements: basicStatement statements  */
-#line 297 "SemanticAnalyzer.y"
-                                               {}
-#line 1984 "y.tab.c"
+#line 298 "AST.y"
+                                               {char* temp; temp=(char *)malloc(sizeof(char)*10000);strcat(temp,"#BS#");strcat(temp,(yyvsp[-1].Str));strcat(temp,"@@#Satements#");strcat(temp,(yyvsp[0].Str));strcat(temp,"@@");(yyval.Str)=strdup(temp);}
+#line 1910 "y.tab.c"
     break;
 
-  case 14: /* $@1: %empty  */
-#line 304 "SemanticAnalyzer.y"
-                            {pushNewScope();}
-#line 1990 "y.tab.c"
+  case 9: /* statements: functionCall statements  */
+#line 299 "AST.y"
+                                             {char* temp; temp=(char *)malloc(sizeof(char)*10000);strcat(temp,"#FC#");strcat(temp,(yyvsp[-1].Str));strcat(temp,"@@#Satements#");strcat(temp,(yyvsp[0].Str));strcat(temp,"@@");(yyval.Str)=strdup(temp);}
+#line 1916 "y.tab.c"
     break;
 
-  case 22: /* forLoop1: OPBRAC forAssignStatement forExpStatement SEMICOLON forUpdateStatement CLBRAC SEMICOLON  */
-#line 310 "SemanticAnalyzer.y"
-                                                                                                          {popScope(); }
-#line 1996 "y.tab.c"
+  case 10: /* statements: %empty  */
+#line 300 "AST.y"
+                     {(yyval.Str)=strdup("#Epsilon@");}
+#line 1922 "y.tab.c"
     break;
 
-  case 23: /* $@2: %empty  */
-#line 311 "SemanticAnalyzer.y"
-                                                                                                   {pushNewScope();}
-#line 2002 "y.tab.c"
+  case 11: /* singleStatement: specialStatement  */
+#line 301 "AST.y"
+                                   {char* temp; temp=(char *)malloc(sizeof(char)*10000);strcat(temp,"#SS#");strcat(temp,(yyvsp[0].Str));strcat(temp,"@@");(yyval.Str)=strdup(temp);}
+#line 1928 "y.tab.c"
     break;
 
-  case 24: /* forLoop2: OPBRAC forAssignStatement forExpStatement SEMICOLON forUpdateStatement CLBRAC OPCUR $@2 inLoop CLCUR  */
-#line 311 "SemanticAnalyzer.y"
-                                                                                                                                  {popScope(); popScope(); }
-#line 2008 "y.tab.c"
+  case 12: /* singleStatement: basicStatement  */
+#line 302 "AST.y"
+                                    {char* temp; temp=(char *)malloc(sizeof(char)*10000);strcat(temp,"#BS#");strcat(temp,(yyvsp[0].Str));strcat(temp,"@@");(yyval.Str)=strdup(temp);}
+#line 1934 "y.tab.c"
     break;
 
-  case 25: /* $@3: %empty  */
-#line 312 "SemanticAnalyzer.y"
-                                                                                              {pushNewScope();}
-#line 2014 "y.tab.c"
+  case 13: /* singleStatement: functionCall  */
+#line 303 "AST.y"
+                                  {char* temp; temp=(char *)malloc(sizeof(char)*10000);strcat(temp,"#FC#");strcat(temp,(yyvsp[0].Str));strcat(temp,"@@");(yyval.Str)=strdup(temp);}
+#line 1940 "y.tab.c"
     break;
 
-  case 26: /* forLoop3: OPBRAC forAssignStatement forExpStatement SEMICOLON forUpdateStatement CLBRAC $@3 singleLoopStatement  */
-#line 312 "SemanticAnalyzer.y"
-                                                                                                                                    {popScope(); popScope(); }
-#line 2020 "y.tab.c"
+  case 14: /* specialStatement: ifStatement  */
+#line 306 "AST.y"
+                                               {char* temp; temp=(char *)malloc(sizeof(char)*10000);strcat(temp,"#IFS#");strcat(temp,(yyvsp[0].Str));strcat(temp,"@@");(yyval.Str)=strdup(temp);}
+#line 1946 "y.tab.c"
     break;
 
-  case 35: /* forAssignStatement: INT IDENTIFIER EQUAL expressionStatement SEMICOLON  */
-#line 323 "SemanticAnalyzer.y"
-                                                                                             { if(checkVariable((yyvsp[-3].Str),currScope,false,false)){printf("MULTIPLE DECLARATIONS %s\n\n",(yyvsp[-3].Str));return 1;}if(strcmp((yyvsp[-1].Str),strdup("i"))!=0){printf("Type Mismatch");return 1;}insertInTable((yyvsp[-3].Str),strdup("i"),strdup("i"),currScope, -1,NULL,sizes,instDim,false,false);}
-#line 2026 "y.tab.c"
+  case 15: /* specialStatement: whileLoop  */
+#line 307 "AST.y"
+                                             {char* temp; temp=(char *)malloc(sizeof(char)*10000);strcat(temp,"#WL#");strcat(temp,(yyvsp[0].Str));strcat(temp,"@@");(yyval.Str)=strdup(temp);}
+#line 1952 "y.tab.c"
     break;
 
-  case 36: /* forAssignStatement: INT IDENTIFIER EQUAL expressionStatement COMMA forAssignStatement  */
-#line 324 "SemanticAnalyzer.y"
-                                                                                                             { if(checkVariable((yyvsp[-4].Str),currScope,false,false)){printf("MULTIPLE DECLARATIONS %s\n\n",(yyvsp[-4].Str));return 1;}if(strcmp((yyvsp[-2].Str),strdup("i"))!=0){printf("Type Mismatch");return 1;}insertInTable((yyvsp[-4].Str),strdup("i"),strdup("i"),currScope, -1,NULL,sizes,instDim,false,false);}
-#line 2032 "y.tab.c"
+  case 16: /* specialStatement: switchStatement  */
+#line 308 "AST.y"
+                                                   {char* temp; temp=(char *)malloc(sizeof(char)*10000);strcat(temp,"#SWS#");strcat(temp,(yyvsp[0].Str));strcat(temp,"@@");(yyval.Str)=strdup(temp);}
+#line 1958 "y.tab.c"
     break;
 
-  case 37: /* forAssignStatement: CHAR IDENTIFIER EQUAL expressionStatement SEMICOLON  */
-#line 325 "SemanticAnalyzer.y"
-                                                                                              { if(checkVariable((yyvsp[-3].Str),currScope,false,false)){printf("MULTIPLE DECLARATIONS %s\n\n",(yyvsp[-3].Str));return 1;}if(strcmp((yyvsp[-1].Str),strdup("c"))!=0){printf("Type Mismatch");return 1;}insertInTable((yyvsp[-3].Str),strdup("c"),strdup("c"),currScope, -1,NULL,sizes,instDim,false,false);}
-#line 2038 "y.tab.c"
+  case 17: /* singleLoopStatement: specialStatement  */
+#line 319 "AST.y"
+                                       {char* temp; temp=(char *)malloc(sizeof(char)*10000);strcat(temp,"#SS#");strcat(temp,(yyvsp[0].Str));strcat(temp,"@@");(yyval.Str)=strdup(temp);}
+#line 1964 "y.tab.c"
     break;
 
-  case 38: /* forAssignStatement: CHAR IDENTIFIER EQUAL expressionStatement COMMA forAssignStatement  */
-#line 326 "SemanticAnalyzer.y"
-                                                                                                              { if(checkVariable((yyvsp[-4].Str),currScope,false,false)){printf("MULTIPLE DECLARATIONS %s\n\n",(yyvsp[-4].Str));return 1;}if(strcmp((yyvsp[-2].Str),strdup("c"))!=0){printf("Type Mismatch");return 1;}insertInTable((yyvsp[-4].Str),strdup("c"),strdup("c"),currScope, -1,NULL,sizes,instDim,false,false);}
-#line 2044 "y.tab.c"
+  case 18: /* singleLoopStatement: basicStatement  */
+#line 320 "AST.y"
+                                                         {char* temp; temp=(char *)malloc(sizeof(char)*10000);strcat(temp,"#BS#");strcat(temp,(yyvsp[0].Str));strcat(temp,"@@");(yyval.Str)=strdup(temp);}
+#line 1970 "y.tab.c"
     break;
 
-  case 42: /* forUpdateStatement: IDENTIFIER EQUAL expressionStatement COMMA forUpdateStatement  */
-#line 330 "SemanticAnalyzer.y"
-                                                                                        {int inst = getIdentifierIndex((yyvsp[-4].Str),false,false); if(inst==-1){printf("VARIABLE NOT FOUND");return 1;}if(strcmp(table[inst].dataType,(yyvsp[-2].Str))!=0){printf("VARIABLE NOT FOUND");return 1;}}
-#line 2050 "y.tab.c"
+  case 19: /* singleLoopStatement: functionCall  */
+#line 321 "AST.y"
+                                                       {char* temp; temp=(char *)malloc(sizeof(char)*10000);strcat(temp,"#FC#");strcat(temp,(yyvsp[0].Str));strcat(temp,"@@");(yyval.Str)=strdup(temp);}
+#line 1976 "y.tab.c"
     break;
 
-  case 43: /* forUpdateStatement: IDENTIFIER EQUAL expressionStatement  */
-#line 331 "SemanticAnalyzer.y"
-                                                                          {int inst = getIdentifierIndex((yyvsp[-2].Str),false,false); if(inst==-1){printf("VARIABLE NOT FOUND");return 1;}if(strcmp(table[inst].dataType,(yyvsp[0].Str))!=0){printf("VARIABLE NOT FOUND");return 1;}}
-#line 2056 "y.tab.c"
+  case 20: /* singleLoopStatement: BREAK SEMICOLON  */
+#line 322 "AST.y"
+                                                          {(yyval.Str)=strdup("#break@#;@");}
+#line 1982 "y.tab.c"
     break;
 
-  case 44: /* $@4: %empty  */
-#line 334 "SemanticAnalyzer.y"
-                             {pushNewScope();}
-#line 2062 "y.tab.c"
+  case 21: /* singleLoopStatement: CONTINUE SEMICOLON  */
+#line 323 "AST.y"
+                                                             {(yyval.Str)=strdup("#continue@#;@");}
+#line 1988 "y.tab.c"
     break;
 
-  case 46: /* $@5: %empty  */
-#line 335 "SemanticAnalyzer.y"
-                         {pushNewScope();}
-#line 2068 "y.tab.c"
+  case 22: /* singleLoopStatement: switchStatement  */
+#line 324 "AST.y"
+                                                          {char* temp; temp=(char *)malloc(sizeof(char)*10000);strcat(temp,"#SWS#");strcat(temp,(yyvsp[0].Str));strcat(temp,"@@");(yyval.Str)=strdup(temp);}
+#line 1994 "y.tab.c"
     break;
 
-  case 47: /* whileSuffix: OPCUR $@5 inLoop CLCUR  */
-#line 335 "SemanticAnalyzer.y"
-                                                       { popScope(); popScope(); }
-#line 2074 "y.tab.c"
+  case 23: /* singleLoopStatement: ifInLoopStatement  */
+#line 325 "AST.y"
+                                                            {char* temp; temp=(char *)malloc(sizeof(char)*10000);strcat(temp,"#IfLoop#");strcat(temp,(yyvsp[0].Str));strcat(temp,"@@");(yyval.Str)=strdup(temp);}
+#line 2000 "y.tab.c"
     break;
 
-  case 48: /* whileSuffix: SEMICOLON  */
-#line 336 "SemanticAnalyzer.y"
-                              {popScope(); printf("\nWHILE SEMICOLON \n");}
-#line 2080 "y.tab.c"
+  case 24: /* whileLoop: WHILE OPBRAC expressionStatement CLBRAC whileSuffix  */
+#line 338 "AST.y"
+                                                                {char* temp; temp=(char *)malloc(sizeof(char)*10000);strcat(temp,"#while@#(@#ES#");strcat(temp,(yyvsp[-2].Str));strcat(temp,"@@#)@#WSuffix#");strcat(temp,(yyvsp[0].Str));strcat(temp,"@@");(yyval.Str)=strdup(temp);}
+#line 2006 "y.tab.c"
     break;
 
-  case 49: /* $@6: %empty  */
-#line 337 "SemanticAnalyzer.y"
-                    {pushNewScope();}
-#line 2086 "y.tab.c"
+  case 25: /* whileSuffix: OPCUR inLoop CLCUR  */
+#line 340 "AST.y"
+                                 {char *temp;temp=(char *)malloc(sizeof(char)*10000);strcat(temp,"#{@#InL#");strcat(temp,(yyvsp[-1].Str));strcat(temp,"@@#}@");(yyval.Str)=strdup(temp);}
+#line 2012 "y.tab.c"
     break;
 
-  case 50: /* whileSuffix: $@6 singleLoopStatement  */
-#line 337 "SemanticAnalyzer.y"
-                                                          { popScope(); popScope();}
-#line 2092 "y.tab.c"
+  case 26: /* whileSuffix: SEMICOLON  */
+#line 341 "AST.y"
+                              {(yyval.Str)=strdup(";");}
+#line 2018 "y.tab.c"
     break;
 
-  case 51: /* inLoop: BREAK SEMICOLON inLoop  */
-#line 339 "SemanticAnalyzer.y"
-                                     {}
-#line 2098 "y.tab.c"
+  case 27: /* whileSuffix: singleLoopStatement  */
+#line 342 "AST.y"
+                                        {char* temp; temp=(char *)malloc(sizeof(char)*10000);strcat(temp,"#SLS#");strcat(temp,(yyvsp[0].Str));strcat(temp,"@@");(yyval.Str)=strdup(temp);}
+#line 2024 "y.tab.c"
     break;
 
-  case 52: /* inLoop: CONTINUE SEMICOLON inLoop  */
-#line 340 "SemanticAnalyzer.y"
-                                            {}
-#line 2104 "y.tab.c"
+  case 28: /* inLoop: BREAK SEMICOLON inLoop  */
+#line 344 "AST.y"
+                                {char* temp; temp=(char *)malloc(sizeof(char)*10000);strcat(temp,"#break@#;@#InL#");strcat(temp,(yyvsp[0].Str));strcat(temp,"@@");(yyval.Str)=strdup(temp);}
+#line 2030 "y.tab.c"
     break;
 
-  case 53: /* inLoop: specialStatement inLoop  */
-#line 341 "SemanticAnalyzer.y"
-                                          {}
-#line 2110 "y.tab.c"
+  case 29: /* inLoop: CONTINUE SEMICOLON inLoop  */
+#line 345 "AST.y"
+                                            {char* temp; temp=(char *)malloc(sizeof(char)*10000);strcat(temp,"#continue@#;@#InL#");strcat(temp,(yyvsp[0].Str));strcat(temp,"@@");(yyval.Str)=strdup(temp);}
+#line 2036 "y.tab.c"
     break;
 
-  case 54: /* inLoop: basicStatement inLoop  */
-#line 342 "SemanticAnalyzer.y"
-                                        {}
-#line 2116 "y.tab.c"
+  case 30: /* inLoop: specialStatement inLoop  */
+#line 346 "AST.y"
+                                          {char* temp; temp=(char *)malloc(sizeof(char)*10000);strcat(temp,"#SS#");strcat(temp,(yyvsp[-1].Str));strcat(temp,"@@#InL#");strcat(temp,(yyvsp[0].Str));strcat(temp,"@@");(yyval.Str)=strdup(temp);}
+#line 2042 "y.tab.c"
     break;
 
-  case 55: /* inLoop: functionCall inLoop  */
-#line 343 "SemanticAnalyzer.y"
-                                     {}
-#line 2122 "y.tab.c"
+  case 31: /* inLoop: basicStatement inLoop  */
+#line 347 "AST.y"
+                                        {char* temp; temp=(char *)malloc(sizeof(char)*10000);strcat(temp,"#BS#");strcat(temp,(yyvsp[-1].Str));strcat(temp,"@@#InL#");strcat(temp,(yyvsp[0].Str));strcat(temp,"@@");(yyval.Str)=strdup(temp);}
+#line 2048 "y.tab.c"
     break;
 
-  case 56: /* inLoop: ifInLoopStatement inLoop  */
-#line 344 "SemanticAnalyzer.y"
-                                           {}
-#line 2128 "y.tab.c"
+  case 32: /* inLoop: functionCall inLoop  */
+#line 348 "AST.y"
+                                       {char* temp; temp=(char *)malloc(sizeof(char)*10000);strcat(temp,"#FC#");strcat(temp,(yyvsp[-1].Str));strcat(temp,"@@#InL#");strcat(temp,(yyvsp[0].Str));strcat(temp,"@@");(yyval.Str)=strdup(temp);}
+#line 2054 "y.tab.c"
     break;
 
-  case 57: /* inLoop: switchStatement inLoop  */
-#line 345 "SemanticAnalyzer.y"
-                                         {}
-#line 2134 "y.tab.c"
+  case 33: /* inLoop: ifInLoopStatement inLoop  */
+#line 349 "AST.y"
+                                            {char* temp; temp=(char *)malloc(sizeof(char)*10000);strcat(temp,"#IfInL#");strcat(temp,(yyvsp[-1].Str));strcat(temp,"@@#InL#");strcat(temp,(yyvsp[0].Str));strcat(temp,"@@");(yyval.Str)=strdup(temp);}
+#line 2060 "y.tab.c"
     break;
 
-  case 58: /* inLoop: singleLoopStatement inLoop  */
-#line 346 "SemanticAnalyzer.y"
-                                             {}
-#line 2140 "y.tab.c"
+  case 34: /* inLoop: switchStatement inLoop  */
+#line 350 "AST.y"
+                                          {char* temp; temp=(char *)malloc(sizeof(char)*10000);strcat(temp,"#SS#");strcat(temp,(yyvsp[-1].Str));strcat(temp,"@@#InL#");strcat(temp,(yyvsp[0].Str));strcat(temp,"@@");(yyval.Str)=strdup(temp);}
+#line 2066 "y.tab.c"
     break;
 
-  case 59: /* $@7: %empty  */
-#line 347 "SemanticAnalyzer.y"
-                          {memset(printlistArray,'\0',sizeof(printlistArray));printindex = 0;}
-#line 2146 "y.tab.c"
+  case 35: /* inLoop: singleLoopStatement inLoop  */
+#line 351 "AST.y"
+                                              {char* temp; temp=(char *)malloc(sizeof(char)*10000);strcat(temp,"#SLS#");strcat(temp,(yyvsp[-1].Str));strcat(temp,"@@#InL#");strcat(temp,(yyvsp[0].Str));strcat(temp,"@@");(yyval.Str)=strdup(temp);}
+#line 2072 "y.tab.c"
     break;
 
-  case 61: /* $@8: %empty  */
-#line 348 "SemanticAnalyzer.y"
-                                  {memset(scanlistArray,'\0',sizeof(scanlistArray));scanindex = 0;}
-#line 2152 "y.tab.c"
+  case 36: /* inLoop: printer inLoop  */
+#line 352 "AST.y"
+                                  {char* temp; temp=(char *)malloc(sizeof(char)*10000);strcat(temp,"#printer#");strcat(temp,(yyvsp[-1].Str));strcat(temp,"@@#InL#");strcat(temp,(yyvsp[0].Str));strcat(temp,"@@");(yyval.Str)=strdup(temp);}
+#line 2078 "y.tab.c"
     break;
 
-  case 64: /* $@9: %empty  */
-#line 351 "SemanticAnalyzer.y"
-                                                              {pushNewScope();}
-#line 2158 "y.tab.c"
+  case 37: /* inLoop: Scanner inLoop  */
+#line 353 "AST.y"
+                                  {char* temp; temp=(char *)malloc(sizeof(char)*10000);strcat(temp,"#Scanner#");strcat(temp,(yyvsp[-1].Str));strcat(temp,"@@#InL#");strcat(temp,(yyvsp[0].Str));strcat(temp,"@@");(yyval.Str)=strdup(temp);}
+#line 2084 "y.tab.c"
     break;
 
-  case 65: /* $@10: %empty  */
-#line 351 "SemanticAnalyzer.y"
-                                                                                           {popScope();}
-#line 2164 "y.tab.c"
+  case 38: /* inLoop: %empty  */
+#line 354 "AST.y"
+                  {(yyval.Str)=strdup("#Epsilon@");}
+#line 2090 "y.tab.c"
     break;
 
-  case 67: /* $@11: %empty  */
-#line 352 "SemanticAnalyzer.y"
-                                                               {pushNewScope();}
-#line 2170 "y.tab.c"
+  case 39: /* ifStatement: IF OPBRAC expressionStatement CLBRAC OPCUR statements CLCUR ifContinuer  */
+#line 356 "AST.y"
+                                                                                      {char* temp; temp=(char *)malloc(sizeof(char)*10000);strcat(temp,"#IF@#(@#ES#");strcat(temp,(yyvsp[-5].Str));strcat(temp,"@@#)@#{@#Satements#");strcat(temp,(yyvsp[-2].Str));strcat(temp,"@@#}@#");strcat(temp,(yyvsp[0].Str));strcat(temp,"@");(yyval.Str)=strdup(temp);}
+#line 2096 "y.tab.c"
     break;
 
-  case 68: /* $@12: %empty  */
-#line 352 "SemanticAnalyzer.y"
-                                                                                                 {popScope();}
-#line 2176 "y.tab.c"
+  case 40: /* ifStatement: IF OPBRAC expressionStatement CLBRAC singleStatement ifContinuer  */
+#line 357 "AST.y"
+                                                                                           {char* temp; temp=(char *)malloc(sizeof(char)*10000);strcat(temp,"#IF@#(@#ES#");strcat(temp,(yyvsp[-3].Str));strcat(temp,"@@#)@#SingleS#");strcat(temp,(yyvsp[-1].Str));strcat(temp,"@@#");strcat(temp,(yyvsp[0].Str));strcat(temp,"@");(yyval.Str)=strdup(temp);}
+#line 2102 "y.tab.c"
     break;
 
-  case 72: /* $@13: %empty  */
-#line 356 "SemanticAnalyzer.y"
-                                                          {pushNewScope();}
-#line 2182 "y.tab.c"
+  case 41: /* ifContinuer: ES  */
+#line 359 "AST.y"
+                 {char* temp; temp=(char *)malloc(sizeof(char)*10000);strcat(temp,"#ES#");strcat(temp,(yyvsp[0].Str));strcat(temp,"@@");(yyval.Str)=strdup(temp);}
+#line 2108 "y.tab.c"
     break;
 
-  case 73: /* $@14: %empty  */
-#line 356 "SemanticAnalyzer.y"
-                                                                                       {popScope();}
-#line 2188 "y.tab.c"
+  case 42: /* ifContinuer: ifStatement  */
+#line 360 "AST.y"
+                                      {char* temp; temp=(char *)malloc(sizeof(char)*10000);strcat(temp,"#IfS#");strcat(temp,(yyvsp[0].Str));strcat(temp,"@@");(yyval.Str)=strdup(temp);}
+#line 2114 "y.tab.c"
     break;
 
-  case 75: /* $@15: %empty  */
-#line 357 "SemanticAnalyzer.y"
-                     {pushNewScope();}
-#line 2194 "y.tab.c"
+  case 43: /* ES: ELSE IF OPBRAC expressionStatement CLBRAC OPCUR statements CLCUR ES  */
+#line 362 "AST.y"
+                                                                         {char* temp; temp=(char *)malloc(sizeof(char)*10000);strcat(temp,"#elseif@#(@#ES#");strcat(temp,(yyvsp[-5].Str));strcat(temp,"@@#)@#{@#STMTS#");strcat(temp,(yyvsp[-2].Str));strcat(temp,"@@#}@#ES#");strcat(temp,(yyvsp[0].Str));strcat(temp,"@@");(yyval.Str)=strdup(temp);}
+#line 2120 "y.tab.c"
     break;
 
-  case 76: /* $@16: %empty  */
-#line 357 "SemanticAnalyzer.y"
-                                                  {popScope();}
-#line 2200 "y.tab.c"
+  case 44: /* ES: ELSE OPCUR statements CLCUR  */
+#line 363 "AST.y"
+                                      {char* temp; temp=(char *)malloc(sizeof(char)*10000);strcat(temp,"#else@#{@#STMTS#");strcat(temp,(yyvsp[-1].Str));strcat(temp,"@@#}@");(yyval.Str)=strdup(temp);}
+#line 2126 "y.tab.c"
     break;
 
-  case 78: /* $@17: %empty  */
-#line 358 "SemanticAnalyzer.y"
-                                                   {pushNewScope();}
-#line 2206 "y.tab.c"
+  case 45: /* ES: ELSE IF OPBRAC expressionStatement CLBRAC singleStatement ES  */
+#line 364 "AST.y"
+                                                                       {char* temp; temp=(char *)malloc(sizeof(char)*10000);strcat(temp,"#elseif@#(@#ES#");strcat(temp,(yyvsp[-3].Str));strcat(temp,"@@#)@#SS#");strcat(temp,(yyvsp[-1].Str));strcat(temp,"@@#ElS#");strcat(temp,(yyvsp[0].Str));strcat(temp,"@@");(yyval.Str)=strdup(temp);}
+#line 2132 "y.tab.c"
     break;
 
-  case 79: /* $@18: %empty  */
-#line 358 "SemanticAnalyzer.y"
-                                                                                     {popScope();}
-#line 2212 "y.tab.c"
+  case 46: /* ES: ELSE singleStatement  */
+#line 365 "AST.y"
+                               {char* temp; temp=(char *)malloc(sizeof(char)*10000);strcat(temp,"#else@#SS#");strcat(temp,(yyvsp[-1].Str));strcat(temp,"@@");(yyval.Str)=strdup(temp);}
+#line 2138 "y.tab.c"
     break;
 
-  case 81: /* $@19: %empty  */
-#line 359 "SemanticAnalyzer.y"
-               {pushNewScope();}
-#line 2218 "y.tab.c"
+  case 47: /* ES: %empty  */
+#line 365 "AST.y"
+                                                                                                                                                                          {(yyval.Str)=strdup("#Epsilon@");}
+#line 2144 "y.tab.c"
     break;
 
-  case 82: /* ES: ELSE $@19 singleStatement  */
-#line 359 "SemanticAnalyzer.y"
-                                                 {popScope();}
-#line 2224 "y.tab.c"
+  case 48: /* ifInLoopStatement: IF OPBRAC expressionStatement CLBRAC OPCUR inLoop CLCUR ifInLoopContinuer  */
+#line 367 "AST.y"
+                                                                                              {char* temp; temp=(char *)malloc(sizeof(char)*10000);strcat(temp,"#if@#(@#ES#");strcat(temp,(yyvsp[-5].Str));strcat(temp,"@@#)@#{@#IL#");strcat(temp,(yyvsp[-2].Str));strcat(temp,"@@#}@#IILC#");strcat(temp,(yyvsp[0].Str));strcat(temp,"@@");(yyval.Str)=strdup(temp);}
+#line 2150 "y.tab.c"
     break;
 
-  case 84: /* $@20: %empty  */
-#line 362 "SemanticAnalyzer.y"
-                                                                    {pushNewScope();}
-#line 2230 "y.tab.c"
+  case 49: /* ifInLoopContinuer: ESLoop  */
+#line 367 "AST.y"
+                                                                                                                                                                                                                                                                                                                                                           {char* temp; temp=(char *)malloc(sizeof(char)*10000);strcat(temp,"#ESL#");strcat(temp,(yyvsp[0].Str));strcat(temp,"@@");(yyval.Str)=strdup(temp);}
+#line 2156 "y.tab.c"
     break;
 
-  case 85: /* $@21: %empty  */
-#line 362 "SemanticAnalyzer.y"
-                                                                                             {popScope;}
-#line 2236 "y.tab.c"
+  case 50: /* ifInLoopContinuer: ifInLoopStatement  */
+#line 367 "AST.y"
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    {char* temp; temp=(char *)malloc(sizeof(char)*10000);strcat(temp,"#IILS#");strcat(temp,(yyvsp[0].Str));strcat(temp,"@@");(yyval.Str)=strdup(temp);}
+#line 2162 "y.tab.c"
     break;
 
-  case 89: /* $@22: %empty  */
-#line 366 "SemanticAnalyzer.y"
-                                                              {pushNewScope();}
-#line 2242 "y.tab.c"
+  case 51: /* ESLoop: ELSE IF OPBRAC expressionStatement CLBRAC OPCUR inLoop CLCUR ESLoop  */
+#line 369 "AST.y"
+                                                                             {char* temp; temp=(char *)malloc(sizeof(char)*10000);strcat(temp,"#elseif@#(@#ES#");strcat(temp,(yyvsp[-5].Str));strcat(temp,"@@#)@#IL#");strcat(temp,(yyvsp[-3].Str)); strcat(temp,"@@#ESL#");strcat(temp,(yyvsp[-2].Str));strcat(temp,"@@");(yyval.Str)=strdup(temp);}
+#line 2168 "y.tab.c"
     break;
 
-  case 90: /* $@23: %empty  */
-#line 366 "SemanticAnalyzer.y"
-                                                                                       {popScope();}
-#line 2248 "y.tab.c"
+  case 52: /* ESLoop: ELSE OPCUR inLoop CLCUR  */
+#line 370 "AST.y"
+                                  {char* temp; temp=(char *)malloc(sizeof(char)*10000);strcat(temp,"#else@#{@#IL#");strcat(temp,(yyvsp[-1].Str));strcat(temp,"@@#}@");(yyval.Str)=strdup(temp);}
+#line 2174 "y.tab.c"
     break;
 
-  case 92: /* $@24: %empty  */
-#line 367 "SemanticAnalyzer.y"
-                     {pushNewScope();}
-#line 2254 "y.tab.c"
+  case 53: /* ESLoop: ELSE IF OPBRAC expressionStatement CLBRAC singleLoopStatement ESLoop  */
+#line 371 "AST.y"
+                                                                              {char* temp; temp=(char *)malloc(sizeof(char)*10000);strcat(temp,"#elseif@#(@#ES#");strcat(temp,(yyvsp[-3].Str));strcat(temp,"@@#)@#SLS#");strcat(temp,(yyvsp[-1].Str)); strcat(temp,"@@#ESL#");strcat(temp,(yyvsp[0].Str));strcat(temp,"@@");(yyval.Str)=strdup(temp);}
+#line 2180 "y.tab.c"
     break;
 
-  case 93: /* $@25: %empty  */
-#line 367 "SemanticAnalyzer.y"
-                                              {popScope();}
-#line 2260 "y.tab.c"
+  case 54: /* ESLoop: ELSE singleLoopStatement  */
+#line 372 "AST.y"
+                                   {char* temp; temp=(char *)malloc(sizeof(char)*10000);strcat(temp,"#else@#SLS#");strcat(temp,(yyvsp[0].Str));strcat(temp,"@@");(yyval.Str)=strdup(temp);}
+#line 2186 "y.tab.c"
     break;
 
-  case 95: /* $@26: %empty  */
-#line 368 "SemanticAnalyzer.y"
-                                                   {pushNewScope();}
-#line 2266 "y.tab.c"
+  case 55: /* ESLoop: %empty  */
+#line 372 "AST.y"
+                                                                                                                                                                                  {(yyval.Str)=strdup("#Epsilon@");}
+#line 2192 "y.tab.c"
     break;
 
-  case 96: /* $@27: %empty  */
-#line 368 "SemanticAnalyzer.y"
-                                                                                         {popScope();}
-#line 2272 "y.tab.c"
+  case 56: /* switchStatement: SWITCH OPBRAC IDENTIFIER CLBRAC OPCUR caseStatements defaultStatement CLCUR  */
+#line 374 "AST.y"
+                                                                                              {char* temp; temp=(char *)malloc(sizeof(char)*10000); strcat(temp,"#switch@#(@#Identifier#");strcat(temp,(yyvsp[-5].Str));strcat(temp,"@@#(@#{@#CS#");strcat(temp,(yyvsp[-2].Str));strcat(temp,"@@#DS#");strcat(temp,(yyvsp[-1].Str));strcat(temp,"@@#}@");(yyval.Str)=strdup(temp);}
+#line 2198 "y.tab.c"
     break;
 
-  case 98: /* $@28: %empty  */
-#line 369 "SemanticAnalyzer.y"
-               {pushNewScope();}
-#line 2278 "y.tab.c"
+  case 57: /* caseStatements: caseStatementInt  */
+#line 376 "AST.y"
+                                  {char* temp; temp=(char *)malloc(sizeof(char)*10000);strcat(temp,"#CSI#");strcat(temp,(yyvsp[0].Str));strcat(temp,"@@");(yyval.Str)=strdup(temp);}
+#line 2204 "y.tab.c"
     break;
 
-  case 99: /* ESLoop: ELSE $@28 singleLoopStatement  */
-#line 369 "SemanticAnalyzer.y"
-                                                     {popScope();}
-#line 2284 "y.tab.c"
+  case 58: /* caseStatements: %empty  */
+#line 377 "AST.y"
+                                  {(yyval.Str)=strdup("#Epsilon@");}
+#line 2210 "y.tab.c"
     break;
 
-  case 101: /* $@29: %empty  */
-#line 372 "SemanticAnalyzer.y"
-                                                             {pushNewScope();}
-#line 2290 "y.tab.c"
+  case 59: /* caseStatementInt: caseInt caseStatementInt  */
+#line 379 "AST.y"
+                                            {char* temp; temp=(char *)malloc(sizeof(char)*10000);strcat(temp,"#CI#");strcat(temp,(yyvsp[-1].Str));strcat(temp,"@@#CSI#");strcat(temp,(yyvsp[0].Str));strcat(temp,"@@");(yyval.Str)=strdup(temp);}
+#line 2216 "y.tab.c"
     break;
 
-  case 102: /* $@30: %empty  */
-#line 372 "SemanticAnalyzer.y"
-                                                                                                               {popScope();}
-#line 2296 "y.tab.c"
+  case 60: /* caseStatementInt: %empty  */
+#line 380 "AST.y"
+                                          {(yyval.Str)=strdup("#Epsilon@");}
+#line 2222 "y.tab.c"
     break;
 
-  case 103: /* switchStatement: SWITCH OPBRAC IDENTIFIER CLBRAC OPCUR $@29 caseStatements defaultStatement $@30 CLCUR  */
-#line 372 "SemanticAnalyzer.y"
-                                                                                                                                   {}
-#line 2302 "y.tab.c"
+  case 61: /* caseInt: CASE OPBRAC INTVAL CLBRAC COLON caseContinuer  */
+#line 382 "AST.y"
+                                                        {char* temp; temp=(char *)malloc(sizeof(char)*10000);strcat(temp,"#case@#(@#");strcat(temp,(yyvsp[-4].Str));strcat(temp,"@#)@#:@#CC#");strcat(temp,(yyvsp[-2].Str));strcat(temp,"@@");(yyval.Str)=strdup(temp);}
+#line 2228 "y.tab.c"
     break;
 
-  case 105: /* caseStatements: %empty  */
-#line 373 "SemanticAnalyzer.y"
-                                         {}
-#line 2308 "y.tab.c"
+  case 62: /* caseInt: CASE INTVAL COLON caseContinuer  */
+#line 383 "AST.y"
+                                                  {char* temp; temp=(char *)malloc(sizeof(char)*10000);strcat(temp,"#case@#");strcat(temp,(yyvsp[-2].Str));strcat(temp,"@#:@#CC#");strcat(temp,(yyvsp[0].Str));strcat(temp,"@@");(yyval.Str)=strdup(temp);}
+#line 2234 "y.tab.c"
     break;
 
-  case 106: /* $@31: %empty  */
-#line 374 "SemanticAnalyzer.y"
-                        {pushNewScope();}
-#line 2314 "y.tab.c"
+  case 63: /* caseInt: CASE OPBRAC CHARVAL CLBRAC COLON caseContinuer  */
+#line 384 "AST.y"
+                                                                 {char* temp; temp=(char *)malloc(sizeof(char)*10000);strcat(temp,"#case@#(@#");strcat(temp,(yyvsp[-4].Str));strcat(temp,"@#)@#:@#CC#");strcat(temp,(yyvsp[-2].Str));strcat(temp,"@@");(yyval.Str)=strdup(temp);}
+#line 2240 "y.tab.c"
     break;
 
-  case 107: /* $@32: %empty  */
-#line 374 "SemanticAnalyzer.y"
-                                                  {pushNewScope();}
-#line 2320 "y.tab.c"
+  case 64: /* caseInt: CASE CHARVAL COLON caseContinuer  */
+#line 385 "AST.y"
+                                                   {char* temp; temp=(char *)malloc(sizeof(char)*10000);strcat(temp,"#case@#");strcat(temp,(yyvsp[-2].Str));strcat(temp,"@#:@#CC#");strcat(temp,(yyvsp[0].Str));strcat(temp,"@@");(yyval.Str)=strdup(temp);}
+#line 2246 "y.tab.c"
     break;
 
-  case 109: /* caseStatementInt: %empty  */
-#line 374 "SemanticAnalyzer.y"
-                                                                                       {}
-#line 2326 "y.tab.c"
+  case 65: /* caseContinuer: statements BREAK SEMICOLON  */
+#line 387 "AST.y"
+                                            {char* temp; temp=(char *)malloc(sizeof(char)*10000);strcat(temp,"#STMTS#");strcat(temp,(yyvsp[-2].Str));strcat(temp,"@@#break@#;@");(yyval.Str)=strdup(temp);}
+#line 2252 "y.tab.c"
     break;
 
-  case 111: /* caseInt: CASE INTVAL COLON caseContinuer  */
-#line 376 "SemanticAnalyzer.y"
-                                                  {}
-#line 2332 "y.tab.c"
+  case 66: /* caseContinuer: statements  */
+#line 388 "AST.y"
+                                             {char* temp; temp=(char *)malloc(sizeof(char)*10000);strcat(temp,"#STMTS#");strcat(temp,(yyvsp[0].Str));strcat(temp,"@@");(yyval.Str)=strdup(temp);}
+#line 2258 "y.tab.c"
     break;
 
-  case 116: /* $@33: %empty  */
-#line 381 "SemanticAnalyzer.y"
-                                      {pushNewScope();}
-#line 2338 "y.tab.c"
+  case 67: /* defaultStatement: DEFAULT COLON statements  */
+#line 390 "AST.y"
+                                            {char* temp; temp=(char *)malloc(sizeof(char)*10000);strcat(temp,"#default@#:@#STMTS#");strcat(temp,(yyvsp[0].Str));strcat(temp,"@@");(yyval.Str)=strdup(temp);}
+#line 2264 "y.tab.c"
     break;
 
-  case 117: /* defaultStatement: DEFAULT COLON $@33 statements  */
-#line 381 "SemanticAnalyzer.y"
-                                                                   {popScope();}
-#line 2344 "y.tab.c"
+  case 68: /* defaultStatement: %empty  */
+#line 391 "AST.y"
+                                          {(yyval.Str)=strdup("#Epsilon@");}
+#line 2270 "y.tab.c"
     break;
 
-  case 118: /* defaultStatement: %empty  */
-#line 382 "SemanticAnalyzer.y"
-                                          {}
-#line 2350 "y.tab.c"
+  case 69: /* basicStatements: basicStatement basicStatements  */
+#line 394 "AST.y"
+                                                 {char* temp; temp=(char *)malloc(sizeof(char)*10000);strcat(temp,"#BS#");strcat(temp,(yyvsp[-1].Str));strcat(temp,"@@#BSs#");strcat(temp,(yyvsp[0].Str));strcat(temp,"@@");(yyval.Str)=strdup(temp);}
+#line 2276 "y.tab.c"
     break;
 
-  case 121: /* basicStatement: expressionStatement  */
-#line 388 "SemanticAnalyzer.y"
-                                          {}
-#line 2356 "y.tab.c"
+  case 70: /* basicStatements: basicStatement  */
+#line 395 "AST.y"
+                                 {char* temp; temp=(char *)malloc(sizeof(char)*10000);strcat(temp,"#BS#");strcat(temp,(yyvsp[0].Str));strcat(temp,"@@");(yyval.Str)=strdup(temp);}
+#line 2282 "y.tab.c"
     break;
 
-  case 122: /* basicStatement: declarationStatement  */
-#line 389 "SemanticAnalyzer.y"
-                                       {}
-#line 2362 "y.tab.c"
+  case 71: /* basicStatement: expressionStatement  */
+#line 397 "AST.y"
+                                     {char* temp; temp=(char *)malloc(sizeof(char)*10000);strcat(temp,"#ES#");strcat(temp,(yyvsp[0].Str));strcat(temp,"@@");(yyval.Str)=strdup(temp);}
+#line 2288 "y.tab.c"
     break;
 
-  case 123: /* basicStatement: assignmentStatement  */
-#line 390 "SemanticAnalyzer.y"
-                                        {}
-#line 2368 "y.tab.c"
+  case 72: /* basicStatement: declarationStatement  */
+#line 398 "AST.y"
+                                       {char* temp; temp=(char *)malloc(sizeof(char)*10000);strcat(temp,"#DS#");strcat(temp,(yyvsp[0].Str));strcat(temp,"@@");(yyval.Str)=strdup(temp);}
+#line 2294 "y.tab.c"
     break;
 
-  case 125: /* assignmentStatement: IDENTIFIER EQUAL expressionStatement COMMA assignmentStatement  */
-#line 393 "SemanticAnalyzer.y"
-                                                                                          {int inst = getIdentifierIndex((yyvsp[-4].Str),false,false);if(inst>=0){if(strcmp(table[inst].dataType,(yyvsp[-2].Str))!=0){printf("Type Mismatch");return 1;}}else{printf("VARIABLE NOT FOUND"); return 1;}}
-#line 2374 "y.tab.c"
+  case 73: /* basicStatement: assignmentStatement  */
+#line 399 "AST.y"
+                                        {char* temp; temp=(char *)malloc(sizeof(char)*10000);strcat(temp,"#AS#");strcat(temp,(yyvsp[0].Str));strcat(temp,"@@");(yyval.Str)=strdup(temp);}
+#line 2300 "y.tab.c"
     break;
 
-  case 126: /* assignmentStatement: IDENTIFIER EQUAL expressionStatement SEMICOLON  */
-#line 394 "SemanticAnalyzer.y"
-                                                                 {int inst = getIdentifierIndex((yyvsp[-3].Str),false,false);if(inst>=0){if(strcmp(table[inst].dataType,(yyvsp[-1].Str))!=0){printf("Type Mismatch");return 1;}}else{printf("VARIABLE NOT FOUND"); return 1;}}
-#line 2380 "y.tab.c"
+  case 74: /* basicStatement: functionCall  */
+#line 399 "AST.y"
+                                                                                                                                                                                                       {char* temp; temp=(char *)malloc(sizeof(char)*10000);strcat(temp,"#FC#");strcat(temp,(yyvsp[0].Str));strcat(temp,"@@");(yyval.Str)=strdup(temp);}
+#line 2306 "y.tab.c"
     break;
 
-  case 127: /* assignmentStatement: IDENTIFIER dimension EQUAL expressionStatement COMMA assignmentStatement  */
-#line 395 "SemanticAnalyzer.y"
-                                                                                                   {int inst = getIdentifierIndex((yyvsp[-5].Str),true,false);if(inst>=0){if(strcmp(table[inst].dataType,(yyvsp[-3].Str))!=0){printf("Type Mismatch");return 1;}}else{printf("VARIABLE NOT FOUND"); return 1;}}
-#line 2386 "y.tab.c"
+  case 75: /* assignmentStatement: IDENTIFIER EQUAL expressionStatement COMMA assignmentStatement  */
+#line 401 "AST.y"
+                                                                                     {char* temp; temp=(char *)malloc(sizeof(char)*10000);strcat(temp,"#Identifier#");strcat(temp,(yyvsp[-4].Str));strcat(temp,"@@");strcat(temp,"#=@#ES#");strcat(temp,(yyvsp[-2].Str));strcat(temp,"@@#,@#AS#");strcat(temp,(yyvsp[0].Str));strcat(temp,"@@");(yyval.Str)=strdup(temp);}
+#line 2312 "y.tab.c"
     break;
 
-  case 128: /* assignmentStatement: IDENTIFIER dimension EQUAL expressionStatement SEMICOLON  */
-#line 396 "SemanticAnalyzer.y"
-                                                                           {int inst = getIdentifierIndex((yyvsp[-4].Str),true,false);if(inst>=0){if(strcmp(table[inst].dataType,(yyvsp[-2].Str))!=0){printf("Type Mismatch");return 1;}}else{printf("VARIABLE NOT FOUND"); return 1;}}
-#line 2392 "y.tab.c"
+  case 76: /* assignmentStatement: IDENTIFIER EQUAL expressionStatement SEMICOLON  */
+#line 402 "AST.y"
+                                                                 {char* temp; temp=(char *)malloc(sizeof(char)*10000);strcat(temp,"#Identifier#");strcat(temp,(yyvsp[-3].Str));strcat(temp,"@@");strcat(temp,"#=@#ES#");strcat(temp,(yyvsp[0].Str));strcat(temp,"@@#;@");(yyval.Str)=strdup(temp);}
+#line 2318 "y.tab.c"
     break;
 
-  case 129: /* printer: PRINTF OPBRAC STRING prattributes CLBRAC SEMICOLON  */
-#line 398 "SemanticAnalyzer.y"
-                                                                  {char* presentPrintString = strdup((yyvsp[-3].Str)); int len = strlen(presentPrintString); printf("s = %s \n",presentPrintString);printArray(printlistArray,printindex);populate(presentPrintString,len);if(!compareParam(instanceStringList,printlistArray,instanceStringIndex,printindex)){printf("PRINTF TYPE DONOT MATCH\n\n");return 1;}else{printf("Correct printf");}printf("PRINTF DONE");memset(instanceStringList,'\0',sizeof(instanceStringList));memset(printlistArray,'\0',sizeof(printlistArray));instanceStringIndex = 0;printindex = 0;}
-#line 2398 "y.tab.c"
+  case 77: /* assignmentStatement: IDENTIFIER dimension EQUAL expressionStatement COMMA assignmentStatement  */
+#line 402 "AST.y"
+                                                                                                                                                                                                                                                                                                                                                           {char* temp; temp=(char *)malloc(sizeof(char)*10000);strcat(temp,"#Identifier#");strcat(temp,(yyvsp[-5].Str));strcat(temp,"@@#Dim#");strcat(temp,(yyvsp[-4].Str));strcat(temp,"@@#=@#ES#");strcat(temp,(yyvsp[-2].Str));strcat(temp,"@@#,@#AS#");strcat(temp,(yyvsp[0].Str));strcat(temp,"@@");(yyval.Str)=strdup(temp);}
+#line 2324 "y.tab.c"
     break;
 
-  case 130: /* scanner: SCANF OPBRAC STRING scattributes CLBRAC SEMICOLON  */
-#line 399 "SemanticAnalyzer.y"
-                                                                 {char* presentPrintString = strdup((yyvsp[-3].Str)); int len = strlen(presentPrintString); printf("s = %s \n",presentPrintString);printArray(scanlistArray,scanindex);populate(presentPrintString,len);if(!compareParam(instanceStringList,scanlistArray,instanceStringIndex,scanindex)){printf("SCANF TYPE DONOT MATCH\n\n");return 1;}else{printf("Correct printf");}printf("PRINTF DONE");memset(instanceStringList,'\0',sizeof(instanceStringList));memset(scanlistArray,'\0',sizeof(scanlistArray));instanceStringIndex = 0;scanindex = 0;}
-#line 2404 "y.tab.c"
+  case 78: /* assignmentStatement: IDENTIFIER dimension EQUAL expressionStatement SEMICOLON  */
+#line 403 "AST.y"
+                                                                           {char* temp; temp=(char *)malloc(sizeof(char)*10000);strcat(temp,"#Identifier#");strcat(temp,(yyvsp[-4].Str));strcat(temp,"@@#Dim#");strcat(temp,(yyvsp[-3].Str));strcat(temp,"@@#=@#ES#");strcat(temp,(yyvsp[-1].Str));strcat(temp,"@@#;@");(yyval.Str)=strdup(temp);}
+#line 2330 "y.tab.c"
     break;
 
-  case 131: /* $@34: %empty  */
-#line 400 "SemanticAnalyzer.y"
-                                                             {presentFunctionType = strdup("i");}
-#line 2410 "y.tab.c"
+  case 79: /* printer: PRINTF OPBRAC STRING prattributes CLBRAC SEMICOLON  */
+#line 405 "AST.y"
+                                                             {char* temp; temp=(char *)malloc(sizeof(char)*10000);strcat(temp,"#printf@#(@#String#\\");strcat(temp,(yyvsp[-3].Str));strcat(temp,"\\\"@@#PrA#");strcat(temp,(yyvsp[-2].Str));strcat(temp,"@@#)@#;@");(yyval.Str)=strdup(temp);}
+#line 2336 "y.tab.c"
     break;
 
-  case 132: /* declarationStatement: INT IDENTIFIER OPBRAC parameters $@34 CLBRAC compoundStatements  */
-#line 400 "SemanticAnalyzer.y"
-                                                                                                                             {int inst = getIdentifierIndex((yyvsp[-5].Str),false,true); if(inst == -1){insertInTable((yyvsp[-5].Str),strdup("i"),strdup("i"),currScope,currentParamCount,instanceParamList,NULL,0,false,true);}else{printf("%s is already defined earlier\n",(yyvsp[-5].Str));return 1;}memset(instanceParamList, '\0',sizeof(instanceParamList)); currentParamCount = 0;}
-#line 2416 "y.tab.c"
+  case 80: /* Scanner: SCANF OPBRAC STRING scattributes CLBRAC SEMICOLON  */
+#line 406 "AST.y"
+                                                           {char* temp; temp=(char *)malloc(sizeof(char)*10000);strcat(temp,"#scanf@#(@#String#");strcat(temp,(yyvsp[-3].Str));strcat(temp,"@@#SCA#");strcat(temp,(yyvsp[-2].Str));strcat(temp,"@@#)@#;@");(yyval.Str)=strdup(temp);}
+#line 2342 "y.tab.c"
     break;
 
-  case 133: /* $@35: %empty  */
-#line 401 "SemanticAnalyzer.y"
-                                                      {presentFunctionType = strdup("c");}
-#line 2422 "y.tab.c"
+  case 81: /* declarationStatement: INT IDENTIFIER OPBRAC parameters CLBRAC compoundStatements  */
+#line 408 "AST.y"
+                                                                                   {char* temp; temp=(char *)malloc(sizeof(char)*10000);strcat(temp,"#int@#Identifier#");strcat(temp,(yyvsp[-4].Str));strcat(temp,"@@#(@#PS#");strcat(temp,(yyvsp[-2].Str));strcat(temp,"@@#)@#CS#");strcat(temp,(yyvsp[0].Str));strcat(temp,"@@");(yyval.Str)=strdup(temp);}
+#line 2348 "y.tab.c"
     break;
 
-  case 134: /* declarationStatement: CHAR IDENTIFIER OPBRAC parameters $@35 CLBRAC compoundStatements  */
-#line 401 "SemanticAnalyzer.y"
-                                                                                                                     {int inst = getIdentifierIndex((yyvsp[-5].Str),false,true); if(inst ==-1){insertInTable((yyvsp[-5].Str),strdup("c"),strdup("c"),currScope,currentParamCount,instanceParamList,NULL,0,false,true);} else{printf("%s is already defined earlier\n",(yyvsp[-5].Str));return 1;} memset(instanceParamList, '\0',sizeof(instanceParamList)); currentParamCount = 0;}
-#line 2428 "y.tab.c"
+  case 82: /* declarationStatement: CHAR IDENTIFIER OPBRAC parameters CLBRAC compoundStatements  */
+#line 409 "AST.y"
+                                                                                {char* temp; temp=(char *)malloc(sizeof(char)*10000);strcat(temp,"#char@#Identifier#");strcat(temp,(yyvsp[-4].Str));strcat(temp,"@@#(@#PS#");strcat(temp,(yyvsp[-2].Str));strcat(temp,"@@#)@#CS#");strcat(temp,(yyvsp[0].Str));strcat(temp,"@@");(yyval.Str)=strdup(temp);}
+#line 2354 "y.tab.c"
     break;
 
-  case 135: /* $@36: %empty  */
-#line 402 "SemanticAnalyzer.y"
-                                                             {presentFunctionType = strdup("f");}
-#line 2434 "y.tab.c"
+  case 83: /* declarationStatement: FLOAT IDENTIFIER OPBRAC parameters CLBRAC compoundStatements  */
+#line 410 "AST.y"
+                                                                                {char* temp; temp=(char *)malloc(sizeof(char)*10000);strcat(temp,"#float@#Identifier#");strcat(temp,(yyvsp[-4].Str));strcat(temp,"@@#(@#PS#");strcat(temp,(yyvsp[-2].Str));strcat(temp,"@@#)@#CS#");strcat(temp,(yyvsp[0].Str));strcat(temp,"@@");(yyval.Str)=strdup(temp);}
+#line 2360 "y.tab.c"
     break;
 
-  case 136: /* declarationStatement: FLOAT IDENTIFIER OPBRAC parameters CLBRAC $@36 compoundStatements  */
-#line 402 "SemanticAnalyzer.y"
-                                                                                                                     {int inst = getIdentifierIndex((yyvsp[-5].Str),false,true); if(inst == -1){insertInTable((yyvsp[-5].Str),strdup("f"),strdup("f"),currScope,currentParamCount,instanceParamList,NULL,0,false,true);} else{printf("%s is already defined earlier\n",(yyvsp[-5].Str));return 1;} memset(instanceParamList, '\0',sizeof(instanceParamList)); currentParamCount = 0;}
-#line 2440 "y.tab.c"
+  case 84: /* declarationStatement: INT IDENTIFIER OPBRAC CLBRAC compoundStatements  */
+#line 411 "AST.y"
+                                                                  {char* temp; temp=(char *)malloc(sizeof(char)*10000);strcat(temp,"#int@#Identifier#");strcat(temp,(yyvsp[-3].Str));strcat(temp,"@@#(@#)@#CS#");strcat(temp,(yyvsp[0].Str));strcat(temp,"@@");(yyval.Str)=strdup(temp);}
+#line 2366 "y.tab.c"
     break;
 
-  case 137: /* $@37: %empty  */
-#line 403 "SemanticAnalyzer.y"
-                                         {pushNewScope();}
-#line 2446 "y.tab.c"
+  case 85: /* declarationStatement: FLOAT IDENTIFIER OPBRAC CLBRAC compoundStatements  */
+#line 412 "AST.y"
+                                                                    {char* temp; temp=(char *)malloc(sizeof(char)*10000);strcat(temp,"#float@#Identifier#");strcat(temp,(yyvsp[-3].Str));strcat(temp,"@@#(@#)@#CS#");strcat(temp,(yyvsp[0].Str));strcat(temp,"@@");(yyval.Str)=strdup(temp);}
+#line 2372 "y.tab.c"
     break;
 
-  case 138: /* $@38: %empty  */
-#line 403 "SemanticAnalyzer.y"
-                                                          {presentFunctionType = strdup("i");}
-#line 2452 "y.tab.c"
+  case 86: /* declarationStatement: CHAR IDENTIFIER OPBRAC CLBRAC compoundStatements  */
+#line 413 "AST.y"
+                                                                   {char* temp; temp=(char *)malloc(sizeof(char)*10000);strcat(temp,"#char@#Identifier#");strcat(temp,(yyvsp[-3].Str));strcat(temp,"@@#(@#)@#CS#");strcat(temp,(yyvsp[0].Str));strcat(temp,"@@");(yyval.Str)=strdup(temp);}
+#line 2378 "y.tab.c"
     break;
 
-  case 139: /* declarationStatement: INT IDENTIFIER OPBRAC $@37 $@38 CLBRAC compoundStatements  */
-#line 403 "SemanticAnalyzer.y"
-                                                                                                                          {int inst = getIdentifierIndex((yyvsp[-5].Str),false,true); if(inst == -1){insertInTable((yyvsp[-5].Str),strdup("i"),strdup("i"),currScope,currentParamCount,instanceParamList,NULL,0,false,true);} else{printf("%s is already defined earlier\n",(yyvsp[-5].Str));return 1;} memset(instanceParamList, '\0',sizeof(instanceParamList)); currentParamCount = 0;}
-#line 2458 "y.tab.c"
+  case 87: /* declarationStatement: INT declarationListInt SEMICOLON  */
+#line 414 "AST.y"
+                                                   {char* temp; temp=(char *)malloc(sizeof(char)*10000);strcat(temp,"#int@#DLI#");strcat(temp,(yyvsp[-1].Str));strcat(temp,"@@#;@");(yyval.Str)=strdup(temp);}
+#line 2384 "y.tab.c"
     break;
 
-  case 140: /* $@39: %empty  */
-#line 404 "SemanticAnalyzer.y"
-                                           {pushNewScope();}
-#line 2464 "y.tab.c"
+  case 88: /* declarationStatement: CHAR IDENTIFIER BOXOPEN INTVAL BOXCLOSE EQUAL STRING SEMICOLON  */
+#line 415 "AST.y"
+                                                                                 {char* temp; temp=(char *)malloc(sizeof(char)*10000);strcat(temp,"#char@#Identifier#");strcat(temp,(yyvsp[-6].Str));strcat(temp,"@@#[@#");strcat(temp,(yyvsp[-4].Str));strcat(temp,"@#]@#=@#STRING#\\");strcat(temp,(yyvsp[-1].Str));strcat(temp,"\\\"@@#;@");(yyval.Str)=strdup(temp);}
+#line 2390 "y.tab.c"
     break;
 
-  case 141: /* $@40: %empty  */
-#line 404 "SemanticAnalyzer.y"
-                                                            {presentFunctionType = strdup("f");}
-#line 2470 "y.tab.c"
+  case 89: /* declarationStatement: CHAR IDENTIFIER BOXOPEN BOXCLOSE EQUAL STRING SEMICOLON  */
+#line 416 "AST.y"
+                                                                          {char* temp; temp=(char *)malloc(sizeof(char)*10000);strcat(temp,"#char@#Identifier#");strcat(temp,(yyvsp[-5].Str));strcat(temp,"@@#[@#]@#=@#STRING#\\");strcat(temp,(yyvsp[-1].Str));strcat(temp,"\\\"@@#;@");(yyval.Str)=strdup(temp);}
+#line 2396 "y.tab.c"
     break;
 
-  case 142: /* declarationStatement: FLOAT IDENTIFIER OPBRAC $@39 $@40 CLBRAC compoundStatements  */
-#line 404 "SemanticAnalyzer.y"
-                                                                                                                             {int inst = getIdentifierIndex((yyvsp[-5].Str),false,true); if(inst == -1){insertInTable((yyvsp[-5].Str),strdup("f"),strdup("f"),currScope,currentParamCount,instanceParamList,NULL,0,false,true);} else{printf("%s is already defined earlier\n",(yyvsp[-5].Str));return 1;} memset(instanceParamList, '\0',sizeof(instanceParamList)); currentParamCount = 0;}
-#line 2476 "y.tab.c"
+  case 90: /* declarationStatement: CHAR declarationListChar SEMICOLON  */
+#line 417 "AST.y"
+                                                     {char* temp; temp=(char *)malloc(sizeof(char)*10000);strcat(temp,"#char@#DLC#");strcat(temp,(yyvsp[-1].Str));strcat(temp,"@@#;@");(yyval.Str)=strdup(temp);}
+#line 2402 "y.tab.c"
     break;
 
-  case 143: /* $@41: %empty  */
-#line 405 "SemanticAnalyzer.y"
-                                          {pushNewScope();}
-#line 2482 "y.tab.c"
+  case 91: /* declarationStatement: FLOAT declarationListFloat SEMICOLON  */
+#line 418 "AST.y"
+                                                       {char* temp; temp=(char *)malloc(sizeof(char)*10000);strcat(temp,"#float@#DLF#");strcat(temp,(yyvsp[-1].Str));strcat(temp,"@@#;@");(yyval.Str)=strdup(temp);}
+#line 2408 "y.tab.c"
     break;
 
-  case 144: /* $@42: %empty  */
-#line 405 "SemanticAnalyzer.y"
-                                                           {presentFunctionType = strdup("c");}
-#line 2488 "y.tab.c"
+  case 92: /* declarationStatement: INT IDENTIFIER BOXOPEN BOXCLOSE EQUAL OPCUR arrayValues CLCUR SEMICOLON  */
+#line 419 "AST.y"
+                                                                                          {char* temp; temp=(char *)malloc(sizeof(char)*10000);strcat(temp,"#int@#Identifier#");strcat(temp,(yyvsp[-7].Str));strcat(temp,"@@#[@#]@#=@#{@#AV#");strcat(temp,(yyvsp[-2].Str));strcat(temp,"@@#}@#;@");(yyval.Str)=strdup(temp);}
+#line 2414 "y.tab.c"
     break;
 
-  case 145: /* declarationStatement: CHAR IDENTIFIER OPBRAC $@41 $@42 CLBRAC compoundStatements  */
-#line 405 "SemanticAnalyzer.y"
-                                                                                                                            {int inst = getIdentifierIndex((yyvsp[-5].Str),false,true); if(inst == -1){insertInTable((yyvsp[-5].Str),strdup("c"),strdup("c"),currScope,currentParamCount,instanceParamList,NULL,0,false,true);} else{printf("%s is already defined earlier\n",(yyvsp[-5].Str));return 1;} memset(instanceParamList, '\0',sizeof(instanceParamList)); currentParamCount = 0;}
-#line 2494 "y.tab.c"
+  case 93: /* declarationStatement: INT IDENTIFIER BOXOPEN BOXCLOSE EQUAL OPCUR CLCUR SEMICOLON  */
+#line 420 "AST.y"
+                                                                              {char* temp; temp=(char *)malloc(sizeof(char)*10000);strcat(temp,"#int@#Identifier#");strcat(temp,(yyvsp[-6].Str));strcat(temp,"@@#[@#]@#=@#{@#}@#;@");(yyval.Str)=strdup(temp);}
+#line 2420 "y.tab.c"
     break;
 
-  case 146: /* declarationStatement: INT declarationListInt SEMICOLON  */
-#line 406 "SemanticAnalyzer.y"
-                                                   {}
-#line 2500 "y.tab.c"
+  case 94: /* declarationStatement: FLOAT IDENTIFIER BOXOPEN BOXCLOSE EQUAL OPCUR arrayValuesF CLCUR SEMICOLON  */
+#line 420 "AST.y"
+                                                                                                                                                                                                                                                                                                                                     {char* temp; temp=(char *)malloc(sizeof(char)*10000);strcat(temp,"#float@#Identifier#");strcat(temp,(yyvsp[-7].Str));strcat(temp,"@@#[@#]@#=@#{@#AVF#");strcat(temp,(yyvsp[-2].Str));strcat(temp,"@@#}@#;@");(yyval.Str)=strdup(temp);}
+#line 2426 "y.tab.c"
     break;
 
-  case 147: /* declarationStatement: CHAR IDENTIFIER BOXOPEN INTVAL BOXCLOSE EQUAL STRING SEMICOLON  */
-#line 407 "SemanticAnalyzer.y"
-                                                                                 {if(checkVariable((yyvsp[-6].Str),currScope,true,true)){printf("MULTIPLE DECLARATIONS %s\n\n",(yyvsp[-6].Str));return 1;}insertInTable((yyvsp[-6].Str),strdup("c"),strdup("c"),currScope, -1,NULL,sizes,instDim,true,false);instDim=0;sizes[0]=-1;sizes[1]=-1;}
-#line 2506 "y.tab.c"
+  case 95: /* declarationStatement: FLOAT IDENTIFIER BOXOPEN BOXCLOSE EQUAL OPCUR CLCUR SEMICOLON  */
+#line 421 "AST.y"
+                                                                                {char* temp; temp=(char *)malloc(sizeof(char)*10000);strcat(temp,"#float@#Identifier#");strcat(temp,(yyvsp[-6].Str));strcat(temp,"@@#[@#]@#=@#{@#}@#;@");(yyval.Str)=strdup(temp);}
+#line 2432 "y.tab.c"
     break;
 
-  case 148: /* declarationStatement: CHAR IDENTIFIER BOXOPEN BOXCLOSE EQUAL STRING SEMICOLON  */
-#line 408 "SemanticAnalyzer.y"
-                                                                          {if(checkVariable((yyvsp[-5].Str),currScope,true,true)){printf("MULTIPLE DECLARATIONS %s\n\n",(yyvsp[-5].Str));return 1;}insertInTable((yyvsp[-5].Str),strdup("c"),strdup("c"),currScope, -1,NULL,sizes,instDim,true,false);instDim=0;sizes[0]=-1;sizes[1]=-1;}
-#line 2512 "y.tab.c"
+  case 96: /* arrayValuesF: FLOATVAL COMMA arrayValuesF  */
+#line 424 "AST.y"
+                                            {char* temp; temp=(char *)malloc(sizeof(char)*10000);strcat(temp,"#");strcat(temp,(yyvsp[-2].Str));strcat(temp,"@#,@#AVF#");strcat(temp,(yyvsp[0].Str));strcat(temp,"@@");(yyval.Str)=strdup(temp);}
+#line 2438 "y.tab.c"
     break;
 
-  case 151: /* declarationStatement: INT IDENTIFIER BOXOPEN BOXCLOSE EQUAL OPCUR arrayValues CLCUR SEMICOLON  */
-#line 411 "SemanticAnalyzer.y"
-                                                                                          {if(checkVariable((yyvsp[-7].Str),currScope,true,false)){printf("MULTIPLE DECLARATIONS %s\n\n",(yyvsp[-7].Str));return 1;}insertInTable((yyvsp[-7].Str),strdup("i"),strdup("i"),currScope, -1,NULL,sizes,instDim,true,false);instDim=0;sizes[0]=-1;sizes[1]=-1;}
-#line 2518 "y.tab.c"
+  case 97: /* arrayValuesF: FLOATVAL  */
+#line 425 "AST.y"
+                                   {char* temp; temp=(char *)malloc(sizeof(char)*10000);strcat(temp,"#");strcat(temp,(yyvsp[0].Str));strcat(temp,"@");(yyval.Str)=strdup(temp);}
+#line 2444 "y.tab.c"
     break;
 
-  case 152: /* declarationStatement: INT IDENTIFIER BOXOPEN BOXCLOSE EQUAL OPCUR CLCUR SEMICOLON  */
-#line 412 "SemanticAnalyzer.y"
-                                                                              {if(checkVariable((yyvsp[-6].Str),currScope,true,false)){printf("MULTIPLE DECLARATIONS %s\n\n",(yyvsp[-6].Str));return 1;}insertInTable((yyvsp[-6].Str),strdup("i"),strdup("i"),currScope, -1,NULL,sizes,instDim,true,false);instDim=0;sizes[0]=-1;sizes[1]=-1;}
-#line 2524 "y.tab.c"
+  case 98: /* arrayValues: INTVAL COMMA arrayValues  */
+#line 427 "AST.y"
+                                        {char* temp; temp=(char *)malloc(sizeof(char)*10000);strcat(temp,"#");strcat(temp,(yyvsp[-2].Str));strcat(temp,"@#,@#AV#");strcat(temp,(yyvsp[0].Str));strcat(temp,"@@");(yyval.Str)=strdup(temp);}
+#line 2450 "y.tab.c"
     break;
 
-  case 153: /* declarationStatement: FLOAT IDENTIFIER BOXOPEN BOXCLOSE EQUAL OPCUR arrayValuesF CLCUR SEMICOLON  */
-#line 413 "SemanticAnalyzer.y"
-                                                                                                     {if(checkVariable((yyvsp[-7].Str),currScope,true,false)){printf("MULTIPLE DECLARATIONS %s\n\n",(yyvsp[-7].Str));return 1;}insertInTable((yyvsp[-7].Str),strdup("f"),strdup("f"),currScope, -1,NULL,sizes,instDim,true,false);instDim=0;sizes[0]=-1;sizes[1]=-1;}
-#line 2530 "y.tab.c"
+  case 99: /* arrayValues: INTVAL  */
+#line 428 "AST.y"
+                                 {char* temp; temp=(char *)malloc(sizeof(char)*10000);strcat(temp,"#");strcat(temp,(yyvsp[0].Str));strcat(temp,"@");(yyval.Str)=strdup(temp);}
+#line 2456 "y.tab.c"
     break;
 
-  case 154: /* declarationStatement: FLOAT IDENTIFIER BOXOPEN BOXCLOSE EQUAL OPCUR CLCUR SEMICOLON  */
-#line 414 "SemanticAnalyzer.y"
-                                                                                {if(checkVariable((yyvsp[-6].Str),currScope,true,false)){printf("MULTIPLE DECLARATIONS %s\n\n",(yyvsp[-6].Str));return 1;}insertInTable((yyvsp[-6].Str),strdup("f"),strdup("f"),currScope, -1,NULL,sizes,instDim,true,false);instDim=0;sizes[0]=-1;sizes[1]=-1;}
-#line 2536 "y.tab.c"
+  case 100: /* prattributes: prattributes COMMA factor  */
+#line 430 "AST.y"
+                                         {char* temp; temp=(char *)malloc(sizeof(char)*10000);strcat(temp,"#PrA#");strcat(temp,(yyvsp[-2].Str));strcat(temp,"@@#,@#factor#");strcat(temp,(yyvsp[0].Str));strcat(temp,"@@");(yyval.Str)=strdup(temp);}
+#line 2462 "y.tab.c"
     break;
 
-  case 159: /* prattributes: prattributes COMMA factor  */
-#line 421 "SemanticAnalyzer.y"
-                                              {printlistArray[printindex++]=strdup((yyvsp[0].Str));printf("PRINT ARG ADDED\n");}
-#line 2542 "y.tab.c"
+  case 101: /* prattributes: %empty  */
+#line 431 "AST.y"
+                          {(yyval.Str)=strdup("#Epsilon@");}
+#line 2468 "y.tab.c"
     break;
 
-  case 161: /* scattributes: scattributes COMMA AMPERSAND factor  */
-#line 423 "SemanticAnalyzer.y"
-                                                        {scanlistArray[scanindex++]=strdup((yyvsp[0].Str)); printf("SCANF ARG ADDED\n");}
-#line 2548 "y.tab.c"
+  case 102: /* scattributes: COMMA AMPERSAND IDENTIFIER scattributes  */
+#line 433 "AST.y"
+                                                       {char* temp; temp=(char *)malloc(sizeof(char)*10000);strcat(temp,"#,@#&@#Identifier#");strcat(temp,(yyvsp[-1].Str));strcat(temp,"@@#,@#SCA#");strcat(temp,(yyvsp[0].Str));strcat(temp,"@@");(yyval.Str)=strdup(temp);}
+#line 2474 "y.tab.c"
     break;
 
-  case 163: /* declarationListInt: IDENTIFIER EQUAL expressionStatement COMMA declarationListInt  */
-#line 426 "SemanticAnalyzer.y"
-                                                                                        { if(checkVariable((yyvsp[-4].Str),currScope,false,false)){printf("MULTIPLE DECLARATIONS %s\n\n",(yyvsp[-4].Str));return 1;}if(strcmp((yyvsp[-2].Str),strdup("i"))!=0){printf("Type Mismatch");return 1;}insertInTable((yyvsp[-4].Str),strdup("i"),strdup("i"),currScope, -1,NULL,sizes,instDim,false,false);}
-#line 2554 "y.tab.c"
+  case 103: /* scattributes: %empty  */
+#line 434 "AST.y"
+                          {(yyval.Str)=strdup("#Epsilon@");}
+#line 2480 "y.tab.c"
     break;
 
-  case 164: /* declarationListInt: IDENTIFIER COMMA declarationListInt  */
-#line 427 "SemanticAnalyzer.y"
-                                                      { if(checkVariable((yyvsp[-2].Str),currScope,false,false)){printf("MULTIPLE DECLARATIONS %s\n\n",(yyvsp[-2].Str));return 1;}insertInTable((yyvsp[-2].Str),strdup("i"),strdup("i"),currScope, -1,NULL,sizes,instDim,false,false);}
-#line 2560 "y.tab.c"
+  case 104: /* declarationListInt: IDENTIFIER EQUAL expressionStatement COMMA declarationListInt  */
+#line 436 "AST.y"
+                                                                                   {char* temp; temp=(char *)malloc(sizeof(char)*10000);strcat(temp,"#Identifier#");strcat(temp,(yyvsp[-4].Str));strcat(temp,"@@#=@#ES#");strcat(temp,(yyvsp[-2].Str));strcat(temp,"@@#,@#DLI#");strcat(temp,(yyvsp[0].Str));strcat(temp,"@@");(yyval.Str)=strdup(temp);}
+#line 2486 "y.tab.c"
     break;
 
-  case 165: /* declarationListInt: IDENTIFIER EQUAL expressionStatement  */
-#line 428 "SemanticAnalyzer.y"
-                                                       { if(checkVariable((yyvsp[-2].Str),currScope,false,false)){printf("MULTIPLE DECLARATIONS %s\n\n",(yyvsp[-2].Str));return 1;}if(strcmp((yyvsp[0].Str),strdup("i"))!=0){printf("Type Mismatch");return 1;}insertInTable((yyvsp[-2].Str),strdup("i"),strdup("i"),currScope, -1,NULL,sizes,instDim,false,false);}
-#line 2566 "y.tab.c"
+  case 105: /* declarationListInt: IDENTIFIER COMMA declarationListInt  */
+#line 437 "AST.y"
+                                                      {char* temp; temp=(char *)malloc(sizeof(char)*10000);strcat(temp,"#Identifier#");strcat(temp,(yyvsp[-2].Str));strcat(temp,"@@#,@#DLI#");strcat(temp,(yyvsp[0].Str));strcat(temp,"@@");(yyval.Str)=strdup(temp);}
+#line 2492 "y.tab.c"
     break;
 
-  case 166: /* declarationListInt: IDENTIFIER dimension  */
-#line 429 "SemanticAnalyzer.y"
-                                        {if(checkVariable((yyvsp[-1].Str),currScope,true,false)){printf("MULTIPLE DECLARATIONS %s\n\n",(yyvsp[-1].Str));return 1;}insertInTable((yyvsp[-1].Str),strdup("i"),strdup("i"),currScope, -1,NULL,sizes,instDim,true,false);instDim=0;sizes[0]=-1;sizes[1]=-1;}
-#line 2572 "y.tab.c"
+  case 106: /* declarationListInt: IDENTIFIER EQUAL expressionStatement  */
+#line 438 "AST.y"
+                                                       {char* temp; temp=(char *)malloc(sizeof(char)*10000);strcat(temp,"#Identifier#");strcat(temp,(yyvsp[-2].Str));strcat(temp,"@@#=@#ES#");strcat(temp,(yyvsp[0].Str));strcat(temp,"@@");(yyval.Str)=strdup(temp);}
+#line 2498 "y.tab.c"
     break;
 
-  case 167: /* declarationListInt: IDENTIFIER  */
-#line 430 "SemanticAnalyzer.y"
-                             { if(checkVariable((yyvsp[0].Str),currScope,false,false)){printf("MULTIPLE DECLARATIONS %s\n\n",(yyvsp[0].Str));return 1;}insertInTable((yyvsp[0].Str),strdup("i"),strdup("i"),currScope, -1,NULL,sizes,instDim,false,false);}
-#line 2578 "y.tab.c"
+  case 107: /* declarationListInt: IDENTIFIER dimension  */
+#line 439 "AST.y"
+                                        {char* temp; temp=(char *)malloc(sizeof(char)*10000);strcat(temp,"#Identifier#");strcat(temp,(yyvsp[-1].Str));strcat(temp,"@@#Dim#");strcat(temp,(yyvsp[0].Str));strcat(temp,"@@");(yyval.Str)=strdup(temp);}
+#line 2504 "y.tab.c"
     break;
 
-  case 168: /* declarationListFloat: IDENTIFIER EQUAL expressionStatement COMMA declarationListFloat  */
-#line 432 "SemanticAnalyzer.y"
-                                                                                            { if(checkVariable((yyvsp[-4].Str),currScope,false,false)){printf("MULTIPLE DECLARATIONS %s\n\n",(yyvsp[-4].Str));return 1;}if(strcmp((yyvsp[-2].Str),strdup("f"))!=0){printf("Type Mismatch");return 1;}insertInTable((yyvsp[-4].Str),strdup("f"),strdup("f"),currScope, -1,NULL,sizes,instDim,false,false);}
-#line 2584 "y.tab.c"
+  case 108: /* declarationListInt: IDENTIFIER  */
+#line 440 "AST.y"
+                             {char* temp; temp=(char *)malloc(sizeof(char)*10000);strcat(temp,"#Identifier#");strcat(temp,(yyvsp[0].Str));strcat(temp,"@@");(yyval.Str)=strdup(temp);}
+#line 2510 "y.tab.c"
     break;
 
-  case 169: /* declarationListFloat: IDENTIFIER COMMA declarationListFloat  */
-#line 433 "SemanticAnalyzer.y"
-                                                        { if(checkVariable((yyvsp[-2].Str),currScope,false,false)){printf("MULTIPLE DECLARATIONS %s\n\n",(yyvsp[-2].Str));return 1;}insertInTable((yyvsp[-2].Str),strdup("f"),strdup("f"),currScope, -1,NULL,sizes,instDim,false,false);}
-#line 2590 "y.tab.c"
+  case 109: /* declarationListFloat: IDENTIFIER EQUAL expressionStatement COMMA declarationListFloat  */
+#line 442 "AST.y"
+                                                                                       {char* temp; temp=(char *)malloc(sizeof(char)*10000);strcat(temp,"#Identifier#");strcat(temp,(yyvsp[-4].Str));strcat(temp,"@@#=@#ES#");strcat(temp,(yyvsp[-2].Str));strcat(temp,"@@#,@#DLF#");strcat(temp,(yyvsp[0].Str));strcat(temp,"@@");(yyval.Str)=strdup(temp);}
+#line 2516 "y.tab.c"
     break;
 
-  case 170: /* declarationListFloat: IDENTIFIER EQUAL expressionStatement  */
-#line 434 "SemanticAnalyzer.y"
-                                                       { if(checkVariable((yyvsp[-2].Str),currScope,false,false)){printf("MULTIPLE DECLARATIONS %s\n\n",(yyvsp[-2].Str));return 1;}if(strcmp((yyvsp[0].Str),strdup("f"))!=0){printf("Type Mismatch");return 1;}insertInTable((yyvsp[-2].Str),strdup("f"),strdup("f"),currScope, -1,NULL,sizes,instDim,false,false);}
-#line 2596 "y.tab.c"
+  case 110: /* declarationListFloat: IDENTIFIER COMMA declarationListFloat  */
+#line 443 "AST.y"
+                                                        {char* temp; temp=(char *)malloc(sizeof(char)*10000);strcat(temp,"#Identifier#");strcat(temp,(yyvsp[-2].Str));strcat(temp,"@@#,@#DLF#");strcat(temp,(yyvsp[0].Str));strcat(temp,"@@");(yyval.Str)=strdup(temp);}
+#line 2522 "y.tab.c"
     break;
 
-  case 171: /* declarationListFloat: IDENTIFIER dimension  */
-#line 435 "SemanticAnalyzer.y"
-                                        {if(checkVariable((yyvsp[-1].Str),currScope,true,false)){printf("MULTIPLE DECLARATIONS %s\n\n",(yyvsp[-1].Str));return 1;}insertInTable((yyvsp[-1].Str),strdup("f"),strdup("f"),currScope, -1,NULL,sizes,instDim,true,false);instDim=0;sizes[0]=-1;sizes[1]=-1;}
-#line 2602 "y.tab.c"
+  case 111: /* declarationListFloat: IDENTIFIER EQUAL expressionStatement  */
+#line 444 "AST.y"
+                                                       {char* temp; temp=(char *)malloc(sizeof(char)*10000);strcat(temp,"#Identifier#");strcat(temp,(yyvsp[-2].Str));strcat(temp,"@@#=@#ES#");strcat(temp,(yyvsp[0].Str));strcat(temp,"@@");(yyval.Str)=strdup(temp);}
+#line 2528 "y.tab.c"
     break;
 
-  case 172: /* declarationListFloat: IDENTIFIER  */
-#line 436 "SemanticAnalyzer.y"
-                             { if(checkVariable((yyvsp[0].Str),currScope,false,false)){printf("MULTIPLE DECLARATIONS %s\n\n",(yyvsp[0].Str));return 1;}insertInTable((yyvsp[0].Str),strdup("f"),strdup("f"),currScope, -1,NULL,sizes,instDim,false,false);}
-#line 2608 "y.tab.c"
+  case 112: /* declarationListFloat: IDENTIFIER dimension  */
+#line 445 "AST.y"
+                                        {char* temp; temp=(char *)malloc(sizeof(char)*10000);strcat(temp,"#Identifier#");strcat(temp,(yyvsp[-1].Str));strcat(temp,"@@#Dim#");strcat(temp,(yyvsp[0].Str));strcat(temp,"@@");(yyval.Str)=strdup(temp);}
+#line 2534 "y.tab.c"
     break;
 
-  case 173: /* declarationListChar: IDENTIFIER EQUAL CHARVAL COMMA declarationListChar  */
-#line 438 "SemanticAnalyzer.y"
-                                                                              {if(checkVariable((yyvsp[-4].Str),currScope,false,false)){printf("MULTIPLE DECLARATIONS %s\n\n",(yyvsp[-4].Str));return 1;}insertInTable((yyvsp[-4].Str),strdup("c"),strdup("c"),currScope, -1,NULL,sizes,instDim,false,false);}
-#line 2614 "y.tab.c"
+  case 113: /* declarationListFloat: IDENTIFIER  */
+#line 446 "AST.y"
+                             {char* temp; temp=(char *)malloc(sizeof(char)*10000);strcat(temp,"#Identifier#");strcat(temp,(yyvsp[0].Str));strcat(temp,"@@");(yyval.Str)=strdup(temp);}
+#line 2540 "y.tab.c"
     break;
 
-  case 174: /* declarationListChar: IDENTIFIER COMMA declarationListChar  */
-#line 439 "SemanticAnalyzer.y"
-                                                       { if(checkVariable((yyvsp[-2].Str),currScope,false,false)){printf("MULTIPLE DECLARATIONS %s\n\n",(yyvsp[-2].Str));return 1;}insertInTable((yyvsp[-2].Str),strdup("c"),strdup("c"),currScope, -1,NULL,sizes,instDim,false,false);}
-#line 2620 "y.tab.c"
+  case 114: /* declarationListChar: IDENTIFIER EQUAL CHARVAL COMMA declarationListChar  */
+#line 448 "AST.y"
+                                                                          {char* temp; temp=(char *)malloc(sizeof(char)*10000);strcat(temp,"#Identifier#");strcat(temp,(yyvsp[-4].Str));strcat(temp,"@@#=@#");strcat(temp,(yyvsp[-2].Str));strcat(temp,"@#,@#DLC#");strcat(temp,(yyvsp[0].Str));strcat(temp,"@@");(yyval.Str)=strdup(temp);}
+#line 2546 "y.tab.c"
     break;
 
-  case 175: /* declarationListChar: IDENTIFIER EQUAL expressionStatement  */
-#line 440 "SemanticAnalyzer.y"
-                                                       {if(checkVariable((yyvsp[-2].Str),currScope,false,false)){printf("MULTIPLE DECLARATIONS %s\n\n",(yyvsp[-2].Str));return 1;}insertInTable((yyvsp[-2].Str),strdup("c"),strdup("c"),currScope, -1,NULL,sizes,instDim,false,false);}
-#line 2626 "y.tab.c"
+  case 115: /* declarationListChar: IDENTIFIER COMMA declarationListChar  */
+#line 449 "AST.y"
+                                                       {char* temp; temp=(char *)malloc(sizeof(char)*10000);strcat(temp,"#Identifier#");strcat(temp,(yyvsp[-2].Str));strcat(temp,"@@#,@#DLC#");strcat(temp,(yyvsp[0].Str));strcat(temp,"@@");(yyval.Str)=strdup(temp);}
+#line 2552 "y.tab.c"
     break;
 
-  case 176: /* declarationListChar: IDENTIFIER dimension  */
-#line 441 "SemanticAnalyzer.y"
-                                       {if(checkVariable((yyvsp[-1].Str),currScope,true,true)){printf("MULTIPLE DECLARATIONS %s\n\n",(yyvsp[-1].Str));return 1;}insertInTable((yyvsp[-1].Str),strdup("c"),strdup("c"),currScope, -1,NULL,sizes,instDim,true,false);instDim=0;sizes[0]=-1;sizes[1]=-1;}
-#line 2632 "y.tab.c"
+  case 116: /* declarationListChar: IDENTIFIER EQUAL expressionStatement  */
+#line 450 "AST.y"
+                                                       {char* temp; temp=(char *)malloc(sizeof(char)*10000);strcat(temp,"#Identifier#");strcat(temp,(yyvsp[-2].Str));strcat(temp,"@@#=@#ES#");strcat(temp,(yyvsp[0].Str));strcat(temp,"@@");(yyval.Str)=strdup(temp);}
+#line 2558 "y.tab.c"
     break;
 
-  case 177: /* declarationListChar: IDENTIFIER  */
-#line 442 "SemanticAnalyzer.y"
-                             { if(checkVariable((yyvsp[0].Str),currScope,false,false)){printf("MULTIPLE DECLARATIONS %s\n\n",(yyvsp[0].Str));return 1;}insertInTable((yyvsp[0].Str),strdup("c"),strdup("c"),currScope, -1,NULL,sizes,instDim,false,false);}
-#line 2638 "y.tab.c"
+  case 117: /* declarationListChar: IDENTIFIER dimension  */
+#line 451 "AST.y"
+                                       {char* temp; temp=(char *)malloc(sizeof(char)*10000);strcat(temp,"#Identifier#");strcat(temp,(yyvsp[-1].Str));strcat(temp,"@@#Dim#");strcat(temp,(yyvsp[0].Str));strcat(temp,"@@");(yyval.Str)=strdup(temp);}
+#line 2564 "y.tab.c"
     break;
 
-  case 178: /* expressionStatement: logicalExpression LOGICALOR expressionStatement  */
-#line 444 "SemanticAnalyzer.y"
-                                                                           {if(strcmp((yyvsp[-2].Str),(yyvsp[0].Str))==0){(yyval.Str) = strdup((yyvsp[-2].Str));}else{printf("TYPES dont match\n\n");return 1;}}
-#line 2644 "y.tab.c"
+  case 118: /* declarationListChar: IDENTIFIER  */
+#line 452 "AST.y"
+                             {char* temp; temp=(char *)malloc(sizeof(char)*10000);strcat(temp,"#Identifier#");strcat(temp,(yyvsp[0].Str));strcat(temp,"@@");(yyval.Str)=strdup(temp);}
+#line 2570 "y.tab.c"
     break;
 
-  case 179: /* expressionStatement: logicalExpression  */
-#line 445 "SemanticAnalyzer.y"
-                                    {(yyval.Str) = strdup((yyvsp[0].Str));}
-#line 2650 "y.tab.c"
+  case 119: /* expressionStatement: logicalExpression LOGICALOR expressionStatement  */
+#line 454 "AST.y"
+                                                                      {char* temp; temp=(char *)malloc(sizeof(char)*10000);strcat(temp,"#LE#");strcat(temp,(yyvsp[-2].Str));strcat(temp,"@@#||@#ES#");strcat(temp,(yyvsp[0].Str));strcat(temp,"@@");(yyval.Str)=strdup(temp);}
+#line 2576 "y.tab.c"
     break;
 
-  case 180: /* logicalExpression: expression LOGICALAND logicalExpression  */
-#line 447 "SemanticAnalyzer.y"
-                                                                 {if(strcmp((yyvsp[-2].Str),(yyvsp[0].Str))==0){(yyval.Str) = strdup((yyvsp[-2].Str));}else{printf("TYPES dont match\n\n");return 1;}}
-#line 2656 "y.tab.c"
+  case 120: /* expressionStatement: logicalExpression  */
+#line 455 "AST.y"
+                                    {char* temp; temp=(char *)malloc(sizeof(char)*10000);strcat(temp,"#LE#");strcat(temp,(yyvsp[0].Str));strcat(temp,"@@");(yyval.Str)=strdup(temp);}
+#line 2582 "y.tab.c"
     break;
 
-  case 181: /* logicalExpression: expression  */
-#line 448 "SemanticAnalyzer.y"
-                             {(yyval.Str) = strdup((yyvsp[0].Str));}
-#line 2662 "y.tab.c"
+  case 121: /* logicalExpression: expression LOGICALAND logicalExpression  */
+#line 457 "AST.y"
+                                                            {char* temp; temp=(char *)malloc(sizeof(char)*10000);strcat(temp,"#Exp#");strcat(temp,(yyvsp[-2].Str));strcat(temp,"@@#&&@#LE#");strcat(temp,(yyvsp[0].Str));strcat(temp,"@@");(yyval.Str)=strdup(temp);}
+#line 2588 "y.tab.c"
     break;
 
-  case 182: /* expression: relationalExpression EQUALS expression  */
-#line 450 "SemanticAnalyzer.y"
-                                                         {if(strcmp((yyvsp[-2].Str),(yyvsp[0].Str))==0){(yyval.Str) = strdup((yyvsp[-2].Str));}else{printf("TYPES dont match\n\n");return 1;}}
-#line 2668 "y.tab.c"
+  case 122: /* logicalExpression: expression  */
+#line 458 "AST.y"
+                             {char* temp; temp=(char *)malloc(sizeof(char)*10000);strcat(temp,"#Exp#");strcat(temp,(yyvsp[0].Str));strcat(temp,"@@");(yyval.Str)=strdup(temp);}
+#line 2594 "y.tab.c"
     break;
 
-  case 183: /* expression: relationalExpression NOTEQUAL expression  */
-#line 451 "SemanticAnalyzer.y"
-                                                           {if(strcmp((yyvsp[-2].Str),(yyvsp[0].Str))==0){(yyval.Str) = strdup((yyvsp[-2].Str));}else{printf("TYPES dont match\n\n");return 1;}}
-#line 2674 "y.tab.c"
+  case 123: /* expression: relationalExpression EQUALS expression  */
+#line 460 "AST.y"
+                                                    {char* temp; temp=(char *)malloc(sizeof(char)*10000);strcat(temp,"#RE#");strcat(temp,(yyvsp[-2].Str));strcat(temp,"@@#==@#Exp#");strcat(temp,(yyvsp[0].Str));strcat(temp,"@@");(yyval.Str)=strdup(temp);}
+#line 2600 "y.tab.c"
     break;
 
-  case 184: /* expression: relationalExpression  */
-#line 452 "SemanticAnalyzer.y"
-                                       {(yyval.Str) = strdup((yyvsp[0].Str));}
-#line 2680 "y.tab.c"
+  case 124: /* expression: relationalExpression NOTEQUAL expression  */
+#line 461 "AST.y"
+                                                           {char* temp; temp=(char *)malloc(sizeof(char)*10000);strcat(temp,"#RE#");strcat(temp,(yyvsp[-2].Str));strcat(temp,"@@#!=@#Exp#");strcat(temp,(yyvsp[0].Str));strcat(temp,"@@");(yyval.Str)=strdup(temp);}
+#line 2606 "y.tab.c"
     break;
 
-  case 185: /* relationalExpression: value GREATERTHAN relationalExpression  */
-#line 454 "SemanticAnalyzer.y"
-                                                                   {if(strcmp((yyvsp[-2].Str),(yyvsp[0].Str))==0){(yyval.Str) = strdup((yyvsp[-2].Str));}else{printf("TYPES dont match\n\n");return 1;}}
-#line 2686 "y.tab.c"
+  case 125: /* expression: relationalExpression  */
+#line 462 "AST.y"
+                                       {char* temp; temp=(char *)malloc(sizeof(char)*10000);strcat(temp,"#RE#");strcat(temp,(yyvsp[0].Str));strcat(temp,"@@");(yyval.Str)=strdup(temp);}
+#line 2612 "y.tab.c"
     break;
 
-  case 186: /* relationalExpression: value GREATERTHANEQUALTO relationalExpression  */
-#line 455 "SemanticAnalyzer.y"
-                                                                {if(strcmp((yyvsp[-2].Str),(yyvsp[0].Str))==0){(yyval.Str) = strdup((yyvsp[-2].Str));}else{printf("TYPES dont match\n\n");return 1;}}
-#line 2692 "y.tab.c"
+  case 126: /* relationalExpression: value GREATERTHAN relationalExpression  */
+#line 464 "AST.y"
+                                                              {char* temp; temp=(char *)malloc(sizeof(char)*10000);strcat(temp,"#value#");strcat(temp,(yyvsp[-2].Str));strcat(temp,"@@#>@#RE#");strcat(temp,(yyvsp[0].Str));strcat(temp,"@@");(yyval.Str)=strdup(temp);}
+#line 2618 "y.tab.c"
     break;
 
-  case 187: /* relationalExpression: value LESSTHAN relationalExpression  */
-#line 456 "SemanticAnalyzer.y"
-                                                      {if(strcmp((yyvsp[-2].Str),(yyvsp[0].Str))==0){(yyval.Str) = strdup((yyvsp[-2].Str));}else{printf("TYPES dont match\n\n");return 1;}}
-#line 2698 "y.tab.c"
+  case 127: /* relationalExpression: value GREATERTHANEQUALTO relationalExpression  */
+#line 465 "AST.y"
+                                                                {char* temp; temp=(char *)malloc(sizeof(char)*10000);strcat(temp,"#value#");strcat(temp,(yyvsp[-2].Str));strcat(temp,"@@#>=@#RE#");strcat(temp,(yyvsp[0].Str));strcat(temp,"@@");(yyval.Str)=strdup(temp);}
+#line 2624 "y.tab.c"
     break;
 
-  case 188: /* relationalExpression: value LESSTHANEQUALTO relationalExpression  */
-#line 457 "SemanticAnalyzer.y"
-                                                             {if(strcmp((yyvsp[-2].Str),(yyvsp[0].Str))==0){(yyval.Str) = strdup((yyvsp[-2].Str));}else{printf("TYPES dont match\n\n");return 1;}}
-#line 2704 "y.tab.c"
+  case 128: /* relationalExpression: value LESSTHAN relationalExpression  */
+#line 466 "AST.y"
+                                                      {char* temp; temp=(char *)malloc(sizeof(char)*10000);strcat(temp,"#value#");strcat(temp,(yyvsp[-2].Str));strcat(temp,"@@#<@#RE#");strcat(temp,(yyvsp[0].Str));strcat(temp,"@@");(yyval.Str)=strdup(temp);}
+#line 2630 "y.tab.c"
     break;
 
-  case 189: /* relationalExpression: value  */
-#line 458 "SemanticAnalyzer.y"
-                        {(yyval.Str) = strdup((yyvsp[0].Str));}
-#line 2710 "y.tab.c"
+  case 129: /* relationalExpression: value LESSTHANEQUALTO relationalExpression  */
+#line 467 "AST.y"
+                                                             {char* temp; temp=(char *)malloc(sizeof(char)*10000);strcat(temp,"#value#");strcat(temp,(yyvsp[-2].Str));strcat(temp,"@@#<=@#RE#");strcat(temp,(yyvsp[0].Str));strcat(temp,"@@");(yyval.Str)=strdup(temp);}
+#line 2636 "y.tab.c"
     break;
 
-  case 190: /* value: term ADD value  */
-#line 460 "SemanticAnalyzer.y"
-                            {if(strcmp((yyvsp[-2].Str),(yyvsp[0].Str))==0){(yyval.Str) = strdup((yyvsp[-2].Str));}else{printf("TYPES dont match\n\n");return 1;}}
-#line 2716 "y.tab.c"
+  case 130: /* relationalExpression: value  */
+#line 468 "AST.y"
+                        {char* temp; temp=(char *)malloc(sizeof(char)*10000);strcat(temp,"#value#");strcat(temp,(yyvsp[0].Str));strcat(temp,"@@");(yyval.Str)=strdup(temp);}
+#line 2642 "y.tab.c"
     break;
 
-  case 191: /* value: term SUB value  */
-#line 461 "SemanticAnalyzer.y"
-                         {if(strcmp((yyvsp[-2].Str),(yyvsp[0].Str))==0){(yyval.Str) = strdup((yyvsp[-2].Str));}else{printf("TYPES dont match\n\n");return 1;}}
-#line 2722 "y.tab.c"
+  case 131: /* value: term ADD value  */
+#line 470 "AST.y"
+                       {char* temp; temp=(char *)malloc(sizeof(char)*10000);strcat(temp,"#term#");strcat(temp,(yyvsp[-2].Str));strcat(temp,"@@#+@#value#");strcat(temp,(yyvsp[0].Str));strcat(temp,"@@");(yyval.Str)=strdup(temp);}
+#line 2648 "y.tab.c"
     break;
 
-  case 192: /* value: term  */
-#line 462 "SemanticAnalyzer.y"
-               {(yyval.Str) = strdup((yyvsp[0].Str));}
-#line 2728 "y.tab.c"
+  case 132: /* value: term SUB value  */
+#line 471 "AST.y"
+                         {char* temp; temp=(char *)malloc(sizeof(char)*10000);strcat(temp,"#term#");strcat(temp,(yyvsp[-2].Str));strcat(temp,"@@#-@#value#");strcat(temp,(yyvsp[0].Str));strcat(temp,"@@");(yyval.Str)=strdup(temp);}
+#line 2654 "y.tab.c"
     break;
 
-  case 193: /* term: factor MULT term  */
-#line 464 "SemanticAnalyzer.y"
-                             {if(strcmp((yyvsp[-2].Str),(yyvsp[0].Str))==0){(yyval.Str) = strdup((yyvsp[-2].Str));}else{printf("TYPES dont match\n\n");return 1;}}
-#line 2734 "y.tab.c"
+  case 133: /* value: term  */
+#line 472 "AST.y"
+               {char* temp; temp=(char *)malloc(sizeof(char)*10000);strcat(temp,"#term#");strcat(temp,(yyvsp[0].Str));strcat(temp,"@@");(yyval.Str)=strdup(temp);}
+#line 2660 "y.tab.c"
     break;
 
-  case 194: /* term: factor DIV term  */
-#line 465 "SemanticAnalyzer.y"
-                          {if(strcmp((yyvsp[-2].Str),(yyvsp[0].Str))==0){(yyval.Str) = strdup((yyvsp[-2].Str));}else{printf("TYPES dont match\n\n");return 1;}}
-#line 2740 "y.tab.c"
+  case 134: /* term: factor MULT term  */
+#line 474 "AST.y"
+                        {char* temp; temp=(char *)malloc(sizeof(char)*10000);strcat(temp,"#factor#");strcat(temp,(yyvsp[-2].Str));strcat(temp,"@@#*@#term#");strcat(temp,(yyvsp[0].Str));strcat(temp,"@@");(yyval.Str)=strdup(temp);}
+#line 2666 "y.tab.c"
     break;
 
-  case 195: /* term: factor MOD term  */
-#line 466 "SemanticAnalyzer.y"
-                          {if(strcmp((yyvsp[-2].Str),(yyvsp[0].Str))==0){(yyval.Str) = strdup((yyvsp[-2].Str));}else{printf("TYPES dont match\n\n");return 1;}}
-#line 2746 "y.tab.c"
+  case 135: /* term: factor DIV term  */
+#line 475 "AST.y"
+                          {char* temp; temp=(char *)malloc(sizeof(char)*10000);strcat(temp,"#factor#");strcat(temp,(yyvsp[-2].Str));strcat(temp,"@@#/@#term#");strcat(temp,(yyvsp[0].Str));strcat(temp,"@@");(yyval.Str)=strdup(temp);}
+#line 2672 "y.tab.c"
     break;
 
-  case 196: /* term: factor  */
-#line 467 "SemanticAnalyzer.y"
-                 {(yyval.Str) = strdup((yyvsp[0].Str));}
-#line 2752 "y.tab.c"
+  case 136: /* term: factor MOD term  */
+#line 476 "AST.y"
+                          {char* temp; temp=(char *)malloc(sizeof(char)*10000);strcat(temp,"#factor#");strcat(temp,(yyvsp[-2].Str));strcat(temp,"@@#%@#term#");strcat(temp,(yyvsp[0].Str));strcat(temp,"@@");(yyval.Str)=strdup(temp);}
+#line 2678 "y.tab.c"
     break;
 
-  case 197: /* factor: IDENTIFIER  */
-#line 469 "SemanticAnalyzer.y"
-                         {int inst = checkVariableScope((yyvsp[0].Str),currScope,false,false); if(inst!=-1){(yyval.Str) = strdup(table[inst].dataType);}else{printf("Variable %s not found\n\n",(yyvsp[0].Str));return 1;}}
-#line 2758 "y.tab.c"
+  case 137: /* term: factor  */
+#line 477 "AST.y"
+                 {char* temp; temp=(char *)malloc(sizeof(char)*10000);strcat(temp,"#factor#");strcat(temp,(yyvsp[0].Str));strcat(temp,"@@");(yyval.Str)=strdup(temp);}
+#line 2684 "y.tab.c"
     break;
 
-  case 198: /* factor: OPBRAC expressionStatement CLBRAC  */
-#line 470 "SemanticAnalyzer.y"
-                                            {(yyval.Str) = strdup((yyvsp[-1].Str));}
-#line 2764 "y.tab.c"
+  case 138: /* factor: IDENTIFIER  */
+#line 479 "AST.y"
+                    {char* temp; temp=(char *)malloc(sizeof(char)*10000);strcat(temp,"#Identifier#");strcat(temp,(yyvsp[0].Str));strcat(temp,"@@");(yyval.Str)=strdup(temp);}
+#line 2690 "y.tab.c"
     break;
 
-  case 199: /* factor: LOGICALNOT expressionStatement  */
-#line 471 "SemanticAnalyzer.y"
-                                         {(yyval.Str) = strdup((yyvsp[0].Str));}
-#line 2770 "y.tab.c"
+  case 139: /* factor: OPBRAC expressionStatement CLBRAC  */
+#line 480 "AST.y"
+                                            {char* temp; temp=(char *)malloc(sizeof(char)*10000);strcat(temp,"#(@#ES#");strcat(temp,(yyvsp[-1].Str));strcat(temp,"@@#)@");(yyval.Str)=strdup(temp);}
+#line 2696 "y.tab.c"
     break;
 
-  case 200: /* factor: CHARVAL  */
-#line 472 "SemanticAnalyzer.y"
-                  {(yyval.Str) = strdup("c");}
-#line 2776 "y.tab.c"
+  case 140: /* factor: LOGICALNOT expressionStatement  */
+#line 481 "AST.y"
+                                         {char* temp; temp=(char *)malloc(sizeof(char)*10000);strcat(temp,"#!@#ES#");strcat(temp,(yyvsp[0].Str));strcat(temp,"@@");(yyval.Str)=strdup(temp);}
+#line 2702 "y.tab.c"
     break;
 
-  case 201: /* factor: INTVAL  */
-#line 473 "SemanticAnalyzer.y"
-                 {(yyval.Str) = strdup("i");printf("INT VALS.. %d\n",yylval);}
-#line 2782 "y.tab.c"
+  case 141: /* factor: CHARVAL  */
+#line 482 "AST.y"
+                  {char* temp; temp=(char *)malloc(sizeof(char)*10000);strcat(temp,"#");strcat(temp,(yyvsp[0].Str));strcat(temp,"@");(yyval.Str)=strdup(temp);}
+#line 2708 "y.tab.c"
     break;
 
-  case 202: /* factor: FLOATVAL  */
-#line 474 "SemanticAnalyzer.y"
-                   {(yyval.Str) = strdup("f");}
-#line 2788 "y.tab.c"
+  case 142: /* factor: INTVAL  */
+#line 483 "AST.y"
+                 {char* temp; temp=(char *)malloc(sizeof(char)*10000);strcat(temp,"#");strcat(temp,(yyvsp[0].Str));strcat(temp,"@");(yyval.Str)=strdup(temp);}
+#line 2714 "y.tab.c"
     break;
 
-  case 203: /* factor: IDENTIFIER OPBRAC CLBRAC  */
-#line 475 "SemanticAnalyzer.y"
-                                   {memset(arglistArray,'\0',sizeof(arglistArray));argindex=0; int inst = getIdentifierIndex((yyvsp[-2].Str),false,true);if(compareParam(arglistArray,table[inst].parameterList,argindex,table[inst].parameterCount)){(yyval.Str) = strdup(table[inst].dataType);}else{printf("PARAMETERS DONT MATCH");return 1;}memset(arglistArray,'\0',sizeof(arglistArray));argindex=0;}
-#line 2794 "y.tab.c"
+  case 143: /* factor: FLOATVAL  */
+#line 484 "AST.y"
+                   {char* temp; temp=(char *)malloc(sizeof(char)*10000);strcat(temp,"#");strcat(temp,(yyvsp[0].Str));strcat(temp,"@");(yyval.Str)=strdup(temp);}
+#line 2720 "y.tab.c"
     break;
 
-  case 204: /* $@43: %empty  */
-#line 476 "SemanticAnalyzer.y"
-                            {memset(arglistArray,'\0',sizeof(arglistArray));argindex=0;}
-#line 2800 "y.tab.c"
+  case 144: /* factor: IDENTIFIER OPBRAC CLBRAC  */
+#line 484 "AST.y"
+                                                                                                                                                                                   {char* temp; temp=(char *)malloc(sizeof(char)*10000);strcat(temp,"#Identifier#");strcat(temp,(yyvsp[-2].Str));strcat(temp,"@@#(@#)@");(yyval.Str)=strdup(temp);}
+#line 2726 "y.tab.c"
     break;
 
-  case 205: /* factor: IDENTIFIER OPBRAC $@43 argList CLBRAC  */
-#line 476 "SemanticAnalyzer.y"
-                                                                                                        {int inst = getIdentifierIndex((yyvsp[-4].Str),false,true); if(compareParam(arglistArray,table[inst].parameterList,argindex,table[inst].parameterCount)){(yyval.Str) = strdup(table[inst].dataType);}else{printf("PARAMETERS DONT MATCH");return 1;}memset(arglistArray,'\0',sizeof(arglistArray));argindex=0;}
-#line 2806 "y.tab.c"
+  case 145: /* factor: IDENTIFIER OPBRAC argList CLBRAC  */
+#line 484 "AST.y"
+                                                                                                                                                                                                                                                                                                                                                                           {char* temp; temp=(char *)malloc(sizeof(char)*10000);strcat(temp,"#Identifier#");strcat(temp,(yyvsp[-3].Str));strcat(temp,"@@#(@#AL#");strcat(temp,(yyvsp[-1].Str));strcat(temp,"@@#)@");(yyval.Str)=strdup(temp);}
+#line 2732 "y.tab.c"
     break;
 
-  case 206: /* factor: IDENTIFIER BOXOPEN INTVAL BOXCLOSE  */
-#line 477 "SemanticAnalyzer.y"
-                                             {int inst = checkVariableScope((yyvsp[-3].Str),currScope,true,false); if(inst!=-1){(yyval.Str) = strdup(table[inst].dataType);}else{printf("Variable %s not found\n\n",(yyvsp[-3].Str));return 1;}}
-#line 2812 "y.tab.c"
+  case 146: /* factor: IDENTIFIER BOXOPEN INTVAL BOXCLOSE  */
+#line 485 "AST.y"
+                                             {char* temp; temp=(char *)malloc(sizeof(char)*10000);strcat(temp,"#Identifier#");strcat(temp,(yyvsp[-3].Str));strcat(temp,"@@");strcat(temp,"#[@#");strcat(temp,(yyvsp[-1].Str));strcat(temp,"@#]@");(yyval.Str)=strdup(temp);}
+#line 2738 "y.tab.c"
     break;
 
-  case 207: /* factor: IDENTIFIER BOXOPEN INTVAL BOXCLOSE BOXOPEN INTVAL BOXCLOSE  */
-#line 478 "SemanticAnalyzer.y"
-                                                                     {int inst = checkVariableScope((yyvsp[-6].Str),currScope,true,false); if(inst!=-1){(yyval.Str) = strdup(table[inst].dataType);}else{printf("Variable %s not found\n\n",(yyvsp[-6].Str));return 1;}memset(arglistArray,'\0',sizeof(arglistArray));argindex=0;}
-#line 2818 "y.tab.c"
+  case 147: /* factor: IDENTIFIER BOXOPEN INTVAL BOXCLOSE BOXOPEN INTVAL BOXCLOSE  */
+#line 486 "AST.y"
+                                                                     {char* temp; temp=(char *)malloc(sizeof(char)*10000);strcat(temp,"#Identifier#");strcat(temp,(yyvsp[-6].Str));strcat(temp,"@@");strcat(temp,"#[@#");strcat(temp,(yyvsp[-4].Str));strcat(temp,"@#]@#[@#");strcat(temp,(yyvsp[-1].Str));strcat(temp,"@#]@");(yyval.Str)=strdup(temp);}
+#line 2744 "y.tab.c"
     break;
 
-  case 208: /* functionCall: IDENTIFIER OPBRAC CLBRAC SEMICOLON  */
-#line 481 "SemanticAnalyzer.y"
-                                                      {memset(arglistArray,'\0',sizeof(arglistArray));argindex=0; int inst = getIdentifierIndex((yyvsp[-3].Str),false,true);if(compareParam(arglistArray,table[inst].parameterList,argindex,table[inst].parameterCount)){(yyval.Str) = strdup(table[inst].dataType);}else{printf("PARAMETERS DONT MATCH");return 1;}memset(arglistArray,'\0',sizeof(arglistArray));argindex=0;}
-#line 2824 "y.tab.c"
+  case 148: /* functionCall: IDENTIFIER OPBRAC CLBRAC SEMICOLON  */
+#line 489 "AST.y"
+                                                  {{char* temp; temp=(char *)malloc(sizeof(char)*10000);strcat(temp,"#Identifier#");strcat(temp,(yyvsp[-3].Str));strcat(temp,"@@#(@#;@");(yyval.Str)=strdup(temp);}}
+#line 2750 "y.tab.c"
     break;
 
-  case 209: /* functionCall: IDENTIFIER OPBRAC argList CLBRAC SEMICOLON  */
-#line 482 "SemanticAnalyzer.y"
-                                                               {int inst = getIdentifierIndex((yyvsp[-4].Str),false,true); if(compareParam(arglistArray,table[inst].parameterList,argindex,table[inst].parameterCount)){(yyval.Str) = strdup(table[inst].dataType);}else{printf("PARAMETERS DONT MATCH");return 1;}memset(arglistArray,'\0',sizeof(arglistArray));argindex=0;}
-#line 2830 "y.tab.c"
+  case 149: /* functionCall: IDENTIFIER OPBRAC argList CLBRAC SEMICOLON  */
+#line 490 "AST.y"
+                                                          {char* temp; temp=(char *)malloc(sizeof(char)*10000);strcat(temp,"#Identifier#");strcat(temp,(yyvsp[-4].Str));strcat(temp,"@@#(@#AL#");strcat(temp,(yyvsp[-2].Str));strcat(temp,"@@#)@#;@");(yyval.Str)=strdup(temp);}
+#line 2756 "y.tab.c"
     break;
 
-  case 210: /* argList: expressionStatement COMMA argList  */
-#line 485 "SemanticAnalyzer.y"
-                                                 {arglistArray[argindex++]=strdup((yyvsp[-2].Str));}
-#line 2836 "y.tab.c"
+  case 150: /* argList: expressionStatement COMMA argList  */
+#line 493 "AST.y"
+                                            {char* temp; temp=(char *)malloc(sizeof(char)*10000);strcat(temp,"#ES#");strcat(temp,(yyvsp[-2].Str));strcat(temp,"@@#,@#AL#");strcat(temp,(yyvsp[0].Str));strcat(temp,"@@");(yyval.Str)=strdup(temp);}
+#line 2762 "y.tab.c"
     break;
 
-  case 211: /* argList: expressionStatement  */
-#line 486 "SemanticAnalyzer.y"
-                                      {arglistArray[argindex++]=strdup((yyvsp[0].Str));}
-#line 2842 "y.tab.c"
+  case 151: /* argList: expressionStatement  */
+#line 494 "AST.y"
+                                      {char* temp; temp=(char *)malloc(sizeof(char)*10000);strcat(temp,"#ES#");strcat(temp,(yyvsp[0].Str));strcat(temp,"@@");(yyval.Str)=strdup(temp);}
+#line 2768 "y.tab.c"
     break;
 
-  case 212: /* $@44: %empty  */
-#line 488 "SemanticAnalyzer.y"
-                  {pushNewScope(); memset(instanceParamList, '\0',sizeof(instanceParamList)); currentParamCount = 0;}
-#line 2848 "y.tab.c"
+  case 152: /* parameters: paramContinuer  */
+#line 496 "AST.y"
+                            {char* temp; temp=(char *)malloc(sizeof(char)*10000);strcat(temp,"#PC#");strcat(temp,(yyvsp[0].Str));strcat(temp,"@@");(yyval.Str)=strdup(temp);}
+#line 2774 "y.tab.c"
     break;
 
-  case 215: /* paramContinuer: parameter COMMA paramContinuer  */
-#line 490 "SemanticAnalyzer.y"
-                                                                  {printf("FUNCTION params\n");}
-#line 2854 "y.tab.c"
+  case 153: /* paramContinuer: parameter  */
+#line 497 "AST.y"
+                           {char* temp; temp=(char *)malloc(sizeof(char)*10000);strcat(temp,"#P#");strcat(temp,(yyvsp[0].Str));strcat(temp,"@@");(yyval.Str)=strdup(temp);}
+#line 2780 "y.tab.c"
     break;
 
-  case 216: /* parameter: type IDENTIFIER  */
-#line 492 "SemanticAnalyzer.y"
-                                 {printf("FUNCTION param\n");insertInTable((yyvsp[0].Str),(yyvsp[-1].Str),(yyvsp[-1].Str),currScope,0,NULL,NULL,0,false,false);}
-#line 2860 "y.tab.c"
+  case 154: /* paramContinuer: parameter COMMA paramContinuer  */
+#line 498 "AST.y"
+                                                                  {char* temp; temp=(char *)malloc(sizeof(char)*10000);strcat(temp,"#P#");strcat(temp,(yyvsp[-2].Str));strcat(temp,"@@#,@#PC#");strcat(temp,(yyvsp[0].Str));strcat(temp,"@@");(yyval.Str)=strdup(temp);}
+#line 2786 "y.tab.c"
     break;
 
-  case 217: /* type: INT  */
-#line 494 "SemanticAnalyzer.y"
-                {(yyval.Str) = strdup("i");instanceParamList[currentParamCount++]=strdup("i");}
-#line 2866 "y.tab.c"
+  case 155: /* parameter: type IDENTIFIER  */
+#line 500 "AST.y"
+                            {char* temp; temp=(char *)malloc(sizeof(char)*10000);strcat(temp,"#type#");strcat(temp,(yyvsp[-1].Str));strcat(temp,"@@#Identifier#");strcat(temp,(yyvsp[0].Str));strcat(temp,"@@");(yyval.Str)=strdup(temp);}
+#line 2792 "y.tab.c"
     break;
 
-  case 218: /* type: FLOAT  */
-#line 495 "SemanticAnalyzer.y"
-                        {(yyval.Str) = strdup("f");instanceParamList[currentParamCount++]=strdup("f");}
-#line 2872 "y.tab.c"
+  case 156: /* type: INT  */
+#line 502 "AST.y"
+           {(yyval.Str)=strdup("#int@");}
+#line 2798 "y.tab.c"
     break;
 
-  case 219: /* type: CHAR  */
-#line 496 "SemanticAnalyzer.y"
-                        {(yyval.Str) = strdup("c");instanceParamList[currentParamCount++]=strdup("c");}
-#line 2878 "y.tab.c"
+  case 157: /* type: FLOAT  */
+#line 503 "AST.y"
+                        {(yyval.Str)=strdup("#float@");}
+#line 2804 "y.tab.c"
     break;
 
-  case 220: /* compoundStatements: OPCUR statementList CLCUR  */
-#line 498 "SemanticAnalyzer.y"
-                                                    {popScope();printf("FUNCTION statements\n");}
-#line 2884 "y.tab.c"
+  case 158: /* type: CHAR  */
+#line 504 "AST.y"
+                        {(yyval.Str)=strdup("#char@");}
+#line 2810 "y.tab.c"
     break;
 
-  case 225: /* $@45: %empty  */
-#line 504 "SemanticAnalyzer.y"
-                                          {memset(printlistArray,'\0',sizeof(printlistArray));
-		printindex = 0;}
-#line 2891 "y.tab.c"
+  case 159: /* compoundStatements: OPCUR statementList CLCUR  */
+#line 506 "AST.y"
+                                               {char* temp; temp=(char *)malloc(sizeof(char)*10000);strcat(temp,"#{@#SL#");strcat(temp,(yyvsp[-1].Str));strcat(temp,"@@#}@");(yyval.Str)=strdup(temp);}
+#line 2816 "y.tab.c"
     break;
 
-  case 227: /* $@46: %empty  */
-#line 506 "SemanticAnalyzer.y"
-                                          {memset(scanlistArray,'\0',sizeof(scanlistArray));
-		scanindex = 0;}
-#line 2898 "y.tab.c"
+  case 160: /* statementList: functionCall statementList  */
+#line 508 "AST.y"
+                                           {char* temp; temp=(char *)malloc(sizeof(char)*10000);strcat(temp,"#FC#");strcat(temp,(yyvsp[-1].Str));strcat(temp,"@@#SL#");strcat(temp,(yyvsp[0].Str));strcat(temp,"@@");(yyval.Str)=strdup(temp);}
+#line 2822 "y.tab.c"
     break;
 
-  case 230: /* returnDec: RETURN expressionStatement SEMICOLON  */
-#line 510 "SemanticAnalyzer.y"
-                                                      {if(strcmp(presentFunctionType,(yyvsp[-1].Str))==0){(yyval.Str) = strdup((yyvsp[-1].Str));}else{printf("INVALID RETURN");return 1;}}
-#line 2904 "y.tab.c"
+  case 161: /* statementList: basicStatements statementList  */
+#line 509 "AST.y"
+                                                                {char* temp; temp=(char *)malloc(sizeof(char)*10000);strcat(temp,"#BS#");strcat(temp,(yyvsp[-1].Str));strcat(temp,"@@#SL#");strcat(temp,(yyvsp[0].Str));strcat(temp,"@@");(yyval.Str)=strdup(temp);}
+#line 2828 "y.tab.c"
     break;
 
-  case 231: /* returnDec: RETURN SEMICOLON  */
-#line 511 "SemanticAnalyzer.y"
-                                           {int inst = getPresentFunctionIndex(); (yyval.Str) = strdup(presentFunctionType);}
-#line 2910 "y.tab.c"
+  case 162: /* statementList: specialStatement statementList  */
+#line 510 "AST.y"
+                                                                 {char* temp; temp=(char *)malloc(sizeof(char)*10000);strcat(temp,"#SS#");strcat(temp,(yyvsp[-1].Str));strcat(temp,"@@#SL#");strcat(temp,(yyvsp[0].Str));strcat(temp,"@@");(yyval.Str)=strdup(temp);}
+#line 2834 "y.tab.c"
     break;
 
-  case 232: /* dimension: BOXOPEN INTVAL BOXCLOSE  */
-#line 513 "SemanticAnalyzer.y"
-                                         {int i = (yyvsp[-1].Int); if(i<=0){printf("Array size has to be  Positive\n"); return 1;}sizes[0] = (yyvsp[-1].Int);instDim++;}
-#line 2916 "y.tab.c"
+  case 163: /* statementList: returnDec  */
+#line 511 "AST.y"
+                                            {char* temp; temp=(char *)malloc(sizeof(char)*10000);strcat(temp,"#RD#");strcat(temp,(yyvsp[0].Str));strcat(temp,"@@");(yyval.Str)=strdup(temp);}
+#line 2840 "y.tab.c"
     break;
 
-  case 233: /* dimension: BOXOPEN INTVAL BOXCLOSE BOXOPEN INTVAL BOXCLOSE  */
-#line 514 "SemanticAnalyzer.y"
-                                                                    {int a = (yyvsp[-4].Int); int b = (yyvsp[-1].Int); if(a<=0||b<=0){printf("Array sizes has to be  Positive\n"); return 1;}sizes[0] = (yyvsp[-4].Int); sizes[1] = (yyvsp[-1].Int);instDim+=2;}
-#line 2922 "y.tab.c"
+  case 164: /* statementList: printer statementList  */
+#line 512 "AST.y"
+                                                        {char* temp; temp=(char *)malloc(sizeof(char)*10000);strcat(temp,"#printer#");strcat(temp,(yyvsp[-1].Str));strcat(temp,"@@#SL#");strcat(temp,(yyvsp[0].Str));strcat(temp,"@@");(yyval.Str)=strdup(temp);}
+#line 2846 "y.tab.c"
     break;
 
-  case 234: /* dimension: BOXOPEN BOXCLOSE BOXOPEN INTVAL BOXCLOSE  */
-#line 515 "SemanticAnalyzer.y"
-                                                             {int i = (yyvsp[-1].Int); if(i<=0){printf("Array sizes has to be  Positive\n"); return 1;}sizes[1] = (yyvsp[-1].Int);instDim+=2;}
-#line 2928 "y.tab.c"
+  case 165: /* statementList: Scanner statementList  */
+#line 513 "AST.y"
+                                                        {char* temp; temp=(char *)malloc(sizeof(char)*10000);strcat(temp,"#Scanner#");strcat(temp,(yyvsp[-1].Str));strcat(temp,"@@#SL#");strcat(temp,(yyvsp[0].Str));strcat(temp,"@@");(yyval.Str)=strdup(temp);}
+#line 2852 "y.tab.c"
     break;
 
+  case 166: /* statementList: %empty  */
+#line 514 "AST.y"
+                                  {(yyval.Str)=strdup("#Epsilon@");}
+#line 2858 "y.tab.c"
+    break;
+
+  case 167: /* returnDec: RETURN expressionStatement SEMICOLON  */
+#line 516 "AST.y"
+                                                 {char* temp; temp=(char *)malloc(sizeof(char)*10000);strcat(temp,"#return@#ES#");strcat(temp,(yyvsp[-2].Str));strcat(temp,"@@#;@");(yyval.Str)=strdup(temp);}
+#line 2864 "y.tab.c"
+    break;
+
+  case 168: /* returnDec: RETURN SEMICOLON  */
+#line 517 "AST.y"
+                                           {(yyval.Str)=strdup("#return@#;@");}
+#line 2870 "y.tab.c"
+    break;
+
+  case 169: /* dimension: BOXOPEN INTVAL BOXCLOSE  */
+#line 519 "AST.y"
+                                    {char* temp; temp=(char *)malloc(sizeof(char)*10000);strcat(temp,"#[@#");strcat(temp,(yyvsp[-1].Str));strcat(temp,"@#]@");(yyval.Str)=strdup(temp);}
+#line 2876 "y.tab.c"
+    break;
+
+  case 170: /* dimension: BOXOPEN INTVAL BOXCLOSE BOXOPEN INTVAL BOXCLOSE  */
+#line 520 "AST.y"
+                                                                    {char* temp; temp=(char *)malloc(sizeof(char)*10000);strcat(temp,"#[@#");strcat(temp,(yyvsp[-4].Str));strcat(temp,"@#]@#[@#");strcat(temp,(yyvsp[-1].Str));strcat(temp,"@#]@");(yyval.Str)=strdup(temp);}
+#line 2882 "y.tab.c"
+    break;
+
+  case 171: /* dimension: BOXOPEN BOXCLOSE BOXOPEN INTVAL BOXCLOSE  */
+#line 521 "AST.y"
+                                                             {char* temp; temp=(char *)malloc(sizeof(char)*10000);strcat(temp,"#[@#]@#[@#");strcat(temp,(yyvsp[-1].Str));strcat(temp,"@#]@");(yyval.Str)=strdup(temp);}
+#line 2888 "y.tab.c"
+    break;
+
 
-#line 2932 "y.tab.c"
+#line 2892 "y.tab.c"
 
       default: break;
     }
@@ -3121,23 +3081,21 @@ yyreturnlab:
   return yyresult;
 }
 
-#line 516 "SemanticAnalyzer.y"
+#line 522 "AST.y"
 
-      
-     #include "lex.yy.c"
-     int main(){
-     	yyin = fopen("./Test Cases/input.txt","r");
-    	availableScopes[0] = 0;
-     	if(!yyparse())
-     	{
-     		printf("\n\nParsed Successfully\n\n");
-			printTable();
-     	}
-     	else 
-     		printf("\n\nParsing Failed\n\n");
-    	
-			
-     	exit(0);
-     }
-      
-      
+ 
+#include "lex.yy.c"
+int main(){
+	yyin = fopen("./Test Cases/inputSWITCH.txt","r");	
+	availableScopes[0] = 0;
+	if(!yyparse())
+	{
+		printf("\n\nParsed Successfully\n\n");		
+		// printTable();
+	}
+	else 
+		printf("\n\nParsing Failed\n\n");			
+	exit(0);
+}
+     
+     

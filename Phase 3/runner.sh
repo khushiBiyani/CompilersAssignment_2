@@ -1,4 +1,4 @@
-yacc -d SemanticAnalyzer.y
-flex SemanticAnalyzer.l
+yacc -d AST.y
+flex AST.l
 g++ y.tab.c -ll -ll
 ./a.out

@@ -33,9 +33,13 @@ int main(int u, char t, float p){
     for(int i = 0;i<5;i=i+2){
         int y;
     }
+    for(int i = 0;i<5;i=i+2);
     y = p;
+
+    for(int i = 0;i<5;i=i+2)
+        y = p;
     float up = rf();
-    //char iot = 'a',poi = pot(reds,reds,yup,t);
+    char iot = 'a',poi = pot(reds,reds,yup,t);
 
     char ap;
     return u;
