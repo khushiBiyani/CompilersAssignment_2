@@ -2,12 +2,11 @@
     #include <stdio.h>
     #include <stdlib.h>
     #include <vector>
-    using namespace std;
     int pCount=0;
     int sCount=0;
-    vector<int> invalidPrintfLine;
-    vector<int> invalidScanfLine;
-    int lineNum=1;
+    std::vector<int> invalidPrintfLine;
+    std::vector<int> invalidScanfLine;
+    int line_count=1;
 %}
 %x COMMENT 
 %x SLCOMMENT 
@@ -16,64 +15,65 @@
 %x SCAN
 %x SCANFTEXT
 %% 
-[-]?[0-9]+([eE][+-]?[1-9][0-9]*)? {printf("%s - INTEGER\n",yytext);}
-[-]?[0-9]*\.[0-9]+([eE][+-]?[1-9][0-9]*)? {printf("\tFLOAT\n",yytext);}
-int {printf("%s - Integer Keyword\n",yytext);}
-else {printf("%s - Else Keyword\n",yytext);}
-char {printf("%s - Char Keyword\n",yytext);}
-float {printf("%s - Float Keyword\n",yytext);}
-break {printf("%s - Break Keyword\n",yytext);}
-continue {printf("%s - Continue Keyword\n",yytext);}
-if {printf("%s - If Keyword\n",yytext);}
-while {printf("%s - While Keyword\n",yytext);}
-for {printf("%s - For Keyword\n",yytext);}
-switch {printf("%s - Switch Keyword\n",yytext);}
-case {printf("%s - Case Keyword\n",yytext);}
-return {printf("%s - Return Keyword\n",yytext);}
-default {printf("%s - Default Keyword\n",yytext);}
-main {printf("%s - Main Keyword\n",yytext);}
- 
-printf/\(\".*\"(",".*)*");" {printf("\n%s - Printf keyword\n",yytext); pCount=0; BEGIN PRINT;}
-"printf".*; {invalidPrintfLine.push_back(lineNum);}
-<PRINT>"(" {printf("\n%s - Open Round Bracket\n", yytext);}
+\n {line_count=line_count+1;}
+[-]?[0-9]+([eE][+-]?[1-9][0-9]*)? {printf("%d\t\t%s\t\tInteger\n",line_count,yytext);}
+[-]?[0-9]*\.[0-9]+([eE][+-]?[1-9][0-9]*)? {printf("%d\t\t%s\t\tFloat\n",line_count,yytext);}
+int {printf("%d\t\t%s\t\tInteger Keyword\n",line_count,yytext);}
+else {printf("%d\t\t%s\t\tElse Keyword\n",line_count,yytext);}
+char {printf("%d\t\t%s\t\tChar Keyword\n",line_count,yytext);}
+float {printf("%d\t\t%s\t\tFloat Keyword\n",line_count,yytext);}
+break {printf("%d\t\t%s\t\tBreak Keyword\n",line_count,yytext);}
+continue {printf("%d\t\t%s\t\tContinue Keyword\n",line_count,yytext);}
+if {printf("%d\t\t%s\t\tIf Keyword\n",line_count,yytext);}
+while {printf("%d\t\t%s\t\tWhile Keyword\n",line_count,yytext);}
+for {printf("%d\t\t%s\t\tFor Keyword\n",line_count,yytext);}
+switch {printf("%d\t\t%s\t\tSwitch Keyword\n",line_count,yytext);}
+case {printf("%d\t\t%s\t\tCase Keyword\n",line_count,yytext);}
+return {printf("%d\t\t%s\t\tReturn Keyword\n",line_count,yytext);}
+default {printf("%d\t\t%s\t\tDefault Keyword\n",line_count,yytext);}
+main {printf("%d\t\t%s\t\tMain Keyword\n",line_count,yytext);}
+
+printf/\(\".*\"(",".*)*");" {printf("%d\t\t%s\t\tPrintf keyword\n",line_count,yytext); pCount=0; BEGIN PRINT;}
+"printf".*; {invalidPrintfLine.push_back(line_count);}
+<PRINT>"(" {printf("%d\t\t%s\t\tOpen Round Bracket\n",line_count, yytext);}
 <PRINT>\" { yymore(); BEGIN PRINTFTEXT;}
 <PRINTFTEXT>"%"[scfd] {yymore(); pCount++;}
-<PRINTFTEXT>\" {printf("\n%s - Printf string\n", yytext);BEGIN PRINT;}
+<PRINTFTEXT>\" {printf("%d\t\t%s\t\tPrintf string\n",line_count, yytext);BEGIN PRINT;}
 <PRINTFTEXT>[.\t\r\f\v] ;
-<PRINTFTEXT>\n {lineNum++;}
-<PRINT>","/(" "*).* {printf("\n%s - Comma\n", yytext);pCount--;}
+<PRINTFTEXT>\n {line_count++;}
+<PRINT>","/(" "*).* {printf("%d\t\t%s\t\tComma\n",line_count, yytext);pCount--;}
 <PRINT>[0-9]+([a-zA-Z]|_)+  {printf("Error: Illegal identifier format\n");pCount--;}
-<PRINT>[a-zA-Z_][a-zA-Z_0-9]* {printf("\n%s - Identifier\n",yytext);}
+<PRINT>[a-zA-Z_][a-zA-Z_0-9]* {printf("%d\t\t%s\t\tIdentifier\n",line_count,yytext);}
 <PRINT>[ \t\v\f\r] ;
-<PRINT>")" {printf("\n%s - Close Round Bracket", yytext);}
+<PRINT>")" {printf("%d\t\t%s\t\tClose Round Bracket\n",line_count, yytext);}
 <PRINT>";" {
-    printf("\n%s - Semi Colon", yytext);
+    printf("%d\t\t%s\t\tSemi Colon\n",line_count, yytext);
     if(pCount!=0)
-        invalidPrintfLine.push_back(lineNum);
+        invalidPrintfLine.push_back(line_count);
     BEGIN INITIAL;
     }
- 
-scanf/\(\".*\"(","" "*&.*)*");" {printf("\n%s - Scanf keyword\n",yytext); sCount=0; BEGIN SCAN;}
-"scanf".*; {invalidScanfLine.push_back(lineNum);}
-<SCAN>"(" {printf("\n%s - Open Round Bracket\n", yytext);}
+
+scanf/\(\".*\"(","" "*&.*)*");" {printf("%d\t\t%s\t\tScanf keyword\n",line_count,yytext); sCount=0; BEGIN SCAN;}
+"scanf".*; {invalidScanfLine.push_back(line_count);}
+<SCAN>"(" {printf("%d\t\t%s\t\tOpen Round Bracket\n",line_count, yytext);}
 <SCAN>\" { yymore(); BEGIN SCANFTEXT;}
 <SCANFTEXT>"%"[scfd] {yymore(); sCount++;}
-<SCANFTEXT>\" {printf("\n%s - Scanf string\n", yytext);BEGIN SCAN;}
+<SCANFTEXT>\" {printf("%d\t\t%s\t\tScanf string\n",line_count, yytext);BEGIN SCAN;}
 <SCANFTEXT>[.\t\r\f\v] ;
-<SCANFTEXT>\n {lineNum++;}
-<SCAN>","/(" "*).* {printf("\n%s - Comma\n", yytext);sCount--;printf("\nsCount: %d\n",sCount);}
-<SCAN>[0-9]+([a-zA-Z]|_)+  {printf("Error: Illegal identifier format\n");sCount--; printf("\nsCount: %d\n",sCount);}
-<SCAN>"&"/.* {printf("\n%s - Ampersand\n", yytext);}
-<SCAN>[a-zA-Z_][a-zA-Z_0-9]* {printf("\n%s - Identifier\n",yytext);}
+<SCANFTEXT>\n {line_count++;}
+<SCAN>","/(" "*).* {printf("%d\t\t%s\t\tComma\n",line_count, yytext);sCount--;}
+<SCAN>[0-9]+([a-zA-Z]|_)+  {printf("Error: Illegal identifier format\n");sCount--;}
+<SCAN>"&"/.* {printf("%d\t\t%s\t\tAmpersand\n",line_count, yytext);}
+<SCAN>[a-zA-Z_][a-zA-Z_0-9]* {printf("%d\t\t%s\t\tIdentifier\n",line_count,yytext);}
 <SCAN>[ \t\v\f\r] ;
-<SCAN>")" {printf("\n%s - Close Round Bracket", yytext);}
+<SCAN>")" {printf("%d\t\t%s\t\tClose Round Bracket\n",line_count, yytext);}
 <SCAN>";" {
-    printf("\n%s - Semi Colon\n", yytext);
+    printf("%d\t\t%s\t\tSemi Colon\n",line_count, yytext);
     if(sCount!=0)
-        invalidScanfLine.push_back(lineNum);
+        invalidScanfLine.push_back(line_count);
     BEGIN INITIAL;
 }
- 
+
 "/*"                                {BEGIN COMMENT;}
 <COMMENT>.|[ \t\r\f\v\n]             ;
 <COMMENT>"*/"                       {BEGIN INITIAL;}
@@ -81,45 +81,49 @@ scanf/\(\".*\"(","" "*&.*)*");" {printf("\n%s - Scanf keyword\n",yytext); sCount
 <COMMENT><<EOF>>                    {printf("Error: Unterminated comments are invalid\n"); yyterminate();}
 "//"                                {BEGIN SLCOMMENT;}
 <SLCOMMENT>.                        ;
-<SLCOMMENT>\n                       {lineNum++; BEGIN INITIAL;}
- 
-"+" {printf("%s - Addition Operator\n",yytext);}
-"-" {printf("%s - Subtraction Operator\n",yytext);}
-"*" {printf("%s - Multiplication Operator\n",yytext);}
-"=" {printf("%s - Assignment Operator\n",yytext);}
-"%" {printf("%s - Modulus Operator\n",yytext);}
-"/" {printf("%s - Division Operator\n",yytext);}
-"==" {printf("%s - Equal to Operator\n",yytext);}
-">=" {printf("%s - Greater Than or Equal To Operator\n",yytext);}
-"<=" {printf("%s - Less Than or Equal To\n",yytext);}
-"<" {printf("%s - Greater Than Operator\n",yytext);}
-">" {printf("%s - Less Than Operator\n",yytext);}
-"!=" {printf("%s - Not Equal to Operator\n",yytext);}
-"&&" {printf("%s - Logical AND Operator\n",yytext);}
-"||" {printf("%s - Logical OR Operator\n",yytext);}
-"!" {printf("%s - Logical NOT Operator\n",yytext);}
-[a-zA-Z_][a-zA-Z0-9_]* {printf("%s - Identifier\n",yytext);}
-[0-9]+([a-zA-Z]|_)+  {printf("Error: Illegal identifier format\n");}
-"["   {printf("%s - Open Square Bracket\n", yytext);}
-"]"   {printf("%s - Closed Square Bracket\n", yytext);}
-"{"   {printf("%s - Open Curly Bracket\n", yytext);}
-"}"   {printf("%s - Closed Curly Bracket\n", yytext);}
-"("   {printf("%s - Open Round Bracket\n", yytext);}
-")"   {printf("%s - Closed Round Bracket\n", yytext);}
-","   {printf("%s - Comma\n", yytext);}
-";"   {printf("%s - Delimiter\n", yytext);}
-"&"   {printf("%s - Ampersand\n",yytext);}
-":"   {printf("%s - Colon\n",yytext);}
-\"[^\"\n]*\" {printf("%s - String\n", yytext);}
-\'[^\'\n]\' {printf("%s - Character\n", yytext);}
-[ \t\r\f\v] ;
-\n {lineNum++;}
-. {printf("%s - Illegal Character\n",yytext);}	
- 
+<SLCOMMENT>\n                       {line_count++; BEGIN INITIAL;}
+
+"+" {printf("%d\t\t%s\t\tAddition Operator\n",line_count,yytext);}
+"-" {printf("%d\t\t%s\t\tSubtraction Operator\n",line_count,yytext);}
+"*" {printf("%d\t\t%s\t\tMultiplication Operator\n",line_count,yytext);}
+"=" {printf("%d\t\t%s\t\tAssignment Operator\n",line_count,yytext);}
+"%" {printf("%d\t\t%s\t\tModulus Operator\n",line_count,yytext);}
+"/" {printf("%d\t\t%s\t\tDivision Operator\n",line_count,yytext);}
+"==" {printf("%d\t\t%s\t\tEqual To Operator\n",line_count,yytext);}
+">=" {printf("%d\t\t%s\t\tGreater Than or Equal To Operator\n",line_count,yytext);}
+"<=" {printf("%d\t\t%s\t\tLess Than or Equal To\n",line_count,yytext);}
+"<" {printf("%d\t\t%s\t\tGreater Than Operator\n",line_count,yytext);}
+">" {printf("%d\t\t%s\t\tLess Than Operator\n",line_count,yytext);}
+"!=" {printf("%d\t\t%s\t\tNot Equal to Operator\n",line_count,yytext);}
+"&&" {printf("%d\t\t%s\t\tLogical AND Operator\n",line_count,yytext);}
+"||" {printf("%d\t\t%s\t\tLogical OR Operator\n",line_count,yytext);}
+"!" {printf("%d\t\t%s\t\tLogical NOT Operator\n",line_count,yytext);}
+"scanf"    {printf("%d\t\t%s\t\tScanf encountered.\n",line_count,yytext);}
+[a-zA-Z_][a-zA-Z0-9_]* {printf("%d\t\t%s\t\tIdentifier\n",line_count,yytext);}
+[0-9]+([a-zA-Z]|_)+  {printf("%d\t\t%s\t\tError: Illegal identifier format\n",line_count,yytext);}
+"["   {printf("%d\t\t%s\t\tOpen Square Bracket\n",line_count, yytext);}
+"]"   {printf("%d\t\t%s\t\tClosed Square Bracket\n",line_count, yytext);}
+"{"   {printf("%d\t\t%s\t\tOpen Curly Bracket\n",line_count, yytext);}
+"}"   {printf("%d\t\t%s\t\tClosed Curly Bracket\n",line_count, yytext);}
+"("   {printf("%d\t\t%s\t\tOpen Round Bracket\n",line_count, yytext);}
+")"   {printf("%d\t\t%s\t\tClosed Round Bracket\n",line_count, yytext);}
+","   {printf("%d\t\t%s\t\tComma\n",line_count, yytext);}
+";"   {printf("%d\t\t%s\t\tDelimiter\n",line_count, yytext);}
+"&"   {printf("%d\t\t%s\t\tAmpersand\n",line_count,yytext);}
+
+\"[^\"\n]*\" {printf("%d\t\t%s\t\tString\n",line_count, yytext);}
+\'[^\'\n]\' {printf("%d\t\t%s\t\tCharacter\n",line_count, yytext);}
+[ \t\r\n\f\v] ;
+. {printf("%d\t\t%s\t\tIllegal Character\n",line_count,yytext);}    
+
+
 %%
- 
+
 int main() {
-    yyin=fopen("./Test Cases/testCase3.c","r");
+    yyin=fopen("./Test Cases/testCase4.c","r");
+    printf("----------------------------------------------------------\n");
+    printf("line number\t\tlexeme\t\ttoken type\n");
+    printf("----------------------------------------------------------\n");
     yylex();
     if(invalidScanfLine.size()!=0){
         printf("\nInvalid Scanf Statements : \n");
