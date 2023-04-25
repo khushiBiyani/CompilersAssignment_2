@@ -35,7 +35,7 @@ int main(int u, char t, float p){
     }
     y = p;
     float up = rf();
-    //char iot = 'a',poi = pot(reds,reds,yup,t);
+    char iot = 'a',poi = pot(reds,reds,yup,t);
 
     char ap;
     return u;
