@@ -296,7 +296,7 @@ dimension : BOXOPEN INTVAL BOXCLOSE {char* temp; temp=(char *)malloc(sizeof(char
  
 #include "lex.yy.c"
 int main(){
-	yyin = fopen("./Test Cases/inputComplex.txt","r");	
+	yyin = fopen("./Test Cases/input.txt","r");	
 	if(!yyparse())
 	{
 		printf("\n\nParsed Successfully\n\n");		
