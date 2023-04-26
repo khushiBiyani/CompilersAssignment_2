@@ -30,7 +30,7 @@
 %token <Str> COMMA SEMICOLON AMPERSAND COLON 
  
 /* Type */
-%token <Str> INT CHAR FLOAT STRING
+%token <Str> INT CHAR FLOAT STRING 
  
 /* Keywords */
 %token <Str> IF ELSE FOR WHILE DEFAULT SWITCH CASE BREAK CONTINUE RETURN PRINTF SCANF
@@ -45,7 +45,7 @@
 %token <Str> INTVAL
 %token <Str> FLOATVAL
 
-%type <Str> code declarationList declarationStatementFirst statements singleStatement specialStatement forLoop forLoop1 forLoop2 forLoop3 singleLoopStatement forAssignStatement forExpStatement forUpdateStatement whileLoop whileSuffix inLoop ifStatement ifContinuer ES ifInLoopContinuer ifInLoopStatement ESLoop basicStatements basicStatement assignmentStatement printer declarationStatement arrayValuesF arrayValues prattributes declarationListInt declarationListFloat declarationListChar expressionStatement logicalExpression expression relationalExpression value term factor paramContinuer parameters parameter type compoundStatements statementList returnDec dimension
+%type <Str> code declarationList declarationStatementFirst statements singleStatement specialStatement forLoop forLoop1 forLoop2 forLoop3 singleLoopStatement forAssignStatement forExpStatement forUpdateStatement whileLoop whileSuffix inLoop ifStatement ifContinuer ES ifInLoopContinuer ifInLoopStatement ESLoop basicStatements basicStatement assignmentStatement printer declarationStatement arrayValuesF arrayValues prattributes declarationListInt declarationListFloat declarationListChar expressionStatement logicalExpression expression relationalExpression value term factor paramContinuer parameters parameter type compoundStatements statementList returnDec dimension ARRAY
  
  
   
@@ -81,7 +81,8 @@ singleStatement : specialStatement
 
 statements : specialStatement statements 
  		   | basicStatement statements 
- 		   | 
+ 		   | specialStatement
+           | basicStatement
 
 statementList :   basicStatements statementList 
  				| specialStatement statementList
@@ -102,7 +103,7 @@ assignmentStatement : IDENTIFIER EQUAL expressionStatement COMMA assignmentState
 printer : PRINTF OPBRAC STRING prattributes CLBRAC SEMICOLON
 
 prattributes : prattributes COMMA factor 
-			| 
+			| COMMA factor
 
 declarationStatement : INT declarationListInt SEMICOLON
 		| CHAR IDENTIFIER BOXOPEN BOXCLOSE EQUAL STRING SEMICOLON 
@@ -119,17 +120,17 @@ arrayValuesF :  FLOATVAL COMMA arrayValuesF
 arrayValues :  INTVAL COMMA arrayValues 
 			| INTVAL
 
-declarationListChar : IDENTIFIER {push();} EQUAL {push();} expressionStatement {codegen_assign();} COMMA declarationListChar
+declarationListChar : declarationListChar COMMA IDENTIFIER {push();} EQUAL {push();} expressionStatement {codegen_assign();} 
 		| IDENTIFIER {push();} EQUAL {push();} expressionStatement {codegen_assign();}
 		| IDENTIFIER dimension 
 		| IDENTIFIER
 
-declarationListInt : IDENTIFIER {push();} EQUAL {push();} expressionStatement {codegen_assign();} COMMA declarationListInt
+declarationListInt : declarationListInt COMMA IDENTIFIER {push();} EQUAL {push();} expressionStatement {codegen_assign();} 
 		| IDENTIFIER {push();} EQUAL {push();} expressionStatement {codegen_assign();}
 		| IDENTIFIER dimension 
 		| IDENTIFIER
 
-declarationListFloat : IDENTIFIER {push();} EQUAL {push();} expressionStatement {codegen_assign();} COMMA declarationListFloat
+declarationListFloat : declarationListFloat COMMA IDENTIFIER {push();} EQUAL {push();} expressionStatement {codegen_assign();} 
 		| IDENTIFIER {push();} EQUAL {push();} expressionStatement {codegen_assign();}
 		| IDENTIFIER dimension 
 		| IDENTIFIER
@@ -141,9 +142,11 @@ dimension : BOXOPEN INTVAL BOXCLOSE
 returnDec : RETURN expressionStatement SEMICOLON 
 			| RETURN SEMICOLON
 
-assignmentStatement : IDENTIFIER {push();} EQUAL {push();} expressionStatement {codegen_assign();} COMMA assignmentStatement 
+assignmentStatement : assignmentStatement COMMA IDENTIFIER {push();} EQUAL {push();} expressionStatement {codegen_assign();}
+        | ARRAY EQUAL expressionStatement SEMICOLON
 		| IDENTIFIER {push();} EQUAL {push();} expressionStatement {codegen_assign();} SEMICOLON
-		| IDENTIFIER dimension EQUAL expressionStatement SEMICOLON
+
+ARRAY : IDENTIFIER dimension 
 
 specialStatement : FOR forLoop 
  				 | ifStatement 
@@ -171,7 +174,6 @@ singleLoopStatement : specialStatement
 					| ifInLoopStatement
 
 forExpStatement : expressionStatement 
-				| 
 
 forUpdateStatement : IDENTIFIER {push();} EQUAL {push();} expressionStatement {codegen_assign();} COMMA forUpdateStatement 
 					| IDENTIFIER {push();} EQUAL {push();} expressionStatement {codegen_assign();}
@@ -189,7 +191,13 @@ inLoop : BREAK SEMICOLON inLoop
  		| ifInLoopStatement inLoop 
  		| singleLoopStatement inLoop  
  		| printer inLoop  
-		| 
+		| BREAK SEMICOLON  
+ 		| CONTINUE SEMICOLON  
+ 		| specialStatement  
+ 		| basicStatement  
+ 		| ifInLoopStatement  
+ 		| singleLoopStatement   
+ 		| printer   
   
 ifStatement : IF OPBRAC expressionStatement CLBRAC {ifelse1();} OPCUR statements CLCUR {ifelse2();} ifContinuer 
 			| IF OPBRAC expressionStatement CLBRAC {ifelse1();} singleStatement {ifelse2();} ifContinuer 
@@ -201,7 +209,8 @@ ES : ELSE IF OPBRAC expressionStatement CLBRAC {ifelse1();} OPCUR statements CLC
 	| ELSE OPCUR statements CLCUR {ifelse3();}
     | ELSE IF OPBRAC expressionStatement CLBRAC {ifelse1();} singleStatement {ifelse2();} ES
 	| ELSE singleLoopStatement {ifelse3();}
-    | 
+    | ELSE IF OPBRAC expressionStatement CLBRAC {ifelse1();} OPCUR statements CLCUR {ifelse2();} 
+    | ELSE IF OPBRAC expressionStatement CLBRAC {ifelse1();} singleStatement {ifelse2();} 
  
 ifInLoopStatement : IF OPBRAC expressionStatement CLBRAC {ifelse1();} OPCUR inLoop CLCUR {ifelse2();} ifInLoopContinuer 
 
