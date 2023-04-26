@@ -127,7 +127,7 @@ declarationListChar : declarationListChar COMMA IDENTIFIER {push();} EQUAL {push
 		| IDENTIFIER
 
 declarationListInt : declarationListInt COMMA IDENTIFIER {push();} EQUAL {push();} expressionStatement {codegen_assign();} COMMA declarationListInt
-		| IDENTIFIER {push();printf("pushed identifier\n");} EQUAL {push();} expressionStatement {codegen_assign();}
+		| IDENTIFIER {push();printf("pushed identifier %s \n",yylval);} EQUAL {push(); printf("EQUAL\n");} expressionStatement {codegen_assign();}
 		| IDENTIFIER dimension 
 		| IDENTIFIER
 
@@ -143,9 +143,10 @@ dimension : BOXOPEN INTVAL BOXCLOSE
 returnDec : RETURN expressionStatement SEMICOLON 
 			| RETURN SEMICOLON
 
-assignmentStatement : assignmentStatement COMMA IDENTIFIER {push();} EQUAL {push();} expressionStatement {codegen_assign();}
-		| IDENTIFIER {push();} EQUAL {push();} expressionStatement {codegen_assign();} SEMICOLON
-		| ARRAY EQUAL expressionStatement SEMICOLON
+assignmentStatement : assignmentStatement IDENTIFIER {push();} EQUAL {push();} expressionStatement {codegen_assign();} SEMICOLON
+SEMICOLON
+		| IDENTIFIER {push();} EQUAL {push();} expressionStatement {codegen_assign();} COMMA
+		| ARRAY EQUAL expressionStatement COMMA
 
 ARRAY : IDENTIFIER dimension 
 
@@ -269,7 +270,15 @@ int abcd=0;
 int l_while=0;
 int l_for=0;
 int flag_set = 1;
-
+void printTAC(){
+     printf("---------------------Quadruples-------------------------\n\n");
+    printf("Operator \t Arg1 \t\t Arg2 \t\t Result \n");
+    int i;
+    for(i=0;i<quadlen;i++)
+    {
+        printf("%-8s \t %-8s \t %-8s \t %-6s \n",q[i].op,q[i].arg1,q[i].arg2,q[i].res);
+    }
+}
 int main(int argc,char *argv[])
 {
 
@@ -298,11 +307,10 @@ void yyerror(char *s)
 {
   printf("Error :%s at %d \n",yylval,yylineno);
 }
-
 push()
 {
-strcpy(st[++top],yylval);
-printf("pushed: %s\n",yylval);
+strcpy(st[++top],yytext);
+printf("pushed: %s\n",yytext);
 }
 pusha()
 {
@@ -312,6 +320,7 @@ printf("pushed one space\n");
 pushx()
 {
 strcpy(st[++top],"x ");
+printf("PUSHED X\n");
 }
 pushab()
 {
@@ -321,7 +330,7 @@ strcpy(st[++top],"  ");
 printf("pushed 3 space\n");
 }
 codegen()
-{
+{   printf("CODEGEN\n");
     strcpy(temp,"T");
     sprintf(tmp_i, "%d", temp_i);
     strcat(temp,tmp_i);
@@ -334,6 +343,13 @@ codegen()
     strcpy(q[quadlen].arg1,st[top-2]);
     strcpy(q[quadlen].arg2,st[top]);
     strcpy(q[quadlen].res,temp);
+     printf("---------------------Quadruples-------------------------\n\n");
+    printf("Operator \t Arg1 \t\t Arg2 \t\t Result \n");
+    int i;
+    for(i=0;i<quadlen;i++)
+    {
+        printf("%-8s \t %-8s \t %-8s \t %-6s \n",q[i].op,q[i].arg1,q[i].arg2,q[i].res);
+    }
     quadlen++;
     top-=2;
     strcpy(st[top],temp);
@@ -342,6 +358,7 @@ temp_i++;
 }
 codegen_assigna()
 {
+    printf("codegen_assigna\n");
 strcpy(temp,"T");
 sprintf(tmp_i, "%d", temp_i);
 strcat(temp,tmp_i);
@@ -363,11 +380,18 @@ if(strlen(st[top])==1)
     strcpy(q[quadlen].arg1,st[top-3]);
     strcpy(q[quadlen].arg2,st[top]);
     strcpy(q[quadlen].res,temp);
+     printf("---------------------Quadruples-------------------------\n\n");
+    printf("Operator \t Arg1 \t\t Arg2 \t\t Result \n");
+    int i;
+    for(i=0;i<quadlen;i++)
+    {
+        printf("%-8s \t %-8s \t %-8s \t %-6s \n",q[i].op,q[i].arg1,q[i].arg2,q[i].res);
+    }
     quadlen++;
     
 }
 else
-{
+{   printf("in else\n");
 	q[quadlen].op = (char*)malloc(sizeof(char)*strlen(st[top-2]));
     q[quadlen].arg1 = (char*)malloc(sizeof(char)*strlen(st[top-3]));
     q[quadlen].arg2 = (char*)malloc(sizeof(char)*strlen(st[top-1]));
@@ -376,6 +400,13 @@ else
     strcpy(q[quadlen].arg1,st[top-3]);
     strcpy(q[quadlen].arg2,st[top-1]);
     strcpy(q[quadlen].res,temp);
+     printf("---------------------Quadruples-------------------------\n\n");
+    printf("Operator \t Arg1 \t\t Arg2 \t\t Result \n");
+    int i;
+    for(i=0;i<quadlen;i++)
+    {
+        printf("%-8s \t %-8s \t %-8s \t %-6s \n",q[i].op,q[i].arg1,q[i].arg2,q[i].res);
+    }
     quadlen++;
 }
 top-=4;
@@ -385,7 +416,7 @@ strcpy(st[++top],temp);
 }
 
 codegen_umin()
-{
+{   printf("codegen_umin\n");
     strcpy(temp,"T");
     sprintf(tmp_i, "%d", temp_i);
     strcat(temp,tmp_i);
@@ -397,13 +428,20 @@ codegen_umin()
     strcpy(q[quadlen].op,"-");
     strcpy(q[quadlen].arg1,st[top-2]);
     strcpy(q[quadlen].res,temp);
+     printf("---------------------Quadruples-------------------------\n\n");
+    printf("Operator \t Arg1 \t\t Arg2 \t\t Result \n");
+    int i;
+    for(i=0;i<quadlen;i++)
+    {
+        printf("%-8s \t %-8s \t %-8s \t %-6s \n",q[i].op,q[i].arg1,q[i].arg2,q[i].res);
+    }
     quadlen++;
     top--;
     strcpy(st[top],temp);
     temp_i++;
 }
 codegen_assign()
-{
+{   printf("assign\n");
     //printf("%s = %s\n",st[top-3],st[top]);
     q[quadlen].op = (char*)malloc(sizeof(char));
     q[quadlen].arg1 = (char*)malloc(sizeof(char)*strlen(st[top]));
@@ -412,12 +450,19 @@ codegen_assign()
     strcpy(q[quadlen].op,"=");
     strcpy(q[quadlen].arg1,st[top]);
     strcpy(q[quadlen].res,st[top-3]);
+     printf("---------------------Quadruples-------------------------\n\n");
+    printf("Operator \t Arg1 \t\t Arg2 \t\t Result \n");
+    int i;
+    for(i=0;i<quadlen;i++)
+    {
+        printf("%-8s \t %-8s \t %-8s \t %-6s \n",q[i].op,q[i].arg1,q[i].arg2,q[i].res);
+    }
     quadlen++;
     top-=2;
 }
 
 if1()
-{
+{   printf("if1\n");
  lnum++;
  strcpy(temp,"T");
  sprintf(tmp_i, "%d", temp_i);
@@ -430,6 +475,13 @@ if1()
  strcpy(q[quadlen].op,"not");
  strcpy(q[quadlen].arg1,st[top]);
  strcpy(q[quadlen].res,temp);
+  printf("---------------------Quadruples-------------------------\n\n");
+    printf("Operator \t Arg1 \t\t Arg2 \t\t Result \n");
+    int i;
+    for(i=0;i<quadlen;i++)
+    {
+        printf("%-8s \t %-8s \t %-8s \t %-6s \n",q[i].op,q[i].arg1,q[i].arg2,q[i].res);
+    }
  quadlen++;
  //printf("if %s goto L%d\n",temp,lnum);
  q[quadlen].op = (char*)malloc(sizeof(char)*3);
@@ -442,6 +494,12 @@ if1()
  sprintf(x,"%d",lnum);
  char l[]="L";
  strcpy(q[quadlen].res,strcat(l,x));
+  printf("---------------------Quadruples-------------------------\n\n");
+    printf("Operator \t Arg1 \t\t Arg2 \t\t Result \n");
+    for(i=0;i<quadlen;i++)
+    {
+        printf("%-8s \t %-8s \t %-8s \t %-6s \n",q[i].op,q[i].arg1,q[i].arg2,q[i].res);
+    }
  quadlen++;
 
  temp_i++;
@@ -449,7 +507,7 @@ if1()
 }
 
 if3()
-{
+{   printf("if3\n");
     int y;
     y=label[ltop--];
     //printf("L%d: \n",y);
@@ -462,11 +520,18 @@ if3()
     sprintf(x,"%d",y);
     char l[]="L";
     strcpy(q[quadlen].res,strcat(l,x));
+     printf("---------------------Quadruples-------------------------\n\n");
+    printf("Operator \t Arg1 \t\t Arg2 \t\t Result \n");
+    int i;
+    for(i=0;i<quadlen;i++)
+    {
+        printf("%-8s \t %-8s \t %-8s \t %-6s \n",q[i].op,q[i].arg1,q[i].arg2,q[i].res);
+    }
     quadlen++;
 }
 
 ifelse1()
-{
+{   printf("ifelse1\n");
     lnum++;
     strcpy(temp,"T");
     sprintf(tmp_i, "%d", temp_i);
@@ -479,6 +544,13 @@ ifelse1()
     strcpy(q[quadlen].op,"not");
     strcpy(q[quadlen].arg1,st[top]);
     strcpy(q[quadlen].res,temp);
+     printf("---------------------Quadruples-------------------------\n\n");
+    printf("Operator \t Arg1 \t\t Arg2 \t\t Result \n");
+    int i;
+    for(i=0;i<quadlen;i++)
+    {
+        printf("%-8s \t %-8s \t %-8s \t %-6s \n",q[i].op,q[i].arg1,q[i].arg2,q[i].res);
+    }
     quadlen++;
     //printf("if %s goto L%d\n",temp,lnum);
     q[quadlen].op = (char*)malloc(sizeof(char)*3);
@@ -491,13 +563,19 @@ ifelse1()
     sprintf(x,"%d",lnum);
     char l[]="L";
     strcpy(q[quadlen].res,strcat(l,x));
+     printf("---------------------Quadruples-------------------------\n\n");
+    printf("Operator \t Arg1 \t\t Arg2 \t\t Result \n");
+    for(i=0;i<quadlen;i++)
+    {
+        printf("%-8s \t %-8s \t %-8s \t %-6s \n",q[i].op,q[i].arg1,q[i].arg2,q[i].res);
+    }
     quadlen++;
     temp_i++;
     label[++ltop]=lnum;
 }
 
 ifelse2()
-{
+{   printf("ifelse2\n");
     int x;
     lnum++;
     x=label[ltop--];
@@ -511,6 +589,13 @@ ifelse2()
     sprintf(jug,"%d",lnum);
     char l[]="L";
     strcpy(q[quadlen].res,strcat(l,jug));
+     printf("---------------------Quadruples-------------------------\n\n");
+    printf("Operator \t Arg1 \t\t Arg2 \t\t Result \n");
+    int i;
+    for(i=0;i<quadlen;i++)
+    {
+        printf("%-8s \t %-8s \t %-8s \t %-6s \n",q[i].op,q[i].arg1,q[i].arg2,q[i].res);
+    }
     quadlen++;
     //printf("L%d: \n",x);
     q[quadlen].op = (char*)malloc(sizeof(char)*6);
@@ -523,12 +608,18 @@ ifelse2()
     sprintf(jug1,"%d",x);
     char l1[]="L";
     strcpy(q[quadlen].res,strcat(l1,jug1));
+     printf("---------------------Quadruples-------------------------\n\n");
+    printf("Operator \t Arg1 \t\t Arg2 \t\t Result \n");
+    for(i=0;i<quadlen;i++)
+    {
+        printf("%-8s \t %-8s \t %-8s \t %-6s \n",q[i].op,q[i].arg1,q[i].arg2,q[i].res);
+    }
     quadlen++;
     label[++ltop]=lnum;
 }
 
 ifelse3()
-{
+{   printf("ifelse3\n");
 int y;
 y=label[ltop--];
 //printf("L%d: \n",y);
@@ -541,12 +632,19 @@ q[quadlen].op = (char*)malloc(sizeof(char)*6);
     sprintf(x,"%d",y);
     char l[]="L";
     strcpy(q[quadlen].res,strcat(l,x));
+     printf("---------------------Quadruples-------------------------\n\n");
+    printf("Operator \t Arg1 \t\t Arg2 \t\t Result \n");
+    int i;
+    for(i=0;i<quadlen;i++)
+    {
+        printf("%-8s \t %-8s \t %-8s \t %-6s \n",q[i].op,q[i].arg1,q[i].arg2,q[i].res);
+    }
     quadlen++;
 lnum++;
 }
 
 ternary1()
-{
+{   printf("ternary1\n");
  lnum++;
  strcpy(temp,"T");
  sprintf(tmp_i, "%d", temp_i);
@@ -559,6 +657,13 @@ ternary1()
     strcpy(q[quadlen].op,"not");
     strcpy(q[quadlen].arg1,st[top]);
     strcpy(q[quadlen].res,temp);
+     printf("---------------------Quadruples-------------------------\n\n");
+    printf("Operator \t Arg1 \t\t Arg2 \t\t Result \n");
+    int i;
+    for(i=0;i<quadlen;i++)
+    {
+        printf("%-8s \t %-8s \t %-8s \t %-6s \n",q[i].op,q[i].arg1,q[i].arg2,q[i].res);
+    }
     quadlen++;
  //printf("if %s goto L%d\n",temp,lnum);
  q[quadlen].op = (char*)malloc(sizeof(char)*3);
@@ -571,6 +676,12 @@ ternary1()
     sprintf(x,"%d",lnum);
     char l[]="L";
     strcpy(q[quadlen].res,strcat(l,x));
+     printf("---------------------Quadruples-------------------------\n\n");
+    printf("Operator \t Arg1 \t\t Arg2 \t\t Result \n");
+    for(i=0;i<quadlen;i++)
+    {
+        printf("%-8s \t %-8s \t %-8s \t %-6s \n",q[i].op,q[i].arg1,q[i].arg2,q[i].res);
+    }
     quadlen++;
 
  temp_i++;
@@ -578,7 +689,7 @@ ternary1()
 }
 
 ternary2()
-{
+{   printf("ternary2\n");
 int x;
 lnum++;
 x=label[ltop--];
@@ -592,6 +703,13 @@ q[quadlen].op = (char*)malloc(sizeof(char)*5);
     sprintf(jug,"%d",lnum);
     char l[]="L";
     strcpy(q[quadlen].res,strcat(l,jug));
+     printf("---------------------Quadruples-------------------------\n\n");
+    printf("Operator \t Arg1 \t\t Arg2 \t\t Result \n");
+    int i;
+    for(i=0;i<quadlen;i++)
+    {
+        printf("%-8s \t %-8s \t %-8s \t %-6s \n",q[i].op,q[i].arg1,q[i].arg2,q[i].res);
+    }
     quadlen++;
 //printf("L%d: \n",x);
 q[quadlen].op = (char*)malloc(sizeof(char)*6);
@@ -603,12 +721,18 @@ q[quadlen].op = (char*)malloc(sizeof(char)*6);
     sprintf(jug1,"%d",x);
     char l1[]="L";
     strcpy(q[quadlen].res,strcat(l1,jug1));
+     printf("---------------------Quadruples-------------------------\n\n");
+    printf("Operator \t Arg1 \t\t Arg2 \t\t Result \n");
+    for(i=0;i<quadlen;i++)
+    {
+        printf("%-8s \t %-8s \t %-8s \t %-6s \n",q[i].op,q[i].arg1,q[i].arg2,q[i].res);
+    }
     quadlen++;
     label[++ltop]=lnum;
 }
 
 ternary3()
-{
+{   printf("ternary3\n");
 int y;
 y=label[ltop--];
 //printf("L%d: \n",y);
@@ -621,13 +745,20 @@ q[quadlen].op = (char*)malloc(sizeof(char)*6);
     sprintf(x,"%d",y);
     char l[]="L";
     strcpy(q[quadlen].res,strcat(l,x));
+     printf("---------------------Quadruples-------------------------\n\n");
+    printf("Operator \t Arg1 \t\t Arg2 \t\t Result \n");
+    int i;
+    for(i=0;i<quadlen;i++)
+    {
+        printf("%-8s \t %-8s \t %-8s \t %-6s \n",q[i].op,q[i].arg1,q[i].arg2,q[i].res);
+    }
     quadlen++;
 lnum++;
 }
 
 while1()
 {
-
+    printf("while1\n");
     l_while = lnum;
     //printf("L%d: \n",lnum++);
 	lnum++;
@@ -640,11 +771,18 @@ while1()
     sprintf(x,"%d",lnum-1);
     char l[]="L";
     strcpy(q[quadlen].res,strcat(l,x));
+     printf("---------------------Quadruples-------------------------\n\n");
+    printf("Operator \t Arg1 \t\t Arg2 \t\t Result \n");
+    int i;
+    for(i=0;i<quadlen;i++)
+    {
+        printf("%-8s \t %-8s \t %-8s \t %-6s \n",q[i].op,q[i].arg1,q[i].arg2,q[i].res);
+    }
     quadlen++;
 }
 
 while2()
-{
+{   printf("while2\n");
  strcpy(temp,"T");
  sprintf(tmp_i, "%d", temp_i);
  strcat(temp,tmp_i);
@@ -656,6 +794,13 @@ while2()
     strcpy(q[quadlen].op,"not");
     strcpy(q[quadlen].arg1,st[top]);
     strcpy(q[quadlen].res,temp);
+     printf("---------------------Quadruples-------------------------\n\n");
+    printf("Operator \t Arg1 \t\t Arg2 \t\t Result \n");
+    int i;
+    for(i=0;i<quadlen;i++)
+    {
+        printf("%-8s \t %-8s \t %-8s \t %-6s \n",q[i].op,q[i].arg1,q[i].arg2,q[i].res);
+    }
     quadlen++;
     //printf("if %s goto L%d\n",temp,lnum);
     q[quadlen].op = (char*)malloc(sizeof(char)*3);
@@ -667,14 +812,20 @@ while2()
     char x[10];
     sprintf(x,"%d",lnum);char l[]="L";
     strcpy(q[quadlen].res,strcat(l,x));
+     printf("---------------------Quadruples-------------------------\n\n");
+    printf("Operator \t Arg1 \t\t Arg2 \t\t Result \n");
+    for(i=0;i<quadlen;i++)
+    {
+        printf("%-8s \t %-8s \t %-8s \t %-6s \n",q[i].op,q[i].arg1,q[i].arg2,q[i].res);
+    }
     quadlen++;
 
  temp_i++;
  }
 
 while3()
-{
-
+{   
+    printf("while3\n");
 //printf("goto L%d \n",l_while);
 q[quadlen].op = (char*)malloc(sizeof(char)*5);
     q[quadlen].arg1 = NULL;
@@ -685,6 +836,13 @@ q[quadlen].op = (char*)malloc(sizeof(char)*5);
     sprintf(x,"%d",l_while);
     char l[]="L";
     strcpy(q[quadlen].res,strcat(l,x));
+     printf("---------------------Quadruples-------------------------\n\n");
+    printf("Operator \t Arg1 \t\t Arg2 \t\t Result \n");
+    int i;
+    for(i=0;i<quadlen;i++)
+    {
+        printf("%-8s \t %-8s \t %-8s \t %-6s \n",q[i].op,q[i].arg1,q[i].arg2,q[i].res);
+    }
     quadlen++;
     //printf("L%d: \n",lnum++);
     q[quadlen].op = (char*)malloc(sizeof(char)*6);
@@ -696,11 +854,17 @@ q[quadlen].op = (char*)malloc(sizeof(char)*5);
     sprintf(x1,"%d",lnum-1);
     char l1[]="L";
     strcpy(q[quadlen].res,strcat(l1,x1));
+     printf("---------------------Quadruples-------------------------\n\n");
+    printf("Operator \t Arg1 \t\t Arg2 \t\t Result \n");
+    for(i=0;i<quadlen;i++)
+    {
+        printf("%-8s \t %-8s \t %-8s \t %-6s \n",q[i].op,q[i].arg1,q[i].arg2,q[i].res);
+    }
     quadlen++;
 }
 
 for1()
-{
+{   printf("for1\n");
     l_for = lnum;
     //printf("L%d: \n",lnum++);
 	lnum++;
@@ -713,10 +877,17 @@ for1()
     sprintf(x,"%d",lnum-1);
     char l[]="L";
     strcpy(q[quadlen].res,strcat(l,x));
+     printf("---------------------Quadruples-------------------------\n\n");
+    printf("Operator \t Arg1 \t\t Arg2 \t\t Result \n");
+    int i;
+    for(i=0;i<quadlen;i++)
+    {
+        printf("%-8s \t %-8s \t %-8s \t %-6s \n",q[i].op,q[i].arg1,q[i].arg2,q[i].res);
+    }
     quadlen++;
 }
 for2()
-{
+{   printf("for2\n");
     strcpy(temp,"T");
     sprintf(tmp_i, "%d", temp_i);
     strcat(temp,tmp_i);
@@ -728,6 +899,13 @@ for2()
     strcpy(q[quadlen].op,"not");
     strcpy(q[quadlen].arg1,st[top]);
     strcpy(q[quadlen].res,temp);
+     printf("---------------------Quadruples-------------------------\n\n");
+    printf("Operator \t Arg1 \t\t Arg2 \t\t Result \n");
+    int i;
+    for(i=0;i<quadlen;i++)
+    {
+        printf("%-8s \t %-8s \t %-8s \t %-6s \n",q[i].op,q[i].arg1,q[i].arg2,q[i].res);
+    }
     quadlen++;
     //printf("if %s goto L%d\n",temp,lnum);
     q[quadlen].op = (char*)malloc(sizeof(char)*3);
@@ -740,6 +918,12 @@ for2()
     sprintf(x,"%d",lnum);
     char l[]="L";
     strcpy(q[quadlen].res,strcat(l,x));
+     printf("---------------------Quadruples-------------------------\n\n");
+    printf("Operator \t Arg1 \t\t Arg2 \t\t Result \n");
+    for(i=0;i<quadlen;i++)
+    {
+        printf("%-8s \t %-8s \t %-8s \t %-6s \n",q[i].op,q[i].arg1,q[i].arg2,q[i].res);
+    }
     quadlen++;
 
     temp_i++;
@@ -755,6 +939,12 @@ for2()
     sprintf(x1,"%d",lnum);
     char l1[]="L";
     strcpy(q[quadlen].res,strcat(l1,x1));
+     printf("---------------------Quadruples-------------------------\n\n");
+    printf("Operator \t Arg1 \t\t Arg2 \t\t Result \n");
+    for(i=0;i<quadlen;i++)
+    {
+        printf("%-8s \t %-8s \t %-8s \t %-6s \n",q[i].op,q[i].arg1,q[i].arg2,q[i].res);
+    }
     quadlen++;
     label[++ltop]=lnum;
     //printf("L%d: \n",++lnum);
@@ -768,10 +958,16 @@ for2()
     sprintf(x2,"%d",lnum);
     char l2[]="L";
     strcpy(q[quadlen].res,strcat(l2,x2));
+     printf("---------------------Quadruples-------------------------\n\n");
+    printf("Operator \t Arg1 \t\t Arg2 \t\t Result \n");
+    for(i=0;i<quadlen;i++)
+    {
+        printf("%-8s \t %-8s \t %-8s \t %-6s \n",q[i].op,q[i].arg1,q[i].arg2,q[i].res);
+    }
     quadlen++;
  }
 for3()
-{
+{   printf("for3\n");
     int x;
     x=label[ltop--];
     //printf("goto L%d \n",l_for);
@@ -785,6 +981,13 @@ for3()
     sprintf(jug,"%d",l_for);
     char l[]="L";
     strcpy(q[quadlen].res,strcat(l,jug));
+     printf("---------------------Quadruples-------------------------\n\n");
+    printf("Operator \t Arg1 \t\t Arg2 \t\t Result \n");
+    int i;
+    for(i=0;i<quadlen;i++)
+    {
+        printf("%-8s \t %-8s \t %-8s \t %-6s \n",q[i].op,q[i].arg1,q[i].arg2,q[i].res);
+    }
     quadlen++;
 
 
@@ -799,12 +1002,18 @@ for3()
     sprintf(jug1,"%d",x);
     char l1[]="L";
     strcpy(q[quadlen].res,strcat(l1,jug1));
+     printf("---------------------Quadruples-------------------------\n\n");
+    printf("Operator \t Arg1 \t\t Arg2 \t\t Result \n");
+    for(i=0;i<quadlen;i++)
+    {
+        printf("%-8s \t %-8s \t %-8s \t %-6s \n",q[i].op,q[i].arg1,q[i].arg2,q[i].res);
+    }
     quadlen++;
 
 }
 
 for4()
-{
+{   printf("for4\n");
     int x;
     x=label[ltop--];
     //printf("goto L%d \n",lnum);
@@ -818,6 +1027,13 @@ for4()
     sprintf(jug,"%d",lnum);
     char l[]="L";
     strcpy(q[quadlen].res,strcat(l,jug));
+     printf("---------------------Quadruples-------------------------\n\n");
+    printf("Operator \t Arg1 \t\t Arg2 \t\t Result \n");
+    int i;
+    for(i=0;i<quadlen;i++)
+    {
+        printf("%-8s \t %-8s \t %-8s \t %-6s \n",q[i].op,q[i].arg1,q[i].arg2,q[i].res);
+    }
     quadlen++;
 
     //printf("L%d: \n",x);
@@ -831,5 +1047,11 @@ for4()
     sprintf(jug1,"%d",x);
     char l1[]="L";
     strcpy(q[quadlen].res,strcat(l1,jug1));
+     printf("---------------------Quadruples-------------------------\n\n");
+    printf("Operator \t Arg1 \t\t Arg2 \t\t Result \n");
+    for(i=0;i<quadlen;i++)
+    {
+        printf("%-8s \t %-8s \t %-8s \t %-6s \n",q[i].op,q[i].arg1,q[i].arg2,q[i].res);
+    }
     quadlen++;
 }

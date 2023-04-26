@@ -1,8 +1,8 @@
-/* A Bison parser, made by GNU Bison 3.5.1.  */
+/* A Bison parser, made by GNU Bison 3.8.2.  */
 
 /* Bison interface for Yacc-like parsers in C
 
-   Copyright (C) 1984, 1989-1990, 2000-2015, 2018-2020 Free Software Foundation,
+   Copyright (C) 1984, 1989-1990, 2000-2015, 2018-2021 Free Software Foundation,
    Inc.
 
    This program is free software: you can redistribute it and/or modify
@@ -16,7 +16,7 @@
    GNU General Public License for more details.
 
    You should have received a copy of the GNU General Public License
-   along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
+   along with this program.  If not, see <https://www.gnu.org/licenses/>.  */
 
 /* As a special exception, you may create a larger work that contains
    part or all of the Bison parser skeleton and distribute that work
@@ -31,8 +31,9 @@
    This special exception was added by the Free Software Foundation in
    version 2.2 of Bison.  */
 
-/* Undocumented macros, especially those whose name start with YY_,
-   are private implementation details.  Do not rely on them.  */
+/* DO NOT RELY ON FEATURES THAT ARE NOT DOCUMENTED in the manual,
+   especially those whose name start with YY_ or yy_.  They are
+   private implementation details that can be changed or removed.  */
 
 #ifndef YY_YY_Y_TAB_H_INCLUDED
 # define YY_YY_Y_TAB_H_INCLUDED
@@ -44,59 +45,68 @@
 extern int yydebug;
 #endif
 
-/* Token type.  */
+/* Token kinds.  */
 #ifndef YYTOKENTYPE
 # define YYTOKENTYPE
   enum yytokentype
   {
-    LOGICALOR = 258,
-    LOGICALAND = 259,
-    EQUALS = 260,
-    NOTEQUAL = 261,
-    GREATERTHAN = 262,
-    GREATERTHANEQUALTO = 263,
-    LESSTHAN = 264,
-    LESSTHANEQUALTO = 265,
-    ADD = 266,
-    SUB = 267,
-    MULT = 268,
-    DIV = 269,
-    MOD = 270,
-    COMMA = 271,
-    SEMICOLON = 272,
-    AMPERSAND = 273,
-    COLON = 274,
-    INT = 275,
-    CHAR = 276,
-    FLOAT = 277,
-    STRING = 278,
-    IF = 279,
-    ELSE = 280,
-    FOR = 281,
-    WHILE = 282,
-    DEFAULT = 283,
-    SWITCH = 284,
-    CASE = 285,
-    BREAK = 286,
-    CONTINUE = 287,
-    RETURN = 288,
-    PRINTF = 289,
-    SCANF = 290,
-    OPBRAC = 291,
-    CLBRAC = 292,
-    OPCUR = 293,
-    CLCUR = 294,
-    BOXOPEN = 295,
-    BOXCLOSE = 296,
-    LOGICALNOT = 297,
-    EQUAL = 298,
-    CHARVAL = 299,
-    INTVAL = 300,
-    FLOATVAL = 301,
-    IDENTIFIER = 302
+    YYEMPTY = -2,
+    YYEOF = 0,                     /* "end of file"  */
+    YYerror = 256,                 /* error  */
+    YYUNDEF = 257,                 /* "invalid token"  */
+    LOGICALOR = 258,               /* LOGICALOR  */
+    LOGICALAND = 259,              /* LOGICALAND  */
+    EQUALS = 260,                  /* EQUALS  */
+    NOTEQUAL = 261,                /* NOTEQUAL  */
+    GREATERTHAN = 262,             /* GREATERTHAN  */
+    GREATERTHANEQUALTO = 263,      /* GREATERTHANEQUALTO  */
+    LESSTHAN = 264,                /* LESSTHAN  */
+    LESSTHANEQUALTO = 265,         /* LESSTHANEQUALTO  */
+    ADD = 266,                     /* ADD  */
+    SUB = 267,                     /* SUB  */
+    MULT = 268,                    /* MULT  */
+    DIV = 269,                     /* DIV  */
+    MOD = 270,                     /* MOD  */
+    COMMA = 271,                   /* COMMA  */
+    SEMICOLON = 272,               /* SEMICOLON  */
+    AMPERSAND = 273,               /* AMPERSAND  */
+    COLON = 274,                   /* COLON  */
+    INT = 275,                     /* INT  */
+    CHAR = 276,                    /* CHAR  */
+    FLOAT = 277,                   /* FLOAT  */
+    STRING = 278,                  /* STRING  */
+    IF = 279,                      /* IF  */
+    ELSE = 280,                    /* ELSE  */
+    FOR = 281,                     /* FOR  */
+    WHILE = 282,                   /* WHILE  */
+    DEFAULT = 283,                 /* DEFAULT  */
+    SWITCH = 284,                  /* SWITCH  */
+    CASE = 285,                    /* CASE  */
+    BREAK = 286,                   /* BREAK  */
+    CONTINUE = 287,                /* CONTINUE  */
+    RETURN = 288,                  /* RETURN  */
+    PRINTF = 289,                  /* PRINTF  */
+    SCANF = 290,                   /* SCANF  */
+    OPBRAC = 291,                  /* OPBRAC  */
+    CLBRAC = 292,                  /* CLBRAC  */
+    OPCUR = 293,                   /* OPCUR  */
+    CLCUR = 294,                   /* CLCUR  */
+    BOXOPEN = 295,                 /* BOXOPEN  */
+    BOXCLOSE = 296,                /* BOXCLOSE  */
+    LOGICALNOT = 297,              /* LOGICALNOT  */
+    EQUAL = 298,                   /* EQUAL  */
+    CHARVAL = 299,                 /* CHARVAL  */
+    INTVAL = 300,                  /* INTVAL  */
+    FLOATVAL = 301,                /* FLOATVAL  */
+    IDENTIFIER = 302               /* IDENTIFIER  */
   };
+  typedef enum yytokentype yytoken_kind_t;
 #endif
-/* Tokens.  */
+/* Token kinds.  */
+#define YYEMPTY -2
+#define YYEOF 0
+#define YYerror 256
+#define YYUNDEF 257
 #define LOGICALOR 258
 #define LOGICALAND 259
 #define EQUALS 260
@@ -144,10 +154,17 @@ extern int yydebug;
 #define IDENTIFIER 302
 
 /* Value type.  */
+#if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
+typedef int YYSTYPE;
+# define YYSTYPE_IS_TRIVIAL 1
+# define YYSTYPE_IS_DECLARED 1
+#endif
 
 
 extern YYSTYPE yylval;
 
+
 int yyparse (void);
+
 
 #endif /* !YY_YY_Y_TAB_H_INCLUDED  */
