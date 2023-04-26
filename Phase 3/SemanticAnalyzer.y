@@ -138,18 +138,18 @@
     		return -1;
      	}
     	void printTable(){
-    		printf("TABLE IS THIS\n\n");
-     
+    		printf("SYMBOL TABLE IS THIS\n\n");
+			printf("Lexeme 	  	Val	Type	isFunc	isArr	scope	parameterCount	 paramList	dimArr 		arrList\n");
     		for(int i=0;i<currIndex;i++){
-    			printf("lexeme = %s		",table[i].lexeme);
-    			printf("value = %s		",table[i].value);
-    			printf("type = %s		",table[i].dataType);
-    			printf(" isFunction = %d		",table[i].isFunction);
-    			printf("isArray = %d		",table[i].isArray);
-    			printf("scope = %d		",table[i].scope);
-    			printf("paramCount = %d		",table[i].parameterCount);
+    			printf("%s		",table[i].lexeme);
+    			printf("%s	",table[i].value);
+    			printf("%s	",table[i].dataType);
+    			printf("%d	",table[i].isFunction);
+    			printf("%d	",table[i].isArray);
+    			printf("%d		",table[i].scope);
+    			printf("%d	   ",table[i].parameterCount);
     			if(table[i].isFunction){
-    				printf("Parameter array = ");
+    				printf("");
     				for(int p = 0;p<table[i].parameterCount;p++){
     					
     					printf("%s ",table[i].parameterList[p]);
@@ -157,7 +157,7 @@
     			}
     			printf("		");
     			
-    			printf(" dimensionofArr = %d		",table[i].dimensionofArray);
+    			printf("%d		",table[i].dimensionofArray);
     			if(table[i].isArray){
     				printf("Parameter array = ");
     				for(int p = 0;p<table[i].dimensionofArray;p++){

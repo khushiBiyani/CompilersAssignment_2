@@ -157,16 +157,16 @@ extern int yydebug;
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 union YYSTYPE
 {
-#line 245 "SemanticAnalyzer.y"
+#line 271 "Execute.y"
 
-    		int Int;
-    		float Float;
-    		char Char;
-    		char* Str;
-    		struct data{
-     
-    		};
-    	
+		int Int;
+		float Float;
+		char Char;
+		char* Str;
+		struct data{
+ 
+		};
+	
 
 #line 172 "y.tab.h"
 

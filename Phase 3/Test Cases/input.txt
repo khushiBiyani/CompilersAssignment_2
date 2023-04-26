@@ -1,46 +1,10 @@
-
- int a[5];
-char pot(int y, int u, float tai, char p){
-   
-}
-float ref(int op){
-    int lop;
-}
-int pi(){
-    return 0;
-}
-
-char pt(){
-    int a[5];
-}
-float rf(){
-    int lop;
-}
-int yup;
-int main(int u, char t, float p){
-    float a;
-    float yup;
-    float c[5];
-    float re = c[0];
-    float d[5][5];
-    float oi = ref(u);
-    float y = 3.12,lk = 9.8;
-    int reds = 9, seds = 89;
-        printf("op%d ",u);
-        printf("op%d %f %c",u,p,t);
-
-    for(int i = 0;i<5;i=i+2){
-        int y;
-        return 3;
+    int yup;
+    int main(int u, char t, float p){
+       int a=9+5;
+       printf("%d",a);
+       printf("\ndone\n");
+     
+        for(int i = 0;i<5;i=i+2){
+            int y;
+        }
     }
-    for(int i = 0;i<5;i=i+2);
-    y = p;
-
-    for(int i = 0;i<5;i=i+2)
-        return reds;
-    float up = rf();
-    char iot = 'a',poi = pot(reds,reds,yup,t);
-
-    char ap;
-    return u;
-}
