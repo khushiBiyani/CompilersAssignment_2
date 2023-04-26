@@ -536,8 +536,8 @@ int yy_flex_debug = 0;
 #define YY_MORE_ADJ 0
 #define YY_RESTORE_YY_MORE_OFFSET
 char *yytext;
-#line 1 "AST.l"
-#line 2 "AST.l"
+#line 1 "SemanticAnalyzer.l"
+#line 2 "SemanticAnalyzer.l"
     #include <stdio.h>
     #include<stdlib.h>
     #include <stdbool.h>
@@ -765,7 +765,7 @@ YY_DECL
 		}
 
 	{
-#line 11 "AST.l"
+#line 11 "SemanticAnalyzer.l"
 
 #line 771 "lex.yy.c"
 
@@ -826,294 +826,294 @@ do_action:	/* This label is used only to access EOF actions. */
 
 case 1:
 YY_RULE_SETUP
-#line 12 "AST.l"
+#line 12 "SemanticAnalyzer.l"
 {BEGIN COMMENT;}
 	YY_BREAK
 case 2:
 /* rule 2 can match eol */
 YY_RULE_SETUP
-#line 13 "AST.l"
+#line 13 "SemanticAnalyzer.l"
 ;
 	YY_BREAK
 case 3:
 YY_RULE_SETUP
-#line 14 "AST.l"
+#line 14 "SemanticAnalyzer.l"
 {BEGIN INITIAL;}
 	YY_BREAK
 case 4:
 YY_RULE_SETUP
-#line 15 "AST.l"
+#line 15 "SemanticAnalyzer.l"
 {printf("Error on line %d: Nested comments are invalid\n",lineCount);yyterminate();}
 	YY_BREAK
 case YY_STATE_EOF(COMMENT):
-#line 16 "AST.l"
+#line 16 "SemanticAnalyzer.l"
 {printf("Error on line %d: Unterminated comments are invalid\n",lineCount); yyterminate();}
 	YY_BREAK
 case 5:
 YY_RULE_SETUP
-#line 17 "AST.l"
+#line 17 "SemanticAnalyzer.l"
 {BEGIN SLCOMMENT;}
 	YY_BREAK
 case 6:
 YY_RULE_SETUP
-#line 18 "AST.l"
+#line 18 "SemanticAnalyzer.l"
 ;
 	YY_BREAK
 case 7:
 /* rule 7 can match eol */
 YY_RULE_SETUP
-#line 19 "AST.l"
+#line 19 "SemanticAnalyzer.l"
 {lineCount++; BEGIN INITIAL;}
 	YY_BREAK
 case 8:
 YY_RULE_SETUP
-#line 21 "AST.l"
+#line 21 "SemanticAnalyzer.l"
 {return ELSE;}
 	YY_BREAK
 case 9:
 YY_RULE_SETUP
-#line 22 "AST.l"
+#line 22 "SemanticAnalyzer.l"
 {return IF;}
 	YY_BREAK
 case 10:
 YY_RULE_SETUP
-#line 23 "AST.l"
+#line 23 "SemanticAnalyzer.l"
 {return DEFAULT;}
 	YY_BREAK
 case 11:
 YY_RULE_SETUP
-#line 24 "AST.l"
+#line 24 "SemanticAnalyzer.l"
 {return SWITCH;}
 	YY_BREAK
 case 12:
 YY_RULE_SETUP
-#line 25 "AST.l"
+#line 25 "SemanticAnalyzer.l"
 {return CASE;}
 	YY_BREAK
 case 13:
 YY_RULE_SETUP
-#line 26 "AST.l"
+#line 26 "SemanticAnalyzer.l"
 {return FOR;}
 	YY_BREAK
 case 14:
 YY_RULE_SETUP
-#line 27 "AST.l"
+#line 27 "SemanticAnalyzer.l"
 {return WHILE;}
 	YY_BREAK
 case 15:
 YY_RULE_SETUP
-#line 28 "AST.l"
+#line 28 "SemanticAnalyzer.l"
 {return BREAK;}
 	YY_BREAK
 case 16:
 YY_RULE_SETUP
-#line 29 "AST.l"
+#line 29 "SemanticAnalyzer.l"
 {return CONTINUE;}
 	YY_BREAK
 case 17:
 YY_RULE_SETUP
-#line 30 "AST.l"
+#line 30 "SemanticAnalyzer.l"
 {return INT;}
 	YY_BREAK
 case 18:
 YY_RULE_SETUP
-#line 31 "AST.l"
+#line 31 "SemanticAnalyzer.l"
 {return CHAR;}
 	YY_BREAK
 case 19:
 YY_RULE_SETUP
-#line 32 "AST.l"
+#line 32 "SemanticAnalyzer.l"
 {return FLOAT;}
 	YY_BREAK
 case 20:
 YY_RULE_SETUP
-#line 33 "AST.l"
+#line 33 "SemanticAnalyzer.l"
 {return RETURN;}
 	YY_BREAK
 case 21:
 YY_RULE_SETUP
-#line 34 "AST.l"
+#line 34 "SemanticAnalyzer.l"
 {return PRINTF;}
 	YY_BREAK
 case 22:
 YY_RULE_SETUP
-#line 35 "AST.l"
+#line 35 "SemanticAnalyzer.l"
 {return SCANF;}
 	YY_BREAK
 case 23:
 YY_RULE_SETUP
-#line 36 "AST.l"
+#line 36 "SemanticAnalyzer.l"
 ;
 	YY_BREAK
 case 24:
 YY_RULE_SETUP
-#line 37 "AST.l"
+#line 37 "SemanticAnalyzer.l"
 {return EQUAL;}
 	YY_BREAK
 case 25:
 YY_RULE_SETUP
-#line 38 "AST.l"
+#line 38 "SemanticAnalyzer.l"
 {return COMMA;}
 	YY_BREAK
 case 26:
 YY_RULE_SETUP
-#line 39 "AST.l"
+#line 39 "SemanticAnalyzer.l"
 {return AMPERSAND;}
 	YY_BREAK
 case 27:
 YY_RULE_SETUP
-#line 40 "AST.l"
+#line 40 "SemanticAnalyzer.l"
 {return COLON;}
 	YY_BREAK
 case 28:
 YY_RULE_SETUP
-#line 41 "AST.l"
+#line 41 "SemanticAnalyzer.l"
 {return SEMICOLON;}
 	YY_BREAK
 case 29:
 YY_RULE_SETUP
-#line 42 "AST.l"
+#line 42 "SemanticAnalyzer.l"
 {yylval.Str = strdup(yytext);return IDENTIFIER;}
 	YY_BREAK
 case 30:
 YY_RULE_SETUP
-#line 43 "AST.l"
+#line 43 "SemanticAnalyzer.l"
 {printf("Error: Illegal identifier format\n");error=1;}
 	YY_BREAK
 case 31:
 YY_RULE_SETUP
-#line 44 "AST.l"
+#line 44 "SemanticAnalyzer.l"
 {return LOGICALOR;}
 	YY_BREAK
 case 32:
 YY_RULE_SETUP
-#line 45 "AST.l"
+#line 45 "SemanticAnalyzer.l"
 {return LOGICALAND;}
 	YY_BREAK
 case 33:
 YY_RULE_SETUP
-#line 46 "AST.l"
+#line 46 "SemanticAnalyzer.l"
 {return EQUALS;}
 	YY_BREAK
 case 34:
 YY_RULE_SETUP
-#line 47 "AST.l"
+#line 47 "SemanticAnalyzer.l"
 {return NOTEQUAL;}
 	YY_BREAK
 case 35:
 YY_RULE_SETUP
-#line 48 "AST.l"
+#line 48 "SemanticAnalyzer.l"
 {return GREATERTHAN;}
 	YY_BREAK
 case 36:
 YY_RULE_SETUP
-#line 49 "AST.l"
+#line 49 "SemanticAnalyzer.l"
 {return GREATERTHANEQUALTO;}
 	YY_BREAK
 case 37:
 YY_RULE_SETUP
-#line 50 "AST.l"
+#line 50 "SemanticAnalyzer.l"
 {return LESSTHAN;}
 	YY_BREAK
 case 38:
 YY_RULE_SETUP
-#line 51 "AST.l"
+#line 51 "SemanticAnalyzer.l"
 {return LESSTHANEQUALTO;}
 	YY_BREAK
 case 39:
 YY_RULE_SETUP
-#line 52 "AST.l"
+#line 52 "SemanticAnalyzer.l"
 {return ADD;}
 	YY_BREAK
 case 40:
 YY_RULE_SETUP
-#line 53 "AST.l"
+#line 53 "SemanticAnalyzer.l"
 {return SUB;}
 	YY_BREAK
 case 41:
 YY_RULE_SETUP
-#line 54 "AST.l"
+#line 54 "SemanticAnalyzer.l"
 {return MULT;}
 	YY_BREAK
 case 42:
 YY_RULE_SETUP
-#line 55 "AST.l"
+#line 55 "SemanticAnalyzer.l"
 {return DIV;}
 	YY_BREAK
 case 43:
 YY_RULE_SETUP
-#line 56 "AST.l"
+#line 56 "SemanticAnalyzer.l"
 {return MOD;}
 	YY_BREAK
 case 44:
 YY_RULE_SETUP
-#line 57 "AST.l"
+#line 57 "SemanticAnalyzer.l"
 {return OPBRAC;}
 	YY_BREAK
 case 45:
 YY_RULE_SETUP
-#line 58 "AST.l"
+#line 58 "SemanticAnalyzer.l"
 {return CLBRAC;}
 	YY_BREAK
 case 46:
 YY_RULE_SETUP
-#line 59 "AST.l"
+#line 59 "SemanticAnalyzer.l"
 {return OPCUR;}
 	YY_BREAK
 case 47:
 YY_RULE_SETUP
-#line 60 "AST.l"
+#line 60 "SemanticAnalyzer.l"
 {return CLCUR;}
 	YY_BREAK
 case 48:
 YY_RULE_SETUP
-#line 61 "AST.l"
+#line 61 "SemanticAnalyzer.l"
 {return BOXOPEN;}
 	YY_BREAK
 case 49:
 YY_RULE_SETUP
-#line 62 "AST.l"
+#line 62 "SemanticAnalyzer.l"
 {return BOXCLOSE;}
 	YY_BREAK
 case 50:
 YY_RULE_SETUP
-#line 63 "AST.l"
+#line 63 "SemanticAnalyzer.l"
 {return LOGICALNOT;}
 	YY_BREAK
 case 51:
 YY_RULE_SETUP
-#line 64 "AST.l"
-{yylval.Str = strdup(yytext);return INTVAL;}
+#line 64 "SemanticAnalyzer.l"
+{yylval.Int = atoi(yytext);return INTVAL;}
 	YY_BREAK
 case 52:
 YY_RULE_SETUP
-#line 65 "AST.l"
-{yylval.Str = strdup(yytext);return FLOATVAL;}
+#line 65 "SemanticAnalyzer.l"
+{yylval.Float = atof(yytext);return FLOATVAL;}
 	YY_BREAK
 case 53:
 YY_RULE_SETUP
-#line 66 "AST.l"
+#line 66 "SemanticAnalyzer.l"
 {return CHARVAL;}   
 	YY_BREAK
 case 54:
 YY_RULE_SETUP
-#line 67 "AST.l"
-{yylval.Str = strndup(yytext,yyleng-1);return STRING;}
+#line 67 "SemanticAnalyzer.l"
+{yylval.Str = strdup(yytext);return STRING;}
 	YY_BREAK
 case 55:
 /* rule 55 can match eol */
 YY_RULE_SETUP
-#line 68 "AST.l"
+#line 68 "SemanticAnalyzer.l"
 {lineCount++;}
 	YY_BREAK
 case 56:
 YY_RULE_SETUP
-#line 69 "AST.l"
+#line 69 "SemanticAnalyzer.l"
 {return yytext[0];}
 	YY_BREAK
 case 57:
 YY_RULE_SETUP
-#line 70 "AST.l"
+#line 70 "SemanticAnalyzer.l"
 ECHO;
 	YY_BREAK
 #line 1120 "lex.yy.c"
@@ -2122,6 +2122,6 @@ void yyfree (void * ptr )
 
 #define YYTABLES_NAME "yytables"
 
-#line 70 "AST.l"
+#line 70 "SemanticAnalyzer.l"
 
 

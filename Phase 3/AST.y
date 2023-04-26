@@ -94,6 +94,7 @@ singleLoopStatement : specialStatement {char* temp; temp=(char *)malloc(sizeof(c
 					| CONTINUE SEMICOLON {$<Str>$=strdup("#continue@#;@");}
 					| switchStatement {char* temp; temp=(char *)malloc(sizeof(char)*10000);strcat(temp,"#SWS#");strcat(temp,$1);strcat(temp,"@@");$<Str>$=strdup(temp);}
 					| ifInLoopStatement {char* temp; temp=(char *)malloc(sizeof(char)*10000);strcat(temp,"#IfLoop#");strcat(temp,$1);strcat(temp,"@@");$<Str>$=strdup(temp);}
+					| returnDec {char* temp; temp=(char *)malloc(sizeof(char)*10000);strcat(temp,"#IfLoop#");strcat(temp,$1);strcat(temp,"@@");$<Str>$=strdup(temp);}
  
 forAssignStatement : assignmentStatement {char* temp; temp=(char *)malloc(sizeof(char)*10000);strcat(temp,"#FA#");strcat(temp,$1);strcat(temp,"@@");$<Str>$=strdup(temp);}
 					| INT IDENTIFIER EQUAL expressionStatement SEMICOLON {char *temp;temp=(char *)malloc(sizeof(char)*10000);strcat(temp,"#int@#");strcat(temp,$2);strcat(temp,"@#=@#ES#");strcat(temp,$4);strcat(temp,"@@#;@");$<Str>$=strdup(temp);}
@@ -124,6 +125,7 @@ inLoop : BREAK SEMICOLON inLoop {char* temp; temp=(char *)malloc(sizeof(char)*10
  		| singleLoopStatement inLoop  {char* temp; temp=(char *)malloc(sizeof(char)*10000);strcat(temp,"#SLS#");strcat(temp,$1);strcat(temp,"@@#InL#");strcat(temp,$2);strcat(temp,"@@");$<Str>$=strdup(temp);}
  		| printer inLoop  {char* temp; temp=(char *)malloc(sizeof(char)*10000);strcat(temp,"#printer#");strcat(temp,$1);strcat(temp,"@@#InL#");strcat(temp,$2);strcat(temp,"@@");$<Str>$=strdup(temp);}
 		| Scanner inLoop  {char* temp; temp=(char *)malloc(sizeof(char)*10000);strcat(temp,"#Scanner#");strcat(temp,$1);strcat(temp,"@@#InL#");strcat(temp,$2);strcat(temp,"@@");$<Str>$=strdup(temp);}
+		| returnDec inLoop  {char* temp; temp=(char *)malloc(sizeof(char)*10000);strcat(temp,"#Scanner#");strcat(temp,$1);strcat(temp,"@@#InL#");strcat(temp,$2);strcat(temp,"@@");$<Str>$=strdup(temp);}
 		| {$<Str>$=strdup("#Epsilon@");}
   
 ifStatement : IF OPBRAC expressionStatement CLBRAC OPCUR statements CLCUR ifContinuer {char* temp; temp=(char *)malloc(sizeof(char)*10000);strcat(temp,"#IF@#(@#ES#");strcat(temp,$3);strcat(temp,"@@#)@#{@#Satements#");strcat(temp,$6);strcat(temp,"@@#}@#");strcat(temp,$8);strcat(temp,"@");$<Str>$=strdup(temp);}
@@ -166,6 +168,7 @@ defaultStatement : DEFAULT COLON statements {char* temp; temp=(char *)malloc(siz
  /* basic statements */
 basicStatements : basicStatement basicStatements {char* temp; temp=(char *)malloc(sizeof(char)*10000);strcat(temp,"#BS#");strcat(temp,$1);strcat(temp,"@@#BSs#");strcat(temp,$2);strcat(temp,"@@");$<Str>$=strdup(temp);}
 		| basicStatement {char* temp; temp=(char *)malloc(sizeof(char)*10000);strcat(temp,"#BS#");strcat(temp,$1);strcat(temp,"@@");$<Str>$=strdup(temp);}
+		| returnDec {char* temp; temp=(char *)malloc(sizeof(char)*10000);strcat(temp,"#BS#");strcat(temp,$1);strcat(temp,"@@");$<Str>$=strdup(temp);}
  
 basicStatement : expressionStatement {char* temp; temp=(char *)malloc(sizeof(char)*10000);strcat(temp,"#ES#");strcat(temp,$1);strcat(temp,"@@");$<Str>$=strdup(temp);}
 		| declarationStatement {char* temp; temp=(char *)malloc(sizeof(char)*10000);strcat(temp,"#DS#");strcat(temp,$1);strcat(temp,"@@");$<Str>$=strdup(temp);}

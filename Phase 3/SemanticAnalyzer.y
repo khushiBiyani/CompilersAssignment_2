@@ -318,6 +318,7 @@
      					| CONTINUE SEMICOLON
      					| switchStatement
      					| ifInLoopStatement
+						| returnDec
       
      forAssignStatement : assignmentStatement 
      					| INT IDENTIFIER EQUAL expressionStatement SEMICOLON { if(checkVariable($2,currScope,false,false)){printf("MULTIPLE DECLARATIONS %s\n\n",$2);return 1;}if(strcmp($4,strdup("i"))!=0){printf("Type Mismatch");return 1;}insertInTable($2,strdup("i"),strdup("i"),currScope, -1,NULL,sizes,instDim,false,false);}
@@ -344,6 +345,7 @@
      		| ifInLoopStatement inLoop {}
      		| switchStatement inLoop {}
      		| singleLoopStatement inLoop {}
+			| returnDec
      		| printer {memset(printlistArray,'\0',sizeof(printlistArray));printindex = 0;} inLoop
 			| scanner {memset(scanlistArray,'\0',sizeof(scanlistArray));scanindex = 0;} inLoop
 			|
@@ -388,6 +390,7 @@
      basicStatement : expressionStatement {}
      		| declarationStatement {}
      		| assignmentStatement	{}
+			| returnDec
     		| functionCall
      		
      assignmentStatement : IDENTIFIER EQUAL expressionStatement COMMA assignmentStatement {int inst = getIdentifierIndex($1,false,false);if(inst>=0){if(strcmp(table[inst].dataType,$3)!=0){printf("Type Mismatch");return 1;}}else{printf("VARIABLE NOT FOUND"); return 1;}}

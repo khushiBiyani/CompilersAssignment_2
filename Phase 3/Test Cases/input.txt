@@ -31,12 +31,13 @@ int main(int u, char t, float p){
 
     for(int i = 0;i<5;i=i+2){
         int y;
+        return 3;
     }
     for(int i = 0;i<5;i=i+2);
     y = p;
 
     for(int i = 0;i<5;i=i+2)
-        y = p;
+        return reds;
     float up = rf();
     char iot = 'a',poi = pot(reds,reds,yup,t);
 

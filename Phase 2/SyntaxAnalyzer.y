@@ -116,6 +116,7 @@ basicStatements : basicStatement basicStatements
 basicStatement : expressionStatement {printf("BS->EXPS..\n");}
 		| declarationStatement {printf("BS->DS..\n");}
 		| assignmentStatement	{printf("Basic->AS..\n");}
+		| returnDec
 		
 assignmentStatement : IDENTIFIER EQUAL expressionStatement COMMA assignmentStatement {printf("AS1..\n");}
 		| IDENTIFIER EQUAL expressionStatement SEMICOLON {printf("AS2..\n");}
@@ -145,7 +146,7 @@ declarationListIntFloat : IDENTIFIER EQUAL expressionStatement COMMA declaration
 		
 declarationListChar : IDENTIFIER EQUAL CHARVAL COMMA declarationListChar
 		| IDENTIFIER COMMA declarationListChar
-		| IDENTIFIER EQUAL CHARVAL
+		| IDENTIFIER EQUAL expressionStatement
 		| IDENTIFIER dimension
 		| IDENTIFIER
 		
