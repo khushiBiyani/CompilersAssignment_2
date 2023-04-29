@@ -68,113 +68,89 @@ type : INT
 		| CHAR
 
 compoundStatements
-      : '{' C '}'
+      : '{' functionBody '}'
       ;
 
-C
-      : C statement ';'
-      | C LOOPS
+functionBody
+      : functionBody statement ';'
+      | functionBody LOOPS
       | statement ';'
       | LOOPS
       ;
 
-returnDec : RETURN EXP
+returnDec : RETURN expressionStatement
 			| RETURN
 
 LOOPS
-      : WHILE {while1();} '(' COND ')' {while2();} LOOPBODY {while3();}
-      | FOR '(' ASSIGN_EXPR {for1();} ';' COND {for2();} ';' statement {for3();} ')' LOOPBODY {for4();}
-      | IF '(' COND ')' {ifelse1();} LOOPBODY {ifelse2();} elseContinuer
+      : WHILE {while1();} '(' conditionalStatement ')' {while2();} LOOPBODY {while3();}
+      | FOR '(' assignmentStatement {for1();} ';' conditionalStatement {for2();} ';' statement {for3();} ')' LOOPBODY {for4();}
+      | IF '(' conditionalStatement ')' {ifelse1();} LOOPBODY {ifelse2();} elseContinuer
 
 elseContinuer : ELSE LOOPBODY {ifelse3();}
-                | ELSE IF '(' COND ')' {ifelse1();} LOOPBODY {ifelse2();} elseContinuer
+                | ELSE IF '(' conditionalStatement ')' {ifelse1();} LOOPBODY {ifelse2();} elseContinuer
                 | 
 
 
 LOOPBODY
-  	  : '{' LOOPC '}'
+  	  : '{' LoopStmt '}'
   	  | ';'
   	  | statement ';'
   	  ;
 
-LOOPC
-      : LOOPC statement ';'
-      | LOOPC LOOPS
+LoopStmt
+      : LoopStmt statement ';'
+      | LoopStmt LOOPS
       | statement ';'
       | LOOPS
       |
       ;
 
 statement
-      : ASSIGN_EXPR
-      | EXP
+      : assignmentStatement
+      | expressionStatement
       | PRINT
       | returnDec
       ;
 
 PRINT: PRINTF '(' STRING prattributes ')'
 
-prattributes : prattributes COMMA F
+prattributes : prattributes COMMA Literal
             |
 
-TERNARY_COND  : T_B {codegen_assigna();}
-              | T_B LOGICALAND {codegen_assigna();} TERNARY_COND
-              | T_B {codegen_assigna();} LOGICALOR TERNARY_COND
-              | LOGICALNOT T_B {codegen_assigna();}
-              ;
-
-T_B : T_V EQUAL {push();} EQUAL {push();} LIT
-  | T_V GREATERTHAN {push();} T_F
-  | T_V LESSTHAN {push();} T_F
-  | T_V LOGICALNOT {push();} EQUAL {push();} LIT
-  |'(' T_B ')'
-  | T_V {pushab();}
-  ;
-
-T_F :EQUAL {push();}LIT
-  |LIT {pusha();}
-  ;
-
-COND  : B {codegen_assigna();}
-      | B LOGICALAND {codegen_assigna();} COND
-      | B {codegen_assigna();} LOGICALOR COND
-      | LOGICALNOT B {codegen_assigna();}
+conditionalStatement  : logicalStatement {codegen_assigna();}
+      | logicalStatement LOGICALAND {codegen_assigna();} conditionalStatement
+      | logicalStatement {codegen_assigna();} LOGICALOR conditionalStatement
+      | LOGICALNOT logicalStatement {codegen_assigna();}
       ;
 
-B : V EQUALS {push();} F
-  | V GREATERTHAN {push();} F
-  | V LESSTHAN {push();} F
-  | V LESSTHANEQUALTO {push();} F
-  | V GREATERTHANEQUALTO {push();} F
-  | V NOTEQUAL {push();} F
-  |'(' B ')'
-  | V {pushab();}
+logicalStatement : Value EQUALS {push();} Literal
+  | Value GREATERTHAN {push();} Literal
+  | Value LESSTHAN {push();} Literal
+  | Value LESSTHANEQUALTO {push();} Literal
+  | Value GREATERTHANEQUALTO {push();} Literal
+  | Value NOTEQUAL {push();} Literal
+  |'(' logicalStatement ')'
+  | Value {pushab();}
   ;
 
-F :EQUAL {push();} LIT
-  |LIT {pusha();}
-  ;
+Value : IDENTIFIER {push();}
 
-V : IDENTIFIER {push();}
-
-T_V : IDENTIFIER {pushx();}
-
-ASSIGN_EXPR
-      : LIT {push();} EQUAL {push();} EXP {codegen_assign();}
-      | TYPE LIT {push();} EQUAL {push();} EXP {codegen_assign();}
-       | TYPE LIT
+assignmentStatement
+      : Literal {push();} EQUAL {push();} expressionStatement {codegen_assign();}
+      | TYPE Literal {push();} EQUAL {push();} expressionStatement {codegen_assign();}
+       | TYPE Literal
       ;
 
-EXP
-	  : ADDSUB
-	  | EXP LESSTHAN {push();} ADDSUB {codegen();}
-	  | EXP GREATERTHAN {push();} ADDSUB {codegen();}
+expressionStatement
+	  : arithmeticExpression
+	  | expressionStatement LESSTHAN {push();} arithmeticExpression {codegen();}
+	  | expressionStatement GREATERTHAN {push();} arithmeticExpression {codegen();}
 	  ;
 
-ADDSUB
+arithmeticExpression
       : TERM
-      | EXP ADD {push();} TERM {codegen();}
-      | EXP SUB {push();} TERM {codegen();}
+      | expressionStatement ADD {push();} TERM {codegen();}
+      | expressionStatement SUB {push();} TERM {codegen();}
       ;
 
 TERM
@@ -185,19 +161,16 @@ TERM
       ;
 
 FACTOR
-	  : LIT
-	  | '(' EXP ')'
-      | 
+	  : Literal
+	  | '(' expressionStatement ')'
   	;
 
 
-LIT
+Literal
       : IDENTIFIER {push();}
       | INTVAL {push();}
       | FLOATVAL {push();}
       | CHARVAL {push();}
-      | '-' INTVAL
-      | '-' FLOATVAL
       ;
 TYPE
       : INT

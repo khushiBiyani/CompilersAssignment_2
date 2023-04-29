@@ -41,6 +41,7 @@
 "," {yylval = strdup(yytext);return COMMA;}
 "&" {yylval = strdup(yytext);return AMPERSAND;}
 ":" {yylval = strdup(yytext);return COLON;}
+
 [a-zA-Z_][a-zA-Z0-9_]* {yylval = strdup(yytext);return IDENTIFIER;}
 [0-9]+([a-zA-Z]|_)+  {printf("Error: Illegal identifier format\n");error=1;}
 "||" {yylval = strdup(yytext);return LOGICALOR;}
@@ -57,8 +58,8 @@
 "/" {yylval = strdup(yytext);return DIV;}
 "%" {yylval = strdup(yytext);return MOD;}
 "!" {yylval = strdup(yytext);return LOGICALNOT;}
-[0-9]+([eE][+-]?[1-9][0-9]*)? {yylval = strdup(yytext);return INTVAL;}
-[0-9]*\.[0-9]+([eE][+-]?[1-9][0-9]*)? {yylval = strdup(yytext);return FLOATVAL;}
+[-]?[0-9]+([eE][+-]?[1-9][0-9]*)? {yylval = strdup(yytext);return INTVAL;}
+[-]?[0-9]*\.[0-9]+([eE][+-]?[1-9][0-9]*)? {yylval = strdup(yytext);return FLOATVAL;}
 \'[^\'\n]\' {yylval = strdup(yytext);return CHARVAL;}   
 \"[^\"\n]*\" {yylval = strdup(yytext);return STRING;}
 \n {lineCount++;}
