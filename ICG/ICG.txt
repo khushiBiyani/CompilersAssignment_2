@@ -1,37 +1,33 @@
-func begin main
-t0 = 0
-t1 = 'a'
-k = t1
-t2 = 1.2
-r = t2
-t3 = 0
-temp = t3
-L0:
-t4 = 5
-t5 = temp < t4
-IF not t5 GoTo L1
-t6 = temp + 1
-temp = t6
-t7 = 45
-a = t7
-GoTo L0:
-L1:
-refparam "bdgdv ans: %d ans: %d yfgyug %c %f"
-refparam a
-refparam temp
-refparam k
-refparam r
+func begin decrease
+t0 = 69
+x = t0
+refparam "%d"
+refparam x
 refparam result
-call printf, 5
-L2:
-t8 = 0
-t9 = temp > t8
-IF not t9 GoTo L3
-t10 = 1
-t11 = temp - t10
-temp = t11
-t12 = 69
-a = t12
-GoTo L2:
-L3:
+call printf, 2
+func end
+
+func begin increase_number
+t1 = 10
+x = t1
+t2 = 10
+t3 = t2 + x
+y = t3
+refparam result
+call decrease, 0
+refparam "%d"
+refparam y
+refparam result
+call printf, 2
+func end
+
+func begin main
+t4 = 4
+x = t4
+refparam result
+call increase_number, 0
+refparam "%d"
+refparam x
+refparam result
+call printf, 2
 func end

@@ -1,7 +1,7 @@
 import re
 
 parsed_icg = []
-variable = {}
+
 param = []
 def searchLine(str):
     ind=0
@@ -25,6 +25,7 @@ def my_printf(fmt_str, *args):
 
 
 def executeFunction(index):
+    variable = {}
     while (1):
         str = [word for word in parsed_icg[index].split(' ')]
         #blank labels
@@ -43,11 +44,15 @@ def executeFunction(index):
                 param[0] = re.sub(pattern, "%s", param[0])
                 ans=my_printf(param[0], *param[1:])
                 print(ans[1:len(ans)-1])
-                param.clear
+                param.clear()
 
 
             else:
                 print("NORMAL FUNCTION CALLED")
+                functionIndex = searchLine("func begin "+str[1][0:len(str[1])-1])
+                functionIndex = functionIndex + 1
+                executeFunction(functionIndex)
+                print(functionIndex)
 
     #variable assign
         #evaluate expression/value

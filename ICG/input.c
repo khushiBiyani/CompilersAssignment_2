@@ -1,19 +1,24 @@
-int main()
+
+void decrease(){
+  int x;
+  x = 69;
+  printf("%d",x);
+}
+void increase_number()
 {
-    int temp = 0;
-	  int a;
-    float r;
-    char k ;
-    k = 'a';
-    r = 1.2;
-    for (temp = 0; temp < 5; temp++)
-    {
-		a = 45; 
-    }
-    printf("bdgdv ans: %d ans: %d yfgyug %c %f", a, temp,k,r);
-    while (temp > 0)
-    {
-        temp = temp - 1;
-		    a = 69;
-    }
+	int x;
+  x = 10;
+	int y;
+	y = 10 + x;
+  decrease();
+	printf("%d",y);
+	
+}
+
+void main()
+{
+	int x;
+	x = 4;
+	increase_number();
+	printf("%d", x);
 }
