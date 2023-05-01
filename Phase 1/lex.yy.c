@@ -2435,7 +2435,7 @@ void yyfree (void * ptr )
 
  
 int main() {
-    yyin=fopen("./Test Cases/testCase3.c","r");
+    yyin=fopen("./Test Cases/testCase.c","r");
     printf("----------------------------------------------------------\n");
     printf("line number\t\tlexeme\t\ttoken type\n");
     printf("----------------------------------------------------------\n");

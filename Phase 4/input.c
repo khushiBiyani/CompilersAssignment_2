@@ -34,7 +34,7 @@ int main()
 		return a+1;
 	}
 	else{
-		a=x-9;
+		a=x+9;
 		return a;
 	}
 	return ;
