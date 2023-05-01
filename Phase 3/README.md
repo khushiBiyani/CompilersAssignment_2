@@ -27,9 +27,9 @@ The code can also explicitly be run using the commands:
 
 This gives the AST STRING as output written to the text file astString.txt
 
-paste the AST STRING in the drawTree.py and run
+Paste the AST STRING in the drawTree.py and run
 
-python drawTree.py or python3 drawTree.py depending on the python version installed
+Python drawTree.py or python3 drawTree.py depending on the python version installed
 
 This displays the abstract syntax tree using NLTK Library
 
