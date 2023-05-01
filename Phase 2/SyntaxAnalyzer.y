@@ -221,14 +221,14 @@ void main(){
 	yyin = fopen("./Test Cases/input.txt","r");
 	if(!yyparse())
 	{
-		printf("Parsing Done\n");
+		printf("Valid Input\n");
 	}
 	else 
-		printf("Failed\n");
+		printf("Syntax Error\n");
 	exit(0);
 }
  
 void yyerror(){
-	printf("Invalid Statement");
+	printf("Syntax Error");
 	exit(0);
 }

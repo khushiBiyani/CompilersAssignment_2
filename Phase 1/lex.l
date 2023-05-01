@@ -32,14 +32,14 @@ case {printf("%d\t\t%s\t\tCase Keyword\n",line_count,yytext);}
 return {printf("%d\t\t%s\t\tReturn Keyword\n",line_count,yytext);}
 default {printf("%d\t\t%s\t\tDefault Keyword\n",line_count,yytext);}
 main {printf("%d\t\t%s\t\tMain Keyword\n",line_count,yytext);}
-
+ 
 printf/\(\".*\"(",".*)*");" {printf("%d\t\t%s\t\tPrintf keyword\n",line_count,yytext); pCount=0; BEGIN PRINT;}
 "printf".*; {invalidPrintfLine.push_back(line_count);}
 <PRINT>"(" {printf("%d\t\t%s\t\tOpen Round Bracket\n",line_count, yytext);}
-<PRINT>\" { yymore(); BEGIN PRINTFTEXT;}
-<PRINTFTEXT>"%"[scfd] {yymore(); pCount++;}
-<PRINTFTEXT>\" {printf("%d\t\t%s\t\tPrintf string\n",line_count, yytext);BEGIN PRINT;}
-<PRINTFTEXT>[.\t\r\f\v] ;
+<PRINT>\" { printf("%d\t\t%s",line_count,yytext); BEGIN PRINTFTEXT;}
+<PRINTFTEXT>"%"[scfd] {printf("%s",yytext); pCount++;}
+<PRINTFTEXT>\" {printf("%s\t\tPrintf string\n",yytext);BEGIN PRINT;}
+<PRINTFTEXT>[.\t\r\f\v] {printf("%s",yytext);};
 <PRINTFTEXT>\n {line_count++;}
 <PRINT>","/(" "*).* {printf("%d\t\t%s\t\tComma\n",line_count, yytext);pCount--;}
 <PRINT>[0-9]+([a-zA-Z]|_)+  {printf("Error: Illegal identifier format\n");pCount--;}
@@ -52,7 +52,7 @@ printf/\(\".*\"(",".*)*");" {printf("%d\t\t%s\t\tPrintf keyword\n",line_count,yy
         invalidPrintfLine.push_back(line_count);
     BEGIN INITIAL;
     }
-
+ 
 scanf/\(\".*\"(","" "*&.*)*");" {printf("%d\t\t%s\t\tScanf keyword\n",line_count,yytext); sCount=0; BEGIN SCAN;}
 "scanf".*; {invalidScanfLine.push_back(line_count);}
 <SCAN>"(" {printf("%d\t\t%s\t\tOpen Round Bracket\n",line_count, yytext);}
@@ -73,7 +73,7 @@ scanf/\(\".*\"(","" "*&.*)*");" {printf("%d\t\t%s\t\tScanf keyword\n",line_count
         invalidScanfLine.push_back(line_count);
     BEGIN INITIAL;
 }
-
+ 
 "/*"                                {BEGIN COMMENT;}
 <COMMENT>.|[ \t\r\f\v\n]             ;
 <COMMENT>"*/"                       {BEGIN INITIAL;}
@@ -82,7 +82,7 @@ scanf/\(\".*\"(","" "*&.*)*");" {printf("%d\t\t%s\t\tScanf keyword\n",line_count
 "//"                                {BEGIN SLCOMMENT;}
 <SLCOMMENT>.                        ;
 <SLCOMMENT>\n                       {line_count++; BEGIN INITIAL;}
-
+ 
 "+" {printf("%d\t\t%s\t\tAddition Operator\n",line_count,yytext);}
 "-" {printf("%d\t\t%s\t\tSubtraction Operator\n",line_count,yytext);}
 "*" {printf("%d\t\t%s\t\tMultiplication Operator\n",line_count,yytext);}
@@ -110,17 +110,17 @@ scanf/\(\".*\"(","" "*&.*)*");" {printf("%d\t\t%s\t\tScanf keyword\n",line_count
 ","   {printf("%d\t\t%s\t\tComma\n",line_count, yytext);}
 ";"   {printf("%d\t\t%s\t\tDelimiter\n",line_count, yytext);}
 "&"   {printf("%d\t\t%s\t\tAmpersand\n",line_count,yytext);}
-
+ 
 \"[^\"\n]*\" {printf("%d\t\t%s\t\tString\n",line_count, yytext);}
 \'[^\'\n]\' {printf("%d\t\t%s\t\tCharacter\n",line_count, yytext);}
 [ \t\r\n\f\v] ;
 . {printf("%d\t\t%s\t\tIllegal Character\n",line_count,yytext);}    
-
-
+ 
+ 
 %%
-
+ 
 int main() {
-    yyin=fopen("./Test Cases/testCase4.c","r");
+    yyin=fopen("./Test Cases/testCase3.c","r");
     printf("----------------------------------------------------------\n");
     printf("line number\t\tlexeme\t\ttoken type\n");
     printf("----------------------------------------------------------\n");
