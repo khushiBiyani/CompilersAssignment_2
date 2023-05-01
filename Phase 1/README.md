@@ -16,4 +16,4 @@ The code can also explicitly be run using the commands:
 
 
 To modify the input file:
-Please change the file read statement on line __ by modifying the file name in double quotes
+Please change the file read statement on line number 123 by modifying the file name in double quotes
