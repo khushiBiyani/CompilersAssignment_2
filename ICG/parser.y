@@ -8,6 +8,7 @@
 	void ins();
 	void insV();
 	int flag=0;
+	FILE *fp;
 
 	extern char curid[20];
 	extern char curtype[20];
@@ -485,7 +486,8 @@ void codegen()
 	char buffer[100];
 	itoa(count,buffer,10);
 	strcat(temp,buffer);
-	printf("%s = %s %s %s\n",temp,s[top-2].value,s[top-1].value,s[top].value);
+	fprintf(fp,"%s = %s %s %s\n",temp,s[top-2].value,s[top-1].value,s[top].value);
+	
 	top = top - 2;
 	strcpy(s[top].value,temp);
 	count++; 
@@ -497,7 +499,8 @@ void codegencon()
 	char buffer[100];
 	itoa(count,buffer,10);
 	strcat(temp,buffer);
-	printf("%s = %s\n",temp,curval);
+	fprintf(fp,"%s = %s\n",temp,curval);
+	
 	push(temp);
 	count++;
 	
@@ -532,14 +535,14 @@ void genunary()
 
 	if(strcmp(temp2,"--")==0)
 	{
-		printf("%s = %s - 1\n", temp, temp1);
-		printf("%s = %s\n", temp1, temp);
+		fprintf(fp,"%s = %s - 1\n", temp, temp1);
+		fprintf(fp,"%s = %s\n", temp1, temp);
 	}
 
 	if(strcmp(temp2,"++")==0)
 	{
-		printf("%s = %s + 1\n", temp, temp1);
-		printf("%s = %s\n", temp1, temp);
+		fprintf(fp,"%s = %s + 1\n", temp, temp1);
+		fprintf(fp,"%s = %s\n", temp1, temp);
 	}
 
 	top = top -2;
@@ -547,7 +550,7 @@ void genunary()
 
 void codeassign()
 {
-	printf("%s = %s\n",s[top-2].value,s[top].value);
+	fprintf(fp,"%s = %s\n",s[top-2].value,s[top].value);
 	top = top - 2;
 }
 
@@ -557,7 +560,7 @@ void label1()
 	char buffer[100];
 	itoa(lno,buffer,10);
 	strcat(temp,buffer);
-	printf("IF not %s GoTo %s\n",s[top].value,temp);
+	fprintf(fp,"IF not %s GoTo %s\n",s[top].value,temp);
 	label[++ltop].labelvalue = lno++;
 }
 
@@ -567,11 +570,11 @@ void label2()
 	char buffer[100];
 	itoa(lno,buffer,10);
 	strcat(temp,buffer);
-	printf("GoTo %s\n",temp);
+	fprintf(fp,"GoTo %s\n",temp);
 	strcpy(temp,"L");
 	itoa(label[ltop].labelvalue,buffer,10);
 	strcat(temp,buffer);
-	printf("%s:\n",temp);
+	fprintf(fp,"%s:\n",temp);
 	ltop--;
 	label[++ltop].labelvalue=lno++;
 }
@@ -582,7 +585,7 @@ void label3()
 	char buffer[100];
 	itoa(label[ltop].labelvalue,buffer,10);
 	strcat(temp,buffer);
-	printf("%s:\n",temp);
+	fprintf(fp,"%s:\n",temp);
 	ltop--;
 	
 }
@@ -593,7 +596,7 @@ void label4()
 	char buffer[100];
 	itoa(lno,buffer,10);
 	strcat(temp,buffer);
-	printf("%s:\n",temp);
+	fprintf(fp,"%s:\n",temp);
 	label[++ltop].labelvalue = lno++;
 }
 
@@ -604,11 +607,11 @@ void label5()
 	char buffer[100];
 	itoa(label[ltop-1].labelvalue,buffer,10);
 	strcat(temp,buffer);
-	printf("GoTo %s:\n",temp);
+	fprintf(fp,"GoTo %s:\n",temp);
 	strcpy(temp,"L");
 	itoa(label[ltop].labelvalue,buffer,10);
 	strcat(temp,buffer);
-	printf("%s:\n",temp);
+	fprintf(fp,"%s:\n",temp);
 	ltop = ltop - 2;
     
    
@@ -616,35 +619,35 @@ void label5()
 
 void funcgen()
 {
-	printf("func begin %s ",currfunc);
+	fprintf(fp,"func begin %s ",currfunc);
 	for(int i = 0;i<params_count;i++){
-		printf("%s ",parameterListofFunction[i]);
+		fprintf(fp,"%s ",parameterListofFunction[i]);
 	}
-	printf("\n");
+	fprintf(fp,"\n");
 }
 
 void funcgenend()
 {
-	printf("func end\n\n");
+	fprintf(fp,"func end\n\n");
 }
 
 void arggen(int i)
 {
     if(i==1)
     {
-	printf("refparam %s\n", curid);
+	fprintf(fp,"refparam %s\n", curid);
 	}
 	else
 	{
-	printf("refparam %s\n", curval);
+	fprintf(fp,"refparam %s\n", curval);
 	}
 }
 
 void callgen()
 {
-	printf("refparam result\n");
+	fprintf(fp,"refparam result\n");
 	push("result");
-	printf("call %s, %d\n",currfunccall,call_params_count);
+	fprintf(fp,"call %s, %d\n",currfunccall,call_params_count);
 }
 
 
@@ -652,19 +655,13 @@ void callgen()
 int main(int argc , char **argv)
 {
 	yyin = fopen(argv[1], "r");
-	yyparse();
+	fp = fopen("ICG.txt", "w");
 
-	if(flag == 0)
-	{
-		printf( "PASSED: ICG Phase\n" );
-		printf("%30s"  "PRINTING SYMBOL TABLE"  "\n", " ");
-		printf("%30s %s\n", " ", "______________");
-		printST();
-
-		printf("\n\n%30s"  "PRINTING CONSTANT TABLE"  "\n", " ");
-		printf("%30s %s\n", " ", "______________");
-		printCT();
+	if(fp == NULL) {
+		printf("file can't be opened\n");
+		exit(1);
 	}
+	yyparse();
 }
 
 void yyerror(char *s)

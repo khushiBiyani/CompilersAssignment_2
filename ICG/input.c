@@ -1,11 +1,11 @@
 
-void increase_number(int n,int y)
+void increase_number(int x,int y)
 {
 // 	int x;
 //   x = 10;
 // 	int y;
 	// y = 10 + x;
-	printf("n: %d y: %d",n,y);
+	printf("n: %d y: %d",x,y);
 	
 }
 
@@ -15,7 +15,7 @@ void main()
 	int x;
 	x = 4;
 	increase_number(5,x);
-	// printf("%d", x);
+	printf("%d", x);
   // for( x = 0;x<5;x++){
   //   int j;
   //   for(j=0;j<5;j++){
@@ -24,7 +24,7 @@ void main()
   //     // printf("%d %d", x,j);
   //   }
   // }
-  // printf("%d", x);
+  printf("x: %d", x);
 
 
 }

@@ -1,6 +1,6 @@
-func begin increase_number n y 
+func begin increase_number x y 
 refparam "n: %d y: %d"
-refparam n
+refparam x
 refparam y
 refparam result
 call printf, 3
@@ -13,4 +13,13 @@ refparam 5
 refparam x
 refparam result
 call increase_number, 2
+refparam "%d"
+refparam x
+refparam result
+call printf, 2
+refparam "x: %d"
+refparam x
+refparam result
+call printf, 2
 func end
+
