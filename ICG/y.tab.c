@@ -1828,7 +1828,7 @@ yyreduce:
 			                                                          yyval=1;
 			                                                          } 
 			                                                          else 
-			                                                          {yyval=-1; printf("Type mismatch\n"); exit(0);} 
+			                                                          {yyval=1; printf("1 Type mismatch\n"); exit(0);} 
 			                                                          codeassign();
 			                                                       }
 #line 1835 "y.tab.c"
@@ -1846,7 +1846,7 @@ yyreduce:
 																	  if(yyvsp[-3]==1 && yyvsp[0]==1) 
 			                                                          yyval=1; 
 			                                                          else 
-			                                                          {yyval=-1; printf("Type mismatch\n"); exit(0);} 
+			                                                          {yyval=1; printf("2 Type mismatch\n"); exit(0);} 
 			                                                          codeassign();
 			                                                       }
 #line 1853 "y.tab.c"
@@ -1864,7 +1864,7 @@ yyreduce:
 																	  if(yyvsp[-3]==1 && yyvsp[0]==1) 
 			                                                          yyval=1; 
 			                                                          else 
-			                                                          {yyval=-1; printf("Type mismatch\n"); exit(0);} 
+			                                                          {yyval=1; printf("3 Type mismatch\n"); exit(0);} 
 			                                                          codeassign();
 			                                                       }
 #line 1871 "y.tab.c"
@@ -1882,7 +1882,7 @@ yyreduce:
 																	  if(yyvsp[-3]==1 && yyvsp[0]==1) 
 			                                                          yyval=1; 
 			                                                          else 
-			                                                          {yyval=-1; printf("Type mismatch\n"); exit(0);}
+			                                                          {yyval=1; printf("4 Type mismatch\n"); exit(0);}
 			                                                          codeassign(); 
 			                                                       }
 #line 1889 "y.tab.c"
@@ -1900,7 +1900,7 @@ yyreduce:
 																	  if(yyvsp[-3]==1 && yyvsp[0]==1) 
 			                                                          yyval=1; 
 			                                                          else 
-			                                                          {yyval=-1; printf("Type mismatch\n"); exit(0);} 
+			                                                          {yyval=1; printf("5 Type mismatch\n"); exit(0);} 
 			                                                       }
 #line 1906 "y.tab.c"
     break;
@@ -1917,7 +1917,7 @@ yyreduce:
 																	  if(yyvsp[-3]==1 && yyvsp[-1]==1) 
 			                                                          yyval=1; 
 			                                                          else 
-			                                                          {yyval=-1; printf("Type mismatch\n"); exit(0);} 
+			                                                          {yyval=1; printf("6 Type mismatch\n"); exit(0);} 
 			                                                          codeassign();
 																	}
 #line 1924 "y.tab.c"
@@ -1925,19 +1925,19 @@ yyreduce:
 
   case 108: /* expression: mutable increment_operator  */
 #line 290 "parser.y"
-                                                                                                        { push("++");if(yyvsp[-1] == 1) yyval=1; else yyval=-1; genunary();}
+                                                                                                        { push("++");if(yyvsp[-1] == 1) yyval=1; else yyval=1; genunary();}
 #line 1930 "y.tab.c"
     break;
 
   case 109: /* expression: mutable decrement_operator  */
 #line 291 "parser.y"
-                                                                                                        {push("--");if(yyvsp[-1] == 1) yyval=1; else yyval=-1;}
+                                                                                                        {push("--");if(yyvsp[-1] == 1) yyval=1; else yyval=1;}
 #line 1936 "y.tab.c"
     break;
 
   case 110: /* expression: simple_expression  */
 #line 292 "parser.y"
-                                            {if(yyvsp[0] == 1) yyval=1; else yyval=-1;}
+                                            {if(yyvsp[0] == 1) yyval=1; else yyval=1;}
 #line 1942 "y.tab.c"
     break;
 
@@ -2122,7 +2122,7 @@ yyreduce:
 			              if(gettype(curid,0)=='i' || gettype(curid,1)== 'c')
 			              yyval = 1;
 			              else
-			              yyval = -1;
+			              yyval = 1;
 			              }
 #line 2128 "y.tab.c"
     break;
@@ -2138,26 +2138,26 @@ yyreduce:
                                            {if(gettype(curid,0)=='i' || gettype(curid,1)== 'c')
 			              		yyval = 1;
 			              		else
-			              		yyval = -1;
+			              		yyval = 1;
 			              		}
 #line 2144 "y.tab.c"
     break;
 
   case 142: /* immutable: '(' expression ')'  */
 #line 356 "parser.y"
-                                             {if(yyvsp[-1]==1) yyval=1; else yyval=-1;}
+                                             {if(yyvsp[-1]==1) yyval=1; else yyval=1;}
 #line 2150 "y.tab.c"
     break;
 
   case 143: /* immutable: call  */
 #line 357 "parser.y"
-                               {if(yyvsp[0]==-1) yyval=-1; else yyval=1;}
+                               {if(yyvsp[0]==-1) yyval=1; else yyval=1;}
 #line 2156 "y.tab.c"
     break;
 
   case 144: /* immutable: constant  */
 #line 358 "parser.y"
-                                   {if(yyvsp[0]==1) yyval=1; else yyval=-1;}
+                                   {if(yyvsp[0]==1) yyval=1; else yyval=1;}
 #line 2162 "y.tab.c"
     break;
 

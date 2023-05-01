@@ -250,46 +250,46 @@ expression
 			                                                          $$=1;
 			                                                          } 
 			                                                          else 
-			                                                          {$$=-1; printf("Type mismatch\n"); exit(0);} 
+			                                                          {$$=1; printf("1 Type mismatch\n"); exit(0);} 
 			                                                          codeassign();
 			                                                       }
 			| mutable addition_assignment_operator {push("+=");}expression {  
 																	  if($1==1 && $4==1) 
 			                                                          $$=1; 
 			                                                          else 
-			                                                          {$$=-1; printf("Type mismatch\n"); exit(0);} 
+			                                                          {$$=1; printf("2 Type mismatch\n"); exit(0);} 
 			                                                          codeassign();
 			                                                       }
 			| mutable subtraction_assignment_operator {push("-=");} expression  {	  
 																	  if($1==1 && $4==1) 
 			                                                          $$=1; 
 			                                                          else 
-			                                                          {$$=-1; printf("Type mismatch\n"); exit(0);} 
+			                                                          {$$=1; printf("3 Type mismatch\n"); exit(0);} 
 			                                                          codeassign();
 			                                                       }
 			| mutable multiplication_assignment_operator {push("*=");} expression {
 																	  if($1==1 && $4==1) 
 			                                                          $$=1; 
 			                                                          else 
-			                                                          {$$=-1; printf("Type mismatch\n"); exit(0);}
+			                                                          {$$=1; printf("4 Type mismatch\n"); exit(0);}
 			                                                          codeassign(); 
 			                                                       }
 			| mutable division_assignment_operator {push("/=");}expression 		{ 
 																	  if($1==1 && $4==1) 
 			                                                          $$=1; 
 			                                                          else 
-			                                                          {$$=-1; printf("Type mismatch\n"); exit(0);} 
+			                                                          {$$=1; printf("5 Type mismatch\n"); exit(0);} 
 			                                                       }
 			| mutable modulo_assignment_operator {push("%=");}expression 		{ 
 																	  if($1==1 && $3==1) 
 			                                                          $$=1; 
 			                                                          else 
-			                                                          {$$=-1; printf("Type mismatch\n"); exit(0);} 
+			                                                          {$$=1; printf("6 Type mismatch\n"); exit(0);} 
 			                                                          codeassign();
 																	}
-			| mutable increment_operator 							{ push("++");if($1 == 1) $$=1; else $$=-1; genunary();}
-			| mutable decrement_operator  							{push("--");if($1 == 1) $$=1; else $$=-1;}
-			| simple_expression {if($1 == 1) $$=1; else $$=-1;} ;
+			| mutable increment_operator 							{ push("++");if($1 == 1) $$=1; else $$=1; genunary();}
+			| mutable decrement_operator  							{push("--");if($1 == 1) $$=1; else $$=1;}
+			| simple_expression {if($1 == 1) $$=1; else $$=1;} ;
 
 
 simple_expression 
@@ -343,19 +343,19 @@ mutable
 			              if(gettype(curid,0)=='i' || gettype(curid,1)== 'c')
 			              $$ = 1;
 			              else
-			              $$ = -1;
+			              $$ = 1;
 			              }
 			| array_identifier {if(!checkscope(curid)){printf("%s\n",curid);printf("Undeclared\n");exit(0);}} '[' expression ']' 
 			                   {if(gettype(curid,0)=='i' || gettype(curid,1)== 'c')
 			              		$$ = 1;
 			              		else
-			              		$$ = -1;
+			              		$$ = 1;
 			              		};
 
 immutable 
-			: '(' expression ')' {if($2==1) $$=1; else $$=-1;}
-			| call {if($1==-1) $$=-1; else $$=1;}
-			| constant {if($1==1) $$=1; else $$=-1;};
+			: '(' expression ')' {if($2==1) $$=1; else $$=1;}
+			| call {if($1==-1) $$=1; else $$=1;}
+			| constant {if($1==1) $$=1; else $$=1;};
 
 call
 			: identifier '('{

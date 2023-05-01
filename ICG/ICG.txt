@@ -1,26 +1,37 @@
 func begin main
 t0 = 0
-t1 = 0
-temp = t1
+t1 = 'a'
+k = t1
+t2 = 1.2
+r = t2
+t3 = 0
+temp = t3
 L0:
-t2 = 5
-t3 = temp < t2
-IF not t3 GoTo L1
-t4 = temp + 1
-temp = t4
-t5 = 45
-a = t5
+t4 = 5
+t5 = temp < t4
+IF not t5 GoTo L1
+t6 = temp + 1
+temp = t6
+t7 = 45
+a = t7
 GoTo L0:
 L1:
+refparam "bdgdv ans: %d ans: %d yfgyug %c %f"
+refparam a
+refparam temp
+refparam k
+refparam r
+refparam result
+call printf, 5
 L2:
-t6 = 0
-t7 = temp > t6
-IF not t7 GoTo L3
-t8 = 1
-t9 = temp - t8
-temp = t9
-t10 = 69
-a = t10
+t8 = 0
+t9 = temp > t8
+IF not t9 GoTo L3
+t10 = 1
+t11 = temp - t10
+temp = t11
+t12 = 69
+a = t12
 GoTo L2:
 L3:
 func end

@@ -6,10 +6,10 @@
 
 	struct symboltable
 	{
-		char name[100];
-		char class[100];
-		char type[100];
-		char value[100];
+		char name[1000];
+		char class[1000];
+		char type[1000];
+		char value[1000];
 		int nestval;
 		int lineno;
 		int length;
@@ -18,8 +18,8 @@
 
 	struct constanttable
 	{
-		char name[100];
-		char type[100];
+		char name[1000];
+		char type[1000];
 		int length;
 	}CT[1007];
 
