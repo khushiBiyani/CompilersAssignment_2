@@ -1,7 +1,7 @@
 import re
 
 parsed_icg = []
-fvariables={}
+
 
 param = []
 def searchLine(str):
@@ -25,8 +25,9 @@ def my_printf(fmt_str, *args):
         return fmt_str
 
 
-def executeFunction(index):
-    variable = fvariables
+def executeFunction(index,data):
+    variable = data
+    fvariables={}
     while (1):
         str = [word for word in parsed_icg[index].split(' ')]
         #blank labels
@@ -59,8 +60,13 @@ def executeFunction(index):
                 # print(fvariables)
                 functionIndex = functionIndex + 1
                 param.clear()
-                executeFunction(functionIndex)
-                fvariables.clear()
+                backup = variable
+                # print(variable)
+                executeFunction(functionIndex,fvariables)
+                variable = backup
+                # print(variable)
+                fvariables = {}
+                # print(variable)
                 # print(functionIndex)
 
     #variable assign
@@ -160,7 +166,7 @@ for line in icg.split('\n'):
 
 start = searchLine('func begin main')
 if(start!=-1):
-    executeFunction(start+1)
+    executeFunction(start+1,{})
     # print(variable)
 else:
     print("no main function defined")

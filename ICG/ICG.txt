@@ -1,6 +1,16 @@
-func begin increase_number x y 
+func begin p a 
+refparam "%d = a "
+refparam a
+refparam result
+call printf, 2
+func end
+
+func begin increase_number n y 
+refparam 45
+refparam result
+call p, 1
 refparam "n: %d y: %d"
-refparam x
+refparam n
 refparam y
 refparam result
 call printf, 3
@@ -9,14 +19,43 @@ func end
 func begin main 
 t0 = 4
 x = t0
-refparam 5
+refparam "%d"
 refparam x
+refparam result
+call printf, 2
+refparam 5
+refparam 3
 refparam result
 call increase_number, 2
 refparam "%d"
 refparam x
 refparam result
 call printf, 2
+t1 = 0
+x = t1
+L0:
+t2 = 5
+t3 = x < t2
+IF not t3 GoTo L1
+t4 = x + 1
+x = t4
+t5 = 0
+j = t5
+L2:
+t6 = 5
+t7 = j < t6
+IF not t7 GoTo L3
+t8 = j + 1
+j = t8
+refparam "%d %d"
+refparam x
+refparam j
+refparam result
+call printf, 3
+GoTo L2:
+L3:
+GoTo L0:
+L1:
 refparam "x: %d"
 refparam x
 refparam result
