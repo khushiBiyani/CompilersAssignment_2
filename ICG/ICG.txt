@@ -1,0 +1,26 @@
+func begin main
+t0 = 0
+t1 = 0
+temp = t1
+L0:
+t2 = 5
+t3 = temp < t2
+IF not t3 GoTo L1
+t4 = temp + 1
+temp = t4
+t5 = 45
+a = t5
+GoTo L0:
+L1:
+L2:
+t6 = 0
+t7 = temp > t6
+IF not t7 GoTo L3
+t8 = 1
+t9 = temp - t8
+temp = t9
+t10 = 69
+a = t10
+GoTo L2:
+L3:
+func end
