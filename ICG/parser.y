@@ -49,7 +49,7 @@
 	void funcgenend();
 	void arggen();
 	void callgen();
-
+	char* parameterListofFunction[500];
 	int params_count=0;
 	int call_params_count=0;
 	int top = 0,count=0,ltop=0,lno=0;
@@ -163,7 +163,7 @@ function_declaration_type
 			: type_specifier identifier '('  { strcpy(currfunctype, curtype); strcpy(currfunc, curid); check_duplicate(curid); insertSTF(curid); ins(); };
 
 function_declaration_param_statement
-			: {params_count=0;}params ')' {funcgen();} statement {funcgenend();};
+			: {params_count=0; memset(parameterListofFunction,'\0',sizeof(parameterListofFunction));}params ')' {funcgen();} statement {funcgenend();};
 
 params 
 			: parameters_list { insertSTparamscount(currfunc, params_count); }| { insertSTparamscount(currfunc, params_count); };
@@ -179,7 +179,7 @@ parameters_identifier_list_breakup
 			| ;
 
 param_identifier 
-			: identifier { ins();insertSTnest(curid,1); params_count++; } param_identifier_breakup;
+			: identifier { parameterListofFunction[params_count] = strdup(curid); ins();insertSTnest(curid,1); params_count++; } param_identifier_breakup;
 
 param_identifier_breakup
 			: '[' ']'
@@ -616,7 +616,11 @@ void label5()
 
 void funcgen()
 {
-	printf("func begin %s\n",currfunc);
+	printf("func begin %s ",currfunc);
+	for(int i = 0;i<params_count;i++){
+		printf("%s ",parameterListofFunction[i]);
+	}
+	printf("\n");
 }
 
 void funcgenend()

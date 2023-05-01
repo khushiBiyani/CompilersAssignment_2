@@ -1,33 +1,16 @@
-func begin decrease
-t0 = 69
-x = t0
-refparam "%d"
-refparam x
-refparam result
-call printf, 2
-func end
-
-func begin increase_number
-t1 = 10
-x = t1
-t2 = 10
-t3 = t2 + x
-y = t3
-refparam result
-call decrease, 0
-refparam "%d"
+func begin increase_number n y 
+refparam "n: %d y: %d"
+refparam n
 refparam y
 refparam result
-call printf, 2
+call printf, 3
 func end
 
-func begin main
-t4 = 4
-x = t4
-refparam result
-call increase_number, 0
-refparam "%d"
+func begin main 
+t0 = 4
+x = t0
+refparam 5
 refparam x
 refparam result
-call printf, 2
+call increase_number, 2
 func end

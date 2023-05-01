@@ -119,7 +119,7 @@
 	void funcgenend();
 	void arggen();
 	void callgen();
-
+	char* parameterListofFunction[500];
 	int params_count=0;
 	int call_params_count=0;
 	int top = 0,count=0,ltop=0,lno=0;
@@ -1662,19 +1662,19 @@ yyreduce:
 
   case 47: /* $@3: %empty  */
 #line 166 "parser.y"
-                          {params_count=0;}
+                          {params_count=0; memset(parameterListofFunction,'\0',sizeof(parameterListofFunction));}
 #line 1667 "y.tab.c"
     break;
 
   case 48: /* $@4: %empty  */
 #line 166 "parser.y"
-                                                      {funcgen();}
+                                                                                                                            {funcgen();}
 #line 1673 "y.tab.c"
     break;
 
   case 49: /* function_declaration_param_statement: $@3 params ')' $@4 statement  */
 #line 166 "parser.y"
-                                                                             {funcgenend();}
+                                                                                                                                                   {funcgenend();}
 #line 1679 "y.tab.c"
     break;
 
@@ -1698,7 +1698,7 @@ yyreduce:
 
   case 57: /* $@6: %empty  */
 #line 182 "parser.y"
-                                     { ins();insertSTnest(curid,1); params_count++; }
+                                     { parameterListofFunction[params_count] = strdup(curid); ins();insertSTnest(curid,1); params_count++; }
 #line 1703 "y.tab.c"
     break;
 
@@ -2673,7 +2673,11 @@ void label5()
 
 void funcgen()
 {
-	printf("func begin %s\n",currfunc);
+	printf("func begin %s ",currfunc);
+	for(int i = 0;i<params_count;i++){
+		printf("%s ",parameterListofFunction[i]);
+	}
+	printf("\n");
 }
 
 void funcgenend()
