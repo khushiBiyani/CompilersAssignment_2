@@ -54,14 +54,8 @@
 				else if(str[i+1]=='c'){
 					instanceStringList[instanceStringIndex++] = strdup("c");
 				}
-         		printf("%c\n", str[i+1]);
         		}
 	  		}
-			printf("STRING PARAMS = ");
-			for(int i = 0;i<instanceStringIndex;i++){
-				printf("%s ",instanceStringList[i]);
-			}
-			printf("\n");
 		}
      	// insert function
      	void insertInTable(char *token,char *type,char *val,int sc,int paramCount,char *paramList[],int arrayDim[],int dimensionofArr,bool isArr,bool isFunc){
@@ -87,7 +81,6 @@
          		newEntry.dimensionofArray=dimensionofArr;
          	}
      		table[currIndex++]=newEntry;
-    		printf("INSIDE TABLE INSERTION\n");
      	}
       
      	// update value of token
@@ -138,7 +131,7 @@
     		return -1;
      	}
     	void printTable(){
-    		printf("SYMBOL TABLE IS THIS\n\n");
+    		printf("SYMBOL TABLE: \n\n");
 			printf("Lexeme 	  	Val	Type	isFunc	isArr	scope	parameterCount	 paramList	dimArr 		arrList\n");
     		for(int i=0;i<currIndex;i++){
     			printf("%s		",table[i].lexeme);
@@ -188,13 +181,11 @@
      			if(strcmp(table[i].lexeme,token)==0&&table[i].isArray==isArray&&table[i].isFunction==isFunction){
     				for(int j = scopeIndex;j>=0;j--){
     					if(table[i].scope==availableScopes[j]){
-							printf("VARIABLE %s FOUND\n\n\n\n",token);
     						return i;
     					}
     				}
     			}
      		}
-			printf("VARIABLE %s NOT FOUND\n\n\n\n",token);
     		return -1;
 		}
 		bool compareParam(char* args[], char* params[], int arg, int par){
@@ -213,24 +204,17 @@
 		bool compareString(char* str,char* param[],int len,int sizep){
 			int yup = 0;
 			int re = 0;
-			printf("%d %d\n",len,sizep);
 			for(int i = 0; i < len; i++) {
        			 if(str[i] == '%' && str[i+1] != '\0' && strchr("cdes", str[i+1])) {
 				re++;
 				yup++;
-         		printf("%c\n", str[i+1]);
             	i++;
         		}
-				printf("%d %d %d\n",yup,re,i);
 	  		}
 			return true;
 		}
 		void printArray(char* arr[],int len){
-			printf("Args = ");
-			for(int i = 0;i<len;i++){
-				printf("%s ",arr[i]);
-			}
-			printf("\n");
+			
 		}
     	void pushNewScope(){// Put a new scope for every open {
     		availableScopes[++scopeIndex]=++maxScope;
@@ -334,7 +318,7 @@
      /* while loop */
     whileLoop : WHILE OPBRAC {pushNewScope();} expressionStatement CLBRAC whileSuffix
      whileSuffix : OPCUR {pushNewScope();}inLoop CLCUR { popScope(); popScope(); }
-     		  | SEMICOLON {popScope(); printf("\nWHILE SEMICOLON \n");}
+     		  | SEMICOLON {popScope(); }
      		  | {pushNewScope();} singleLoopStatement { popScope(); popScope();}
       
      inLoop : BREAK SEMICOLON inLoop {}
@@ -398,8 +382,8 @@
 			| IDENTIFIER dimension EQUAL expressionStatement COMMA assignmentStatement {int inst = getIdentifierIndex($1,true,false);if(inst>=0){if(strcmp(table[inst].dataType,$3)!=0){printf("Type Mismatch");return 1;}}else{printf("VARIABLE NOT FOUND"); return 1;}}
      		| IDENTIFIER dimension EQUAL expressionStatement SEMICOLON {int inst = getIdentifierIndex($1,true,false);if(inst>=0){if(strcmp(table[inst].dataType,$3)!=0){printf("Type Mismatch");return 1;}}else{printf("VARIABLE NOT FOUND"); return 1;}}
       
-     printer : PRINTF OPBRAC STRING prattributes CLBRAC SEMICOLON {char* presentPrintString = strdup($3); int len = strlen(presentPrintString); printf("s = %s \n",presentPrintString);printArray(printlistArray,printindex);populate(presentPrintString,len);if(!compareParam(instanceStringList,printlistArray,instanceStringIndex,printindex)){printf("PRINTF TYPE DONOT MATCH\n\n");return 1;}else{printf("Correct printf");}printf("PRINTF DONE");memset(instanceStringList,'\0',sizeof(instanceStringList));memset(printlistArray,'\0',sizeof(printlistArray));instanceStringIndex = 0;printindex = 0;}
-     scanner : SCANF OPBRAC STRING scattributes CLBRAC SEMICOLON {char* presentPrintString = strdup($3); int len = strlen(presentPrintString); printf("s = %s \n",presentPrintString);printArray(scanlistArray,scanindex);populate(presentPrintString,len);if(!compareParam(instanceStringList,scanlistArray,instanceStringIndex,scanindex)){printf("SCANF TYPE DONOT MATCH\n\n");return 1;}else{printf("Correct printf");}printf("PRINTF DONE");memset(instanceStringList,'\0',sizeof(instanceStringList));memset(scanlistArray,'\0',sizeof(scanlistArray));instanceStringIndex = 0;scanindex = 0;}
+     printer : PRINTF OPBRAC STRING prattributes CLBRAC SEMICOLON {char* presentPrintString = strdup($3); int len = strlen(presentPrintString);printArray(printlistArray,printindex);populate(presentPrintString,len);if(!compareParam(instanceStringList,printlistArray,instanceStringIndex,printindex)){printf("PRINTF TYPE DONOT MATCH\n\n");return 1;}memset(instanceStringList,'\0',sizeof(instanceStringList));memset(printlistArray,'\0',sizeof(printlistArray));instanceStringIndex = 0;printindex = 0;}
+     scanner : SCANF OPBRAC STRING scattributes CLBRAC SEMICOLON {char* presentPrintString = strdup($3); int len = strlen(presentPrintString); printArray(scanlistArray,scanindex);populate(presentPrintString,len);if(!compareParam(instanceStringList,scanlistArray,instanceStringIndex,scanindex)){printf("SCANF TYPE DONOT MATCH\n\n");return 1;}memset(instanceStringList,'\0',sizeof(instanceStringList));memset(scanlistArray,'\0',sizeof(scanlistArray));instanceStringIndex = 0;scanindex = 0;}
      declarationStatement : INT IDENTIFIER OPBRAC parameters {presentFunctionType = strdup("i");} CLBRAC compoundStatements  {int inst = getIdentifierIndex($2,false,true); if(inst == -1){insertInTable($2,strdup("i"),strdup("i"),currScope,currentParamCount,instanceParamList,NULL,0,false,true);}else{printf("%s is already defined earlier\n",$2);return 1;}memset(instanceParamList, '\0',sizeof(instanceParamList)); currentParamCount = 0;}
      		| CHAR IDENTIFIER OPBRAC   parameters {presentFunctionType = strdup("c");} CLBRAC compoundStatements {int inst = getIdentifierIndex($2,false,true); if(inst ==-1){insertInTable($2,strdup("c"),strdup("c"),currScope,currentParamCount,instanceParamList,NULL,0,false,true);} else{printf("%s is already defined earlier\n",$2);return 1;} memset(instanceParamList, '\0',sizeof(instanceParamList)); currentParamCount = 0;}
      		| FLOAT IDENTIFIER OPBRAC  parameters CLBRAC {presentFunctionType = strdup("f");} compoundStatements {int inst = getIdentifierIndex($2,false,true); if(inst == -1){insertInTable($2,strdup("f"),strdup("f"),currScope,currentParamCount,instanceParamList,NULL,0,false,true);} else{printf("%s is already defined earlier\n",$2);return 1;} memset(instanceParamList, '\0',sizeof(instanceParamList)); currentParamCount = 0;}
@@ -421,9 +405,9 @@
      			| FLOATVAL 
      arrayValues :  INTVAL COMMA arrayValues 
      			| INTVAL 
-     prattributes : prattributes COMMA factor {printlistArray[printindex++]=strdup($3);printf("PRINT ARG ADDED\n");}
+     prattributes : prattributes COMMA factor {printlistArray[printindex++]=strdup($3);}
      			| 
-     scattributes : scattributes COMMA AMPERSAND factor {scanlistArray[scanindex++]=strdup($4); printf("SCANF ARG ADDED\n");}
+     scattributes : scattributes COMMA AMPERSAND factor {scanlistArray[scanindex++]=strdup($4);}
      			| 
      		
      declarationListInt : IDENTIFIER EQUAL expressionStatement COMMA declarationListInt { if(checkVariable($1,currScope,false,false)){printf("MULTIPLE DECLARATIONS %s\n\n",$1);return 1;}if(strcmp($3,strdup("i"))!=0){printf("Type Mismatch");return 1;}insertInTable($1,strdup("i"),strdup("i"),currScope, -1,NULL,sizes,instDim,false,false);}
@@ -473,7 +457,7 @@
      	| OPBRAC expressionStatement CLBRAC {$<Str>$ = strdup($2);}
      	| LOGICALNOT expressionStatement {$<Str>$ = strdup($2);}
      	| CHARVAL {$<Str>$ = strdup("c");}
-     	| INTVAL {$<Str>$ = strdup("i");printf("INT VALS.. %d\n",yylval);}
+     	| INTVAL {$<Str>$ = strdup("i");}
      	| FLOATVAL {$<Str>$ = strdup("f");}
     	| IDENTIFIER OPBRAC CLBRAC {memset(arglistArray,'\0',sizeof(arglistArray));argindex=0; int inst = getIdentifierIndex($1,false,true);if(compareParam(arglistArray,table[inst].parameterList,argindex,table[inst].parameterCount)){$<Str>$ = strdup(table[inst].dataType);}else{printf("PARAMETERS DONT MATCH");return 1;}memset(arglistArray,'\0',sizeof(arglistArray));argindex=0;} 
     	| IDENTIFIER OPBRAC {memset(arglistArray,'\0',sizeof(arglistArray));argindex=0;} argList CLBRAC {int inst = getIdentifierIndex($1,false,true); printArray(arglistArray,argindex); if(compareParam(arglistArray,table[inst].parameterList,argindex,table[inst].parameterCount)){$<Str>$ = strdup(table[inst].dataType);}else{printf("PARAMETERS DONT MATCH");return 1;}memset(arglistArray,'\0',sizeof(arglistArray));argindex=0;}
@@ -490,15 +474,15 @@
       
      parameters : {pushNewScope(); memset(instanceParamList, '\0',sizeof(instanceParamList)); currentParamCount = 0;} paramContinuer
     paramContinuer : parameter 
-    				| parameter COMMA paramContinuer  {printf("FUNCTION params\n");}
+    				| parameter COMMA paramContinuer  
       
-     parameter : type IDENTIFIER {printf("FUNCTION param\n");insertInTable($2,$1,$1,currScope,0,NULL,NULL,0,false,false);}
+     parameter : type IDENTIFIER {insertInTable($2,$1,$1,currScope,0,NULL,NULL,0,false,false);}
       
      type : INT {$<Str>$ = strdup("i");instanceParamList[currentParamCount++]=strdup("i");} 
      		| FLOAT {$<Str>$ = strdup("f");instanceParamList[currentParamCount++]=strdup("f");}
     		| CHAR  {$<Str>$ = strdup("c");instanceParamList[currentParamCount++]=strdup("c");}
       
-     compoundStatements : OPCUR statementList CLCUR {popScope();printf("FUNCTION statements\n");}
+     compoundStatements : OPCUR statementList CLCUR {popScope();}
       
      statementList : functionCall statementList 
      				| basicStatements statementList 

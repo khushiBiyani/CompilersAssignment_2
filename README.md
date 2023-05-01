@@ -1,9 +1,9 @@
 # CompilersAssignment_2
 
 # Authors:
-# Ankesh
+Ankesh
 https://github.com/gibsonjackson
-# Khooshrin
+Khooshrin
 https://github.com/Khooshrin
-# Khushi
+Khushi
 https://github.com/khushiBiyani

@@ -10,7 +10,7 @@ void increase_number(int n,int y)
 	// y = 10 + x;
   p(45);
 	printf("n: %d y: %d",n,y);
-	
+	printf("CHANGES\n");
 }
 
 
@@ -26,7 +26,6 @@ void main()
     int j;
     for(j=0;j<5;j++){
       int x;
-    
       printf("%d %d", x,j);
     }
   }

@@ -14,6 +14,9 @@ refparam n
 refparam y
 refparam result
 call printf, 3
+refparam "CHANGES\n"
+refparam result
+call printf, 1
 func end
 
 func begin main 
